@@ -169,3 +169,32 @@ input:focus, textarea:focus, select:focus {
     font-size: 2.2rem;
   }
 }
+
+@media (max-width: 480px) {
+  .section {
+    padding: 48px 14px;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+  }
+
+  .section-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+
+  .whatsapp-float {
+    width: 52px;
+    height: 52px;
+    bottom: 16px;
+    right: 16px;
+    font-size: 24px;
+  }
+}

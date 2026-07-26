@@ -611,3 +611,95 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 480px) {
+  .disenador-layout {
+    gap: 20px;
+  }
+
+  .disenador-panel {
+    gap: 16px;
+  }
+
+  .panel-section h3 {
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+  }
+
+  .producto-selector {
+    gap: 6px;
+  }
+
+  .producto-btn {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .color-tela-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .upload-zone {
+    padding: 24px 16px;
+    min-height: 120px;
+  }
+
+  .canvas-area {
+    aspect-ratio: 1/1.2;
+  }
+
+  .control-group label {
+    min-width: auto;
+    font-size: 0.8rem;
+  }
+
+  .control-group span {
+    font-size: 0.75rem;
+    min-width: 32px;
+  }
+
+  .zonas-selector {
+    gap: 6px;
+  }
+
+  .zona-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .telas-section {
+    max-width: 100%;
+  }
+
+  .telas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tela-card {
+    padding: 8px 12px;
+  }
+
+  .tela-card strong {
+    font-size: 0.8rem;
+  }
+
+  .tela-card .tela-desc {
+    font-size: 0.7rem;
+  }
+
+  .disenador-send {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .canvas-tilt-hint {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+  }
+
+  .fabric-badge {
+    font-size: 0.6rem;
+    padding: 4px 10px;
+  }
+}

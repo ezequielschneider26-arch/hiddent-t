@@ -87,3 +87,19 @@
     text-align: center;
   }
 }
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 36px 14px 20px;
+  }
+
+  .footer-links {
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .footer-links a {
+    font-size: 0.82rem;
+  }
+}

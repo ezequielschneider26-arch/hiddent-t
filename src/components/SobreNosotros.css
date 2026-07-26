@@ -68,4 +68,12 @@
   .nosotros-features {
     grid-template-columns: 1fr;
   }
+
+  .feature-card {
+    padding: 24px 18px;
+  }
+
+  .nosotros-text p {
+    font-size: 0.95rem;
+  }
 }

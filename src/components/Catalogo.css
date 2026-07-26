@@ -55,6 +55,31 @@
 
 @media (max-width: 768px) {
   .catalogo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .catalogo-card-image {
+    height: 160px;
+    padding: 16px;
+  }
+
+  .catalogo-card-content {
+    padding: 16px;
+  }
+
+  .catalogo-card-content h3 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalogo-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .catalogo-card-image {
+    height: 180px;
   }
 }

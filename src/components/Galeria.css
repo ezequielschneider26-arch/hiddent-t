@@ -222,4 +222,55 @@
   .lightbox {
     padding: 20px;
   }
+
+  .galeria-cat-card {
+    padding: 10px 12px;
+    gap: 12px;
+  }
+
+  .galeria-cat-thumb {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+@media (max-width: 480px) {
+  .galeria-slide {
+    flex: 0 0 180px;
+  }
+
+  .galeria-slide-info span {
+    font-size: 0.78rem;
+  }
+
+  .galeria-carousel-wrap {
+    padding: 0 24px;
+  }
+
+  .galeria-carousel-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .galeria-carousel {
+    gap: 10px;
+  }
+
+  .galeria-cat-info h3 {
+    font-size: 1rem;
+  }
+
+  .galeria-cat-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+  }
+
+  .lightbox-content img {
+    max-height: 60vh;
+  }
+
+  .lightbox-content p {
+    font-size: 0.95rem;
+  }
 }

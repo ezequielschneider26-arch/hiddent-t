@@ -36,3 +36,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 480px) {
+  .presupuesto-form {
+    gap: 16px;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .btn-full {
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+}

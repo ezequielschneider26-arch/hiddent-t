@@ -105,3 +105,28 @@
     font-size: 1.1rem;
   }
 }
+
+@media (max-width: 480px) {
+  .navbar-container {
+    height: 60px;
+    padding: 0 14px;
+  }
+
+  .navbar-logo {
+    font-size: 1.5rem;
+  }
+
+  .logo-t {
+    font-size: 1.7rem;
+  }
+
+  .navbar-links {
+    top: 60px;
+    padding: 28px 0;
+    gap: 18px;
+  }
+
+  .navbar-links a {
+    font-size: 1rem;
+  }
+}
