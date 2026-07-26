@@ -4,9 +4,8 @@ import './Navbar.css'
 
 const navLinks = [
   { label: 'Inicio', href: '#inicio' },
-  { label: 'Catalogo', href: '#catalogo' },
-  { label: 'Disenador', href: '#disenador' },
-  { label: 'Galeria', href: '#galeria' },
+  { label: 'Diseñador', href: '#disenador' },
+  { label: 'Galería', href: '#galeria' },
   { label: 'Nosotros', href: '#nosotros' },
   { label: 'Presupuesto', href: '#presupuesto' },
   { label: 'Contacto', href: '#contacto' },

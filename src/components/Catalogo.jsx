@@ -25,35 +25,35 @@ const productos = [
   {
     id: 4,
     nombre: 'Botineras',
-    descripcion: 'Botineras bordadas. Elegi el diseño y el color de tela.',
+    descripcion: 'Botineras bordadas. Elegí el diseño y el color de tela.',
     imagen: '/images/botinera-placeholder.svg',
     color: '#F59E0B',
   },
   {
     id: 5,
     nombre: 'Gorras',
-    descripcion: 'Gorras bordadas con tu logo, frase o imagen. Estilo unico.',
+    descripcion: 'Gorras bordadas con tu logo, frase o imagen. Estilo único.',
     imagen: '/images/gorra-placeholder.svg',
     color: '#22C55E',
   },
   {
     id: 6,
     nombre: 'Estuches',
-    descripcion: 'Estuches bordados para lapices, maquillaje o lo que necesites.',
+    descripcion: 'Estuches bordados para lápices, maquillaje o lo que necesites.',
     imagen: '/images/estuche-placeholder.svg',
     color: '#8B5CF6',
   },
   {
     id: 7,
     nombre: 'Carteras',
-    descripcion: 'Carteras con bordado unico. Cada pieza es especial.',
+    descripcion: 'Carteras con bordado único. Cada pieza es especial.',
     imagen: '/images/cartera-placeholder.svg',
     color: '#EC4899',
   },
   {
     id: 8,
     nombre: 'Personalizado',
-    descripcion: 'No encontras lo que buscas? Bordamos lo que se te ocurra.',
+    descripcion: '¿No encontrás lo que buscás? Bordamos lo que se te ocurra.',
     imagen: '/images/personalizado-placeholder.svg',
     color: '#06B6D4',
   },
@@ -64,7 +64,7 @@ export default function Catalogo() {
     <section id="catalogo" className="section catalogo">
       <h2 className="section-title">Nuestros Productos</h2>
       <p className="section-subtitle">
-        Todo bordado con maquina industrial de alta precision
+        Todo bordado con máquina industrial de alta precisión
       </p>
 
       <div className="catalogo-grid">

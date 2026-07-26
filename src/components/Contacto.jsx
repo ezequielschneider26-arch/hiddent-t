@@ -28,7 +28,7 @@ export default function Contacto() {
           <div className="contacto-item">
             <FiMapPin size={20} />
             <div>
-              <h4>Ubicacion</h4>
+              <h4>Ubicación</h4>
               <p>Argentina</p>
             </div>
           </div>

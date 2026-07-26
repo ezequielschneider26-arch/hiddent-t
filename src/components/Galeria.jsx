@@ -93,9 +93,9 @@ export default function Galeria() {
 
   return (
     <section id="galeria" className="section galeria">
-      <h2 className="section-title">Galeria de Trabajos</h2>
+      <h2 className="section-title">Galería de Trabajos</h2>
       <p className="section-subtitle">
-        Selecciona una categoria para ver los trabajos realizados
+        Seleccioná una categoría para ver los trabajos realizados
       </p>
 
       <div className="galeria-cats">

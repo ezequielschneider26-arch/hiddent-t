@@ -39,7 +39,7 @@ export default function Presupuesto() {
     e.preventDefault()
     const msg = `Hola! Soy ${form.nombre}. Quiero un presupuesto para:\n\n` +
       `Producto: ${form.producto}\n` +
-      `Descripcion: ${form.descripcion}\n` +
+      `Descripción: ${form.descripcion}\n` +
       `Email: ${form.email}\n\n` +
       `(Adjunta la imagen en el chat)`
     window.open(
@@ -100,11 +100,11 @@ export default function Presupuesto() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="descripcion">Que queres bordar?</label>
+          <label htmlFor="descripcion">¿Qué querés bordar?</label>
           <textarea
             id="descripcion"
             name="descripcion"
-            placeholder="Describe tu idea: imagen, frase, colores, tamanos..."
+            placeholder="Describe tu idea: imagen, frase, colores, tamaños..."
             rows={5}
             value={form.descripcion}
             onChange={handleChange}
@@ -127,7 +127,7 @@ export default function Presupuesto() {
               onClick={() => fileRef.current && fileRef.current.click()}
             >
               <FiImage size={24} />
-              <span>Subi una imagen de referencia</span>
+              <span>Subí una imagen de referencia</span>
               <span className="presupuesto-image-hint">JPG, PNG</span>
             </div>
           )}
