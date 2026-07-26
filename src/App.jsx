@@ -21,7 +21,7 @@ function App() {
       <Contacto />
       <Footer />
       <a
-        href="https://wa.me/5491100000000?text=Hola!%20Me%20interesa%20un%20bordado"
+        href="https://wa.me/5493454497729?text=Hola!%20Me%20interesa%20un%20bordado"
         className="whatsapp-float"
         target="_blank"
         rel="noopener noreferrer"

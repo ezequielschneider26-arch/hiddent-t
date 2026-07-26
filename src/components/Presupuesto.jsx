@@ -25,7 +25,7 @@ export default function Presupuesto() {
       `Descripcion: ${form.descripcion}\n` +
       `Email: ${form.email}`
     window.open(
-      `https://wa.me/5491100000000?text=${encodeURIComponent(msg)}`,
+      `https://wa.me/5493454497729?text=${encodeURIComponent(msg)}`,
       '_blank'
     )
   }

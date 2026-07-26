@@ -80,7 +80,7 @@ export default function Catalogo() {
               <h3>{producto.nombre}</h3>
               <p>{producto.descripcion}</p>
               <a
-                href="https://wa.me/5491100000000?text=Hola!%20Quiero%20un%20bordado"
+                href="https://wa.me/5493454497729?text=Hola!%20Quiero%20un%20bordado"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline btn-small"

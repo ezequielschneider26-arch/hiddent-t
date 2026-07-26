@@ -457,7 +457,7 @@ export default function Disenador() {
     if(zonaActiva){var zl=zonaActiva;for(var i=0;i<zonas.length;i++){if(zonas[i].id===zonaActiva){zl=zonas[i].label;break}};msg+='Ubicacion: '+zl+'\n'}
     else if(modoLibre){msg+='Posicion personalizada\n'}
     msg+='Tamano: '+tamano+'%\nRotacion: '+rotacion+'\n\nAdjunto la imagen del bordado.'
-    window.open('https://wa.me/5491100000000?text='+encodeURIComponent(msg),'_blank')
+    window.open('https://wa.me/5493454497729?text='+encodeURIComponent(msg),'_blank')
   }
 
   var imgStyle=function(){
