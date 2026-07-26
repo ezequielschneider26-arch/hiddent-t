@@ -18,8 +18,8 @@ export default function Hero() {
         </h1>
         <p className="hero-text">
           Bordados industriales de alta precision. Mochilas, yerberas, bolsos
-          y mas. Bordamos la imagen que se te ocurra — foto, logo, personaje,
-          lo que imagines.
+          y mas. Bordamos la imagen que se te ocurra — logo, personaje,
+          lo que imagenes.
         </p>
         <div className="hero-buttons">
           <a href="#presupuesto" className="btn btn-primary">

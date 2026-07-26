@@ -13,7 +13,7 @@ export default function Footer() {
               </svg>
               <span className="logo-t">T</span>
             </div>
-            <span className="logo-h">HIDDEN</span>
+            <span className="logo-h">HIDDENT</span>
           </span>
           <p>Bordados industriales con alma</p>
         </div>

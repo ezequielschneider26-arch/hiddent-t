@@ -25,7 +25,7 @@ export default function Navbar() {
             </svg>
             <span className="logo-t">T</span>
           </div>
-          <span className="logo-h">HIDDEN</span>
+          <span className="logo-h">HIDDENT</span>
         </a>
 
         <div className={`navbar-links ${open ? 'active' : ''}`}>
