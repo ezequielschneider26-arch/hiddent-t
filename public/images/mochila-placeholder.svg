@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 220" fill="none">
+  <rect width="300" height="220" fill="#1A1A1A"/>
+  <path d="M110 60 L110 140 Q110 160 130 160 L170 160 Q190 160 190 140 L190 60 Q190 40 170 40 L130 40 Q110 40 110 60Z" stroke="#FF2D78" stroke-width="2" fill="none"/>
+  <path d="M100 70 L200 70 L200 150 Q200 165 185 165 L115 165 Q100 165 100 150 Z" stroke="#FF2D78" stroke-width="3" fill="rgba(255,45,120,0.1)"/>
+  <path d="M130 40 Q130 20 150 20 Q170 20 170 40" stroke="#FF2D78" stroke-width="2" fill="none"/>
+  <text x="150" y="195" text-anchor="middle" fill="#FF2D78" font-family="sans-serif" font-size="14">MOCHILA</text>
+</svg>

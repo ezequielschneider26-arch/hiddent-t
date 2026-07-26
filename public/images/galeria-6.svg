@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#1A1A1A"/>
+  <rect x="90" y="80" width="220" height="160" rx="10" stroke="#00E5FF" stroke-width="3" fill="rgba(0,229,255,0.08)"/>
+  <path d="M90 110 L310 110" stroke="#00E5FF" stroke-width="2"/>
+  <circle cx="200" cy="170" r="30" stroke="#00E5FF" stroke-width="2" fill="rgba(0,229,255,0.15)"/>
+  <path d="M190 165 L198 173 L212 159" stroke="#00E5FF" stroke-width="2" fill="none"/>
+  <text x="200" y="330" text-anchor="middle" fill="#A0A0A0" font-family="sans-serif" font-size="14">Cartera bordado fino</text>
+</svg>

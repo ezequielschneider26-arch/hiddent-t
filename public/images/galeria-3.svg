@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#1A1A1A"/>
+  <rect x="80" y="70" width="240" height="230" rx="14" stroke="#00E5FF" stroke-width="3" fill="rgba(0,229,255,0.08)"/>
+  <circle cx="200" cy="160" r="50" stroke="#00E5FF" stroke-width="2" fill="rgba(0,229,255,0.1)"/>
+  <circle cx="185" cy="148" r="5" fill="#00E5FF"/>
+  <circle cx="215" cy="148" r="5" fill="#00E5FF"/>
+  <path d="M185 170 Q200 185 215 170" stroke="#00E5FF" stroke-width="2" fill="none"/>
+  <path d="M130 70 Q160 30 200 40 Q240 30 270 70" stroke="#FF2D78" stroke-width="2" fill="none"/>
+  <text x="200" y="340" text-anchor="middle" fill="#A0A0A0" font-family="sans-serif" font-size="14">Bolso con retrato bordado</text>
+</svg>
