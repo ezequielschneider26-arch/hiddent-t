@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { FiSend } from 'react-icons/fi'
+import { useState, useRef } from 'react'
+import { FiSend, FiImage, FiX } from 'react-icons/fi'
 import './Presupuesto.css'
 
 const productos = [
-  'Mochila', 'Yerbera', 'Bolso', 'Estuche', 'Cartera', 'Otro'
+  'Mochila', 'Yerbera', 'Bolso', 'Estuche', 'Cartera', 'Gorra', 'Botinera', 'Matera', 'Riñonera', 'Otro'
 ]
 
 export default function Presupuesto() {
@@ -13,9 +13,26 @@ export default function Presupuesto() {
     producto: '',
     descripcion: '',
   })
+  const [imagen, setImagen] = useState(null)
+  const [showHint, setShowHint] = useState(false)
+  const fileRef = useRef(null)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleImage = (e) => {
+    const f = e.target.files && e.target.files[0]
+    if (f && f.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = (ev) => setImagen(ev.target.result)
+      reader.readAsDataURL(f)
+    }
+  }
+
+  const removeImage = () => {
+    setImagen(null)
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   const handleSubmit = (e) => {
@@ -23,7 +40,8 @@ export default function Presupuesto() {
     const msg = `Hola! Soy ${form.nombre}. Quiero un presupuesto para:\n\n` +
       `Producto: ${form.producto}\n` +
       `Descripcion: ${form.descripcion}\n` +
-      `Email: ${form.email}`
+      `Email: ${form.email}\n\n` +
+      `(Adjunta la imagen en el chat)`
     window.open(
       `https://wa.me/5493454497729?text=${encodeURIComponent(msg)}`,
       '_blank'
@@ -94,9 +112,37 @@ export default function Presupuesto() {
           />
         </div>
 
+        <div className="form-group">
+          <label>Imagen de referencia (opcional)</label>
+          {imagen ? (
+            <div className="presupuesto-image-preview">
+              <img src={imagen} alt="referencia" />
+              <button type="button" className="presupuesto-image-remove" onClick={removeImage}>
+                <FiX size={16} />
+              </button>
+            </div>
+          ) : (
+            <div
+              className="presupuesto-image-upload"
+              onClick={() => fileRef.current && fileRef.current.click()}
+            >
+              <FiImage size={24} />
+              <span>Subi una imagen de referencia</span>
+              <span className="presupuesto-image-hint">JPG, PNG</span>
+            </div>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImage}
+            hidden
+          />
+        </div>
+
         <button type="submit" className="btn btn-primary btn-full">
           <FiSend size={18} />
-          Enviar por WhatsApp
+          Enviar
         </button>
       </form>
     </section>
