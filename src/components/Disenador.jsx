@@ -62,35 +62,35 @@ var zonasPorProducto = {
 var telasData = {
   mochila: [
     { id: 'nylon600', nombre: 'Nylon 600D', desc: 'Resistente al agua, ideal para uso diario.' },
-    { id: 'poliester', nombre: 'Poliester 300D', desc: 'Liviano y economico, facil de limpiar.' },
-    { id: 'cuero_sint', nombre: 'Cuero Sintetico PU', desc: 'Look premium, perfecto para regalos.' },
+    { id: 'poliester', nombre: 'Poliester 300D', desc: 'Liviano y económico, fácil de limpiar.' },
+    { id: 'cuero_sint', nombre: 'Cuero Sintético PU', desc: 'Look premium, perfecto para regalos.' },
     { id: 'lona', nombre: 'Lona 12oz', desc: 'Textura natural, muy resistente.' },
     { id: 'malla', nombre: 'Malla Traspirable', desc: 'Para mochilas deportivas.' },
   ],
   yerbera: [
-    { id: 'lona12', nombre: 'Lona 12oz', desc: 'La clasica. Sujeta bien.' },
+    { id: 'lona12', nombre: 'Lona 12oz', desc: 'La clásica. Sujeta bien.' },
     { id: 'nylon600', nombre: 'Nylon 600D', desc: 'Impermeable, protege la yerba.' },
-    { id: 'cuero_sint', nombre: 'Cuero Sintetico PU', desc: 'Look elegante. Superficie lisa.' },
+    { id: 'cuero_sint', nombre: 'Cuero Sintético PU', desc: 'Look elegante. Superficie lisa.' },
     { id: 'polar', nombre: 'Polar Termico', desc: 'Mantiene temperatura.' },
-    { id: 'tela_imp', nombre: 'Tela Impermeable', desc: 'Proteccion total contra derrames.' },
+    { id: 'tela_imp', nombre: 'Tela Impermeable', desc: 'Protección total contra derrames.' },
   ],
   bolso: [
     { id: 'lona', nombre: 'Lona 10oz', desc: 'Textura natural, resistente.' },
-    { id: 'cuero_sint', nombre: 'Cuero Sintetico PU', desc: 'Elegancia accesible.' },
+    { id: 'cuero_sint', nombre: 'Cuero Sintético PU', desc: 'Elegancia accesible.' },
     { id: 'algodon', nombre: 'Algodon Canvas', desc: 'Eco-friendly, transpirable.' },
     { id: 'nylon', nombre: 'Nylon Ripstop', desc: 'Ultra resistente a rasgaduras.' },
     { id: 'poliester', nombre: 'Poliester Oxford', desc: 'Impermeable, liviano.' },
   ],
   botinera: [
-    { id: 'nylon600', nombre: 'Nylon 600D', desc: 'La mas comun. Resistente.' },
-    { id: 'lona16', nombre: 'Lona 16oz', desc: 'La mas gruesa. Uso industrial.' },
-    { id: 'cuero_sint', nombre: 'Cuero Sintetico PU', desc: 'Look premium.' },
+    { id: 'nylon600', nombre: 'Nylon 600D', desc: 'La más común. Resistente.' },
+    { id: 'lona16', nombre: 'Lona 16oz', desc: 'La más gruesa. Uso industrial.' },
+    { id: 'cuero_sint', nombre: 'Cuero Sintético PU', desc: 'Look premium.' },
     { id: 'pvc', nombre: 'PVC Lavable', desc: 'Se limpia con agua.' },
-    { id: 'poliester', nombre: 'Poliester 600D', desc: 'Buena relacion calidad-precio.' },
+    { id: 'poliester', nombre: 'Poliester 600D', desc: 'Buena relación calidad-precio.' },
   ],
   gorra: [
-    { id: 'algodon', nombre: 'Algodon Peinado', desc: 'La clasica. Transpirable.' },
-    { id: 'poliester', nombre: 'Poliester Tricot', desc: 'Secado rapido, colores vivos.' },
+    { id: 'algodon', nombre: 'Algodón Peinado', desc: 'La clásica. Transpirable.' },
+    { id: 'poliester', nombre: 'Poliester Tricot', desc: 'Secado rápido, colores vivos.' },
     { id: 'mezclilla', nombre: 'Mezclilla', desc: 'Estilo retro/casual.' },
     { id: 'nylon', nombre: 'Nylon Malla', desc: 'Muy liviana, trucker.' },
     { id: 'polar', nombre: 'Polar Flis', desc: 'Para gorras de invierno.' },
@@ -100,10 +100,10 @@ var telasData = {
     { id: 'neoprene', nombre: 'Neoprene 3mm', desc: 'Absorbe golpes.' },
     { id: 'poliester', nombre: 'Poliester 300D', desc: 'Liviano y resistente.' },
     { id: 'nylon', nombre: 'Nylon 420D', desc: 'Impermeable, liviano.' },
-    { id: 'cuero_sint', nombre: 'Cuero Sintetico PU', desc: 'Look elegante.' },
+    { id: 'cuero_sint', nombre: 'Cuero Sintético PU', desc: 'Look elegante.' },
   ],
   cartera: [
-    { id: 'cuero_sint', nombre: 'Cuero Sintetico PU', desc: 'La mas elegante.' },
+    { id: 'cuero_sint', nombre: 'Cuero Sintético PU', desc: 'La más elegante.' },
     { id: 'lona', nombre: 'Lona 12oz', desc: 'Casual y resistente.' },
     { id: 'algodon', nombre: 'Algodon Canvas', desc: 'Eco-friendly, textura natural.' },
     { id: 'nylon', nombre: 'Nylon 420D', desc: 'Liviana, impermeable.' },
@@ -467,9 +467,9 @@ export default function Disenador() {
     for(var i=0;i<productos.length;i++){if(productos[i].id===producto){prod=productos[i].nombre;break}}
     for(var i=0;i<coloresTela.length;i++){if(coloresTela[i].hex===colorTela){tela=coloresTela[i].nombre;break}}
     var msg='Hola! Quiero un '+prod+' bordado.\n\nColor de tela: '+tela+'\n'
-    if(zonaActiva){var zl=zonaActiva;for(var i=0;i<zonas.length;i++){if(zonas[i].id===zonaActiva){zl=zonas[i].label;break}};msg+='Ubicacion: '+zl+'\n'}
-    else if(modoLibre){msg+='Posicion personalizada\n'}
-    msg+='Tamano: '+tamano+'%\nRotacion: '+rotacion+'\n\nAdjunto la imagen del bordado.'
+    if(zonaActiva){var zl=zonaActiva;for(var i=0;i<zonas.length;i++){if(zonas[i].id===zonaActiva){zl=zonas[i].label;break}};msg+='Ubicación: '+zl+'\n'}
+    else if(modoLibre){msg+='Posición personalizada\n'}
+    msg+='Tamaño: '+tamano+'%\nRotación: '+rotacion+'\n\nAdjunto la imagen del bordado.'
     window.open('https://wa.me/5493454497729?text='+encodeURIComponent(msg),'_blank')
   }
 
@@ -487,11 +487,11 @@ export default function Disenador() {
   var textureClass=telaSeleccionada?(telaTextureMap[telaSeleccionada]||''):''
 
   return React.createElement('section',{id:'disenador',className:'section disenador'},
-    React.createElement('h2',{className:'section-title'},'Disena tu Bordado'),
-    React.createElement('p',{className:'section-subtitle'},'Elegi el articulo, el color, subi tu imagen y elegi donde va el bordado'),
+    React.createElement('h2',{className:'section-title'},'Diseñá tu Bordado'),
+    React.createElement('p',{className:'section-subtitle'},'Elegí el artículo, el color, subí tu imagen y elegí donde va el bordado'),
 
     React.createElement('div',{className:'disenador-top-section'},
-      React.createElement('h3',null,'1. Elegi el articulo'),
+      React.createElement('h3',null,'1. Elegí el artículo'),
       React.createElement('div',{className:'producto-selector-full'},productos.map(function(pr){
         return React.createElement('button',{key:pr.id,className:producto===pr.id?'producto-btn active':'producto-btn',style:{'--btn-color':pr.color},onClick:function(){cambiarProd(pr.id)}},pr.nombre)
       }))
@@ -517,19 +517,19 @@ export default function Disenador() {
           }),
           textureClass?React.createElement('div',{className:'texture-overlay '+textureClass}):null,
           colorTela&&colorTela!=='#1A1A1A'&&colorTela!=='#F5F5F5'?React.createElement('div',{className:'color-tint-overlay',style:{backgroundColor:colorTela}}):null,
-          !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subi tu imagen para empezar')):null,
-          imagen&&!zonaActiva&&!modoLibre&&!aplicada?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Hace clic en una zona del producto')):null,
-          React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado':modoLibre&&imagen?'Arrastra para mover el diseno':'Elegi una zona para tu bordado')
+          !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subí tu imagen para empezar')):null,
+          imagen&&!zonaActiva&&!modoLibre&&!aplicada?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Haz clic en una zona del producto')):null,
+          React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado':modoLibre&&imagen?'Arrastrá para mover el diseño':'Elegí una zona para tu bordado')
         ),
         imagen?React.createElement('div',{className:'disenador-send-row'},
-          React.createElement('button',{className:'btn btn-whatsapp disenador-send',onClick:sendWA},'Enviar diseno por WhatsApp'),
+          React.createElement('button',{className:'btn btn-whatsapp disenador-send',onClick:sendWA},'Enviar diseño por WhatsApp'),
           React.createElement('button',{className:'btn btn-outline disenador-export',onClick:handleExport},React.createElement(FiDownload,{size:14}),' Descargar PNG')
         ):null
       ),
 
       React.createElement('div',{className:'disenador-panel'},
         React.createElement('div',{className:'panel-section'},
-          React.createElement('h3',null,'3. Subi tu imagen'),
+          React.createElement('h3',null,'3. Subí tu imagen'),
           React.createElement('div',{className:'upload-zone'+(imagen?' has-image':''),onClick:function(){fileInputRef.current&&fileInputRef.current.click()},onDrop:handleDrop,onDragOver:function(e){e.preventDefault()}},
             imagen?React.createElement('img',{src:imagen,alt:'diseno',className:'upload-preview'}):
               React.createElement(React.Fragment,null,React.createElement(FiUpload,{size:32}),React.createElement('p',null,'Haz clic o arrastra tu imagen'),React.createElement('span',null,'JPG, PNG, SVG'))
@@ -554,10 +554,10 @@ export default function Disenador() {
           imagen&&!aplicada?React.createElement(React.Fragment,null,
             React.createElement('div',{className:'zonas-selector'},
               zonas.map(function(z){return React.createElement('button',{key:z.id,className:'zona-btn'+(zonaActiva===z.id?' active':'')+(zonasyMarca.indexOf(z.id)>=0&&zonaActiva!==z.id?' marcada':''),onClick:function(){selZona(z.id)}},zonasyMarca.indexOf(z.id)>=0?React.createElement(FiSliders,{size:12}):null,' '+z.label)}),
-              React.createElement('button',{className:'zona-btn libre-btn'+(modoLibre?' active':''),onClick:function(){setModoLibre(true);setZonaActiva(null)}},React.createElement(FiSliders,{size:12}),' Posicion libre')
+              React.createElement('button',{className:'zona-btn libre-btn'+(modoLibre?' active':''),onClick:function(){setModoLibre(true);setZonaActiva(null)}},React.createElement(FiSliders,{size:12}),' Posición libre')
             ),
-            React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiMaximize2,{size:14}),' Tamano'),React.createElement('input',{type:'range',min:'10',max:'80',value:tamano,onChange:function(e){setTamano(Number(e.target.value))}}),React.createElement('span',null,tamano+'%')),
-            React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiRotateCw,{size:14}),' Rotacion'),React.createElement('input',{type:'range',min:'-180',max:'180',value:rotacion,onChange:function(e){setRotacion(Number(e.target.value))}}),React.createElement('span',null,rotacion)),
+            React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiMaximize2,{size:14}),' Tamaño'),React.createElement('input',{type:'range',min:'10',max:'80',value:tamano,onChange:function(e){setTamano(Number(e.target.value))}}),React.createElement('span',null,tamano+'%')),
+            React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiRotateCw,{size:14}),' Rotación'),React.createElement('input',{type:'range',min:'-180',max:'180',value:rotacion,onChange:function(e){setRotacion(Number(e.target.value))}}),React.createElement('span',null,rotacion)),
             modoLibre?React.createElement(React.Fragment,null,
               React.createElement('div',{className:'control-group'},React.createElement('label',null,'X'),React.createElement('input',{type:'range',min:'0',max:'100',value:posX,onChange:function(e){setPosX(Number(e.target.value))}}),React.createElement('span',null,Math.round(posX)+'%')),
               React.createElement('div',{className:'control-group'},React.createElement('label',null,'Y'),React.createElement('input',{type:'range',min:'0',max:'100',value:posY,onChange:function(e){setPosY(Number(e.target.value))}}),React.createElement('span',null,Math.round(posY)+'%'))

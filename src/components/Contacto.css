@@ -1,47 +1,53 @@
 .contacto-grid {
-  max-width: 600px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
 .contacto-info {
   display: flex;
-  flex-direction: column;
-  gap: 24px;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
 }
 
 .contacto-item {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  gap: 10px;
   color: var(--text-muted);
 }
 
 .contacto-item svg {
   color: var(--primary);
-  margin-top: 4px;
   flex-shrink: 0;
 }
 
 .contacto-item h4 {
   color: var(--text);
-  font-size: 1rem;
-  margin-bottom: 2px;
+  font-size: 0.9rem;
+  margin-bottom: 1px;
 }
 
 .contacto-item p {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+  .contacto-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
   .contacto-item {
-    gap: 12px;
+    gap: 10px;
   }
 
   .contacto-item h4 {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
   .contacto-item p {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
   }
 }
