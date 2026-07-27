@@ -493,7 +493,6 @@ export default function Disenador() {
           className:'canvas-area'+((modoLibre&&imagen)?' mode-place':' mode-3d')+(isDragging||isRotating?' active-drag':''),
           onPointerDown:onCanvasPointerDown,onPointerMove:onCanvasPointerMove,onPointerUp:onCanvasPointerUp,onPointerLeave:onCanvasPointerUp,onPointerCancel:onCanvasPointerUp
         },
-          React.createElement('div',{className:'canvas-light-shine',style:{transform:'translate('+(rotationY*0.3)+'%, '+(-tiltX*0.5)+'%)'}}),
           React.createElement('div',{className:'canvas-groundshadow',style:{transform:'translateX(-50%) rotate('+(tiltX*0.15)+'deg) scaleX('+(1-Math.abs(tiltX)/90)+')'}}),
           React.createElement('div',{className:'product-3d-model',style:{transform:boxTransform}},
             React.createElement(SVGFrontProduct,{pid:producto,fb:colorTela,selZ:zonaActiva,onZC:imagen?selZona:undefined,zm:zonasyMarca,telaId:telaSeleccionada}),

@@ -325,29 +325,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 1200px;
+  perspective: 900px;
   touch-action: none;
   cursor: grab;
 }
 .canvas-area.mode-place { cursor: default; }
 .canvas-area.active-drag { cursor: grabbing; }
-
-/* 4D Light Shine */
-.canvas-light-shine {
-  position: absolute;
-  width: 120%;
-  height: 120%;
-  top: -10%;
-  left: -10%;
-  background: radial-gradient(ellipse at 35% 25%, rgba(255,255,255,0.08) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 1;
-  transition: transform 0.08s ease-out;
-  will-change: transform;
-}
-.canvas-area.active-drag .canvas-light-shine {
-  transition: none;
-}
 
 /* 3D Product Model */
 .product-3d-model {
@@ -357,7 +340,6 @@
   transform-style: preserve-3d;
   transition: transform 0.06s ease-out;
   will-change: transform;
-  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
 }
 .canvas-area.active-drag .product-3d-model {
   transition: none;
@@ -366,6 +348,7 @@
   width: 100%;
   height: auto;
   display: block;
+  filter: drop-shadow(0 14px 24px rgba(0,0,0,0.55));
 }
 
 /* Fabric Texture Overlays — much more visible */
@@ -473,11 +456,11 @@
 .canvas-groundshadow {
   position: absolute;
   left: 50%;
-  bottom: 6%;
-  width: 50%;
-  height: 20px;
-  background: radial-gradient(ellipse, rgba(0,0,0,0.65), transparent 72%);
-  filter: blur(4px);
+  bottom: 8%;
+  width: 46%;
+  height: 16px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.55), transparent 72%);
+  filter: blur(2px);
   z-index: 0;
   pointer-events: none;
   transition: transform 0.08s ease-out;
