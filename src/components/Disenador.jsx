@@ -353,34 +353,57 @@ function SVGFrontProduct(props) {
 }
 
 function CSS3DMochila(props) {
-  var fabricColor=props.fb,selZ=props.selZ,onZC=props.onZC,zm=props.zm||[],applied=props.applied,appliedImg=props.appliedImg,appliedStyle=props.appliedStyle
+  var fabricColor=props.fb,selZ=props.selZ,onZC=props.onZC,zm=props.zm||[],applied=props.applied,appliedImg=props.appliedImg,appliedStyle=props.appliedStyle,telaId=props.telaId
   var c=calcColors(fabricColor)
   var W=React.createElement
   var FW=170,FH=280,FD=72,FX=55,FY=30
   var faceBase={position:'absolute',width:FW+'px',height:FH+'px'}
   var s=[]
+  var ftClass=fabricClassMap[telaId]||''
+  var fabricOverlay=W('div',{className:'fabric-overlay'+(ftClass?' '+ftClass:''),key:'fo'})
+  var fabricDepth=W('div',{className:'fabric-overlay-depth'+(ftClass?' '+ftClass:''),key:'fd'})
 
   s.push(W('div',{key:'sh',style:{position:'absolute',left:'50%',bottom:'-8px',width:'55%',height:'20px',background:'radial-gradient(ellipse,rgba(0,0,0,0.65),transparent 72%)',transform:'translateX(-50%)',filter:'blur(4px)',pointerEvents:'none',zIndex:0}}))
 
-  s.push(W('div',{key:'bk',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',transform:'rotateY(180deg) translateZ('+(FD/2)+'px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 70%)',boxShadow:'inset 0 0 20px rgba(0,0,0,0.6)'}),children:null}))
+  s.push(W('div',{key:'bk',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',transform:'rotateY(180deg) translateZ('+(FD/2)+'px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 70%)',boxShadow:'inset 0 0 20px rgba(0,0,0,0.6)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[fabricOverlay,fabricDepth]}))
 
-  s.push(W('div',{key:'rt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'rotateY(90deg) translateZ('+(FW/2)+'px)',borderRadius:'0 36px 10px 0',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+' 50%,'+c.base+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)'}),children:null}))
+  s.push(W('div',{key:'rt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'rotateY(90deg) translateZ('+(FW/2)+'px)',borderRadius:'0 36px 10px 0',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+' 50%,'+c.base+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
 
-  s.push(W('div',{key:'lt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'rotateY(-90deg) translateZ('+(FW/2)+'px)',borderRadius:'36px 0 0 10px',background:'linear-gradient(90deg,'+c.base+','+c.darker+' 50%,'+c.darkest+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)'}),children:null}))
+  s.push(W('div',{key:'lt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'rotateY(-90deg) translateZ('+(FW/2)+'px)',borderRadius:'36px 0 0 10px',background:'linear-gradient(90deg,'+c.base+','+c.darker+' 50%,'+c.darkest+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
 
-  s.push(W('div',{key:'tp',style:{position:'absolute',left:(FX)+'px',top:(FY)+'px',width:FW+'px',height:FD+'px',transform:'rotateX(90deg) translateZ('+(FD/2)+'px)',transformOrigin:'top center',borderRadius:'85px 85px 0 0',background:'linear-gradient(180deg,'+c.lighter+','+c.base+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.3)'},children:null}))
+  s.push(W('div',{key:'tp',style:{position:'absolute',left:FX+'px',top:FY+'px',width:FW+'px',height:FD+'px',transform:'rotateX(90deg) translateZ('+(FD/2)+'px)',transformOrigin:'top center',borderRadius:'85px 85px 0 0',background:'linear-gradient(180deg,'+c.lighter+','+c.base+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.3)',overflow:'hidden',transformStyle:'preserve-3d'},children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
 
-  s.push(W('div',{key:'bt',style:{position:'absolute',left:(FX)+'px',top:(FY+FH-FD)+'px',width:FW+'px',height:FD+'px',transform:'rotateX(-90deg) translateZ('+(FD/2)+'px)',transformOrigin:'bottom center',borderRadius:'0 0 10px 10px',background:'linear-gradient(0deg,'+c.darkest+','+c.darker+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.5)'},children:null}))
+  s.push(W('div',{key:'bt',style:{position:'absolute',left:FX+'px',top:(FY+FH-FD)+'px',width:FW+'px',height:FD+'px',transform:'rotateX(-90deg) translateZ('+(FD/2)+'px)',transformOrigin:'bottom center',borderRadius:'0 0 10px 10px',background:'linear-gradient(0deg,'+c.darkest+','+c.darker+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.5)',overflow:'hidden',transformStyle:'preserve-3d'},children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
 
   var fc=[]
-  fc.push(W('div',{key:'hd',style:{position:'absolute',left:'50%',top:'-14px',width:'40px',height:'20px',transform:'translateX(-50%)',border:'4px solid '+c.darkest,borderBottom:'none',borderRadius:'12px 12px 0 0',boxSizing:'border-box'}}))
-  fc.push(W('div',{key:'sl',style:{position:'absolute',left:'35px',top:'0',width:'18px',height:'200px',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+')',borderRadius:'4px',opacity:'0.85'}}))
-  fc.push(W('div',{key:'sr',style:{position:'absolute',right:'35px',top:'0',width:'18px',height:'200px',background:'linear-gradient(90deg,'+c.darker+','+c.darkest+')',borderRadius:'4px',opacity:'0.85'}}))
-  fc.push(W('div',{key:'pk',style:{position:'absolute',left:'14px',top:'155px',width:'142px',height:'100px',borderRadius:'8px 8px 14px 14px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 60%)',boxShadow:'0 4px 8px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.5)'}},
-    W('div',{style:{position:'absolute',left:'8px',top:'8px',width:'110px',height:'3px',background:'repeating-linear-gradient(90deg,#666 0 4px,#333 4px 6px)',borderRadius:'3px'}}),
-    W('div',{style:{position:'absolute',right:'8px',top:'3px',width:'9px',height:'13px',background:'#888',borderRadius:'2px',boxShadow:'0 1px 2px rgba(0,0,0,0.6)'}})
+
+  fc.push(W('div',{key:'stitches',style:{position:'absolute',left:'6px',top:'6px',right:'6px',bottom:'6px',border:'1.5px dashed rgba(255,255,255,0.12)',borderRadius:'82px 82px 8px 8px',pointerEvents:'none'}}))
+
+  fc.push(W('div',{key:'hd',style:{position:'absolute',left:'50%',top:'-16px',width:'36px',height:'22px',transform:'translateX(-50%)',border:'4px solid '+c.darkest,borderBottom:'none',borderRadius:'12px 12px 0 0',boxSizing:'border-box',zIndex:5}},
+    W('div',{style:{position:'absolute',top:'3px',left:'3px',right:'3px',height:'3px',background:'repeating-linear-gradient(90deg,'+c.edge+' 0 2px,transparent 2px 4px)',borderRadius:'2px'}})
   ))
-  fc.push(W('div',{key:'ph',style:{position:'absolute',left:'50%',top:'146px',width:'34px',height:'14px',transform:'translateX(-50%)',background:c.darker,borderRadius:'6px',boxShadow:'0 2px 3px rgba(0,0,0,0.5)'}}))
+
+  fc.push(W('div',{key:'sl',style:{position:'absolute',left:'30px',top:'0',width:'12px',height:'210px',background:'linear-gradient(90deg,'+c.darkest+','+c.edge+' 50%,'+c.darker+')',borderRadius:'4px',opacity:'0.9',boxShadow:'1px 0 3px rgba(0,0,0,0.3)'}}))
+  fc.push(W('div',{key:'sr',style:{position:'absolute',right:'30px',top:'0',width:'12px',height:'210px',background:'linear-gradient(90deg,'+c.darker+','+c.edge+' 50%,'+c.darkest+')',borderRadius:'4px',opacity:'0.9',boxShadow:'-1px 0 3px rgba(0,0,0,0.3)'}}))
+
+  fc.push(W('div',{key:'stitchTop',style:{position:'absolute',left:'16px',top:'140px',width:'138px',height:'1px',background:'repeating-linear-gradient(90deg,'+c.edge+' 0 3px,transparent 3px 6px)'}}))
+
+  fc.push(W('div',{key:'pk',style:{position:'absolute',left:'12px',top:'148px',width:'146px',height:'118px',borderRadius:'8px 8px 14px 14px',background:'linear-gradient(170deg,'+c.darker+' 0%,'+c.darkest+' 55%,'+c.edge+' 100%)',boxShadow:'0 4px 10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 14px rgba(0,0,0,0.5)',overflow:'hidden'}},
+    W('div',{style:{position:'absolute',left:'8px',top:'8px',right:'8px',height:'1px',background:'repeating-linear-gradient(90deg,rgba(255,255,255,0.1) 0 3px,transparent 3px 6px)'}}),
+    W('div',{style:{position:'absolute',left:'8px',bottom:'8px',right:'8px',height:'1px',background:'repeating-linear-gradient(90deg,rgba(255,255,255,0.1) 0 3px,transparent 3px 6px)'}}),
+    W('div',{style:{position:'absolute',left:'8px',top:'8px',bottom:'8px',width:'1px',background:'repeating-linear-gradient(180deg,rgba(255,255,255,0.1) 0 3px,transparent 3px 6px)'}}),
+    W('div',{style:{position:'absolute',right:'8px',top:'8px',bottom:'8px',width:'1px',background:'repeating-linear-gradient(180deg,rgba(255,255,255,0.1) 0 3px,transparent 3px 6px)'}}),
+    W('div',{style:{position:'absolute',left:'6px',top:'6px',width:'120px',height:'3px',background:'linear-gradient(90deg,#555,#888 40%,#555 60%,#333)',borderRadius:'2px',boxShadow:'0 1px 2px rgba(0,0,0,0.5)'}}),
+    W('div',{style:{position:'absolute',left:'114px',top:'2px',width:'10px',height:'14px',background:'linear-gradient(180deg,#aaa,#777)',borderRadius:'2px',boxShadow:'0 1px 3px rgba(0,0,0,0.6)',border:'1px solid #999'}}),
+    W('div',{style:{position:'absolute',left:'117px',top:'6px',width:'4px',height:'4px',background:'#ccc',borderRadius:'50%',boxShadow:'0 0 2px rgba(0,0,0,0.4)'}}),
+    React.cloneElement(fabricOverlay,{key:'fpk',style:{opacity:'0.6'}})
+  ))
+
+  fc.push(W('div',{key:'ph',style:{position:'absolute',left:'50%',top:'141px',width:'38px',height:'10px',transform:'translateX(-50%)',background:'linear-gradient(180deg,'+c.edge+','+c.darker+')',borderRadius:'6px',boxShadow:'0 2px 4px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)',zIndex:3}}))
+
+  fc.push(W('div',{key:'stitchBot',style:{position:'absolute',left:'12px',top:'268px',width:'146px',height:'1px',background:'repeating-linear-gradient(90deg,'+c.edge+' 0 3px,transparent 3px 6px)',zIndex:1}}))
+
+  fc.push(W('div',{key:'baseRf',style:{position:'absolute',left:'12px',bottom:'10px',width:'146px',height:'8px',background:'linear-gradient(0deg,'+c.edge+','+c.darker+')',borderRadius:'0 0 10px 10px',boxShadow:'inset 0 1px 3px rgba(0,0,0,0.4)',zIndex:1}}))
 
   if(!applied&&onZC){
     var zn=zonasPorProducto.mochila||[]
@@ -396,7 +419,7 @@ function CSS3DMochila(props) {
     fc.push(W('img',{key:'ai',src:appliedImg,style:Object.assign({position:'absolute',pointerEvents:'none',userSelect:'none',mixBlendMode:'multiply',opacity:'0.94',filter:'contrast(1.15) saturate(0.9) brightness(0.94)'},appliedStyle)}))
   }
 
-  s.push(W('div',{key:'fr',style:{position:'absolute',left:FX+'px',top:FY+'px',width:FW+'px',height:FH+'px',transform:'translateZ('+(FD/2)+'px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.lighter+','+c.base+' 55%,'+c.darker+')',boxShadow:'inset 0 0 26px rgba(0,0,0,0.5)',overflow:applied?'hidden':'visible'},children:fc}))
+  s.push(W('div',{key:'fr',style:{position:'absolute',left:FX+'px',top:FY+'px',width:FW+'px',height:FH+'px',transform:'translateZ('+(FD/2)+'px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.lighter+','+c.base+' 40%,'+c.darker+')',boxShadow:'inset 0 0 30px rgba(0,0,0,0.5)',overflow:applied?'hidden':'visible',transformStyle:'preserve-3d'},children:fc}))
 
   return W('div',{style:{width:'280px',height:'340px',position:'relative',transformStyle:'preserve-3d'}},s)
 }
@@ -568,7 +591,7 @@ export default function Disenador() {
         },
           React.createElement('div',{className:'canvas-groundshadow',style:{transform:'translateX(-50%) rotate('+(tiltX*0.15)+'deg) scaleX('+(1-Math.abs(tiltX)/90)+')'}}),
           React.createElement('div',{className:'product-3d-model',style:{transform:boxTransform}},
-            producto==='mochila'?React.createElement(CSS3DMochila,{fb:colorTela,selZ:zonaActiva,onZC:(imagen&&!aplicada)?selZona:undefined,zm:zonasyMarca,applied:aplicada,appliedImg:aplicada?imagen:null,appliedStyle:aplicadaStyle}):
+            producto==='mochila'?React.createElement(CSS3DMochila,{fb:colorTela,selZ:zonaActiva,onZC:(imagen&&!aplicada)?selZona:undefined,zm:zonasyMarca,applied:aplicada,appliedImg:aplicada?imagen:null,appliedStyle:aplicadaStyle,telaId:telaSeleccionada}):
               React.createElement(SVGFrontProduct,{pid:producto,fb:colorTela,selZ:zonaActiva,onZC:imagen?selZona:undefined,zm:zonasyMarca,telaId:telaSeleccionada}),
             producto!=='mochila'&&imagen&&(zonaActiva||modoLibre)?React.createElement('img',{src:imagen,alt:'diseño',className:'canvas-image',style:imgStyle(),draggable:false}):null
           ),
