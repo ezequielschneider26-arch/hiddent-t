@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <!-- Horizontal bag body -->
+  <rect x="30" y="160" width="340" height="180" rx="16" fill="#2A2A2E"/>
+  <rect x="40" y="170" width="320" height="160" rx="12" fill="#3A3A40"/>
+  <!-- Top zipper -->
+  <path d="M50 185 Q200 175 350 185" stroke="#555" stroke-width="3" fill="none"/>
+  <circle cx="335" cy="188" r="6" fill="#777"/>
+  <!-- Side handles -->
+  <path d="M35 220 Q15 220 15 250 Q15 280 35 280" stroke="#333338" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M365 220 Q385 220 385 250 Q385 280 365 280" stroke="#333338" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <!-- D-rings -->
+  <circle cx="40" cy="250" r="8" fill="none" stroke="#777" stroke-width="3"/>
+  <circle cx="360" cy="250" r="8" fill="none" stroke="#777" stroke-width="3"/>
+  <!-- Bottom -->
+  <rect x="35" y="325" width="330" height="12" rx="3" fill="#333338"/>
+  <!-- Stitching -->
+  <path d="M50 320 L200 320 L350 320" stroke="#2A2A2E" stroke-width="1.5" stroke-dasharray="4,4"/>
+</svg>

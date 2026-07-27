@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <!-- Case body -->
+  <rect x="50" y="120" width="300" height="260" rx="20" fill="#2A2A2E"/>
+  <rect x="60" y="130" width="280" height="240" rx="16" fill="#3A3A40"/>
+  <!-- Lid line -->
+  <line x1="55" y1="200" x2="345" y2="200" stroke="#2A2A2E" stroke-width="4"/>
+  <!-- Zipper -->
+  <path d="M70 205 Q200 195 330 205" stroke="#555" stroke-width="3" fill="none"/>
+  <circle cx="315" cy="208" r="6" fill="#777"/>
+  <!-- Corners -->
+  <path d="M70 140 Q50 140 50 160" stroke="#333338" stroke-width="3" fill="none"/>
+  <path d="M330 140 Q350 140 350 160" stroke="#333338" stroke-width="3" fill="none"/>
+  <path d="M70 360 Q50 360 50 340" stroke="#333338" stroke-width="3" fill="none"/>
+  <path d="M330 360 Q350 360 350 340" stroke="#333338" stroke-width="3" fill="none"/>
+  <!-- Stitching -->
+  <path d="M75 355 L200 355 L325 355" stroke="#2A2A2E" stroke-width="1.5" stroke-dasharray="4,4"/>
+</svg>

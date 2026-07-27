@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <!-- Triangular yerbera body -->
+  <path d="M200 60 L340 400 L60 400 Z" fill="#2A2A2E"/>
+  <path d="M200 80 L325 390 L75 390 Z" fill="#3A3A40"/>
+  <!-- Right slope zipper -->
+  <line x1="210" y1="95" x2="320" y2="380" stroke="#555" stroke-width="3"/>
+  <circle cx="310" cy="370" r="6" fill="#777"/>
+  <!-- Left slope piping -->
+  <line x1="190" y1="95" x2="80" y2="380" stroke="#2A2A2E" stroke-width="5"/>
+  <!-- Bottom reinforcement -->
+  <rect x="65" y="390" width="270" height="16" rx="4" fill="#333338"/>
+  <!-- Top handle ring -->
+  <circle cx="200" cy="68" r="10" fill="none" stroke="#777" stroke-width="3"/>
+  <!-- Stitching -->
+  <path d="M100 385 L200 385 L300 385" stroke="#2A2A2E" stroke-width="1.5" stroke-dasharray="4,4"/>
+</svg>

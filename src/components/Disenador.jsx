@@ -112,13 +112,13 @@ var telasData = {
 }
 
 var productoFotos = {
-  mochila: '/productos/mochila-blank.jpg',
-  yerbera: '/productos/yerbera-blank.jpg',
-  bolso: '/productos/bolso-blank.jpg',
-  botinera: '/productos/botinera-blank.jpg',
-  gorra: '/productos/gorra-blank.jpg',
-  estuche: '/productos/estuche-blank.jpg',
-  cartera: '/productos/cartera-blank.jpg',
+  mochila: '/productos/mochila-blank.svg',
+  yerbera: '/productos/yerbera-blank.svg',
+  bolso: '/productos/bolso-blank.svg',
+  botinera: '/productos/botinera-blank.svg',
+  gorra: '/productos/gorra-blank.svg',
+  estuche: '/productos/estuche-blank.svg',
+  cartera: '/productos/cartera-blank.svg',
 }
 
 var telaTextureMap = {

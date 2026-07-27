@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <!-- Backpack body -->
+  <rect x="80" y="80" width="240" height="340" rx="20" fill="#2A2A2E"/>
+  <rect x="90" y="90" width="220" height="320" rx="16" fill="#3A3A40"/>
+  <!-- Main compartment zipper -->
+  <path d="M100 120 Q200 100 300 120" stroke="#555" stroke-width="3" fill="none"/>
+  <circle cx="280" cy="125" r="6" fill="#777"/>
+  <!-- Front pocket -->
+  <rect x="110" y="220" width="180" height="140" rx="12" fill="#44444A"/>
+  <path d="M120 250 Q200 240 280 250" stroke="#555" stroke-width="2.5" fill="none"/>
+  <circle cx="265" cy="253" r="5" fill="#777"/>
+  <!-- Shoulder straps -->
+  <path d="M130 80 Q120 60 110 80 L110 350 Q120 370 130 350" fill="#333338"/>
+  <path d="M270 80 Q280 60 290 80 L290 350 Q280 370 270 350" fill="#333338"/>
+  <!-- Top handle -->
+  <path d="M170 80 Q200 50 230 80" stroke="#333338" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <!-- Bottom reinforcement -->
+  <rect x="85" y="395" width="230" height="20" rx="4" fill="#333338"/>
+  <!-- Side piping -->
+  <line x1="85" y1="100" x2="85" y2="390" stroke="#2A2A2E" stroke-width="4"/>
+  <line x1="315" y1="100" x2="315" y2="390" stroke="#2A2A2E" stroke-width="4"/>
+</svg>

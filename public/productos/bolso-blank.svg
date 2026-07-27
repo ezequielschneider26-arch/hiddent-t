@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <!-- Bag body -->
+  <rect x="60" y="140" width="280" height="280" rx="16" fill="#2A2A2E"/>
+  <rect x="70" y="150" width="260" height="260" rx="12" fill="#3A3A40"/>
+  <!-- Handles -->
+  <path d="M130 140 Q130 80 160 80" stroke="#333338" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M270 140 Q270 80 240 80" stroke="#333338" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <!-- Closure -->
+  <circle cx="200" cy="165" r="8" fill="#777"/>
+  <line x1="200" y1="173" x2="200" y2="190" stroke="#777" stroke-width="2"/>
+  <!-- Side seams -->
+  <line x1="65" y1="160" x2="65" y2="410" stroke="#2A2A2E" stroke-width="4"/>
+  <line x1="335" y1="160" x2="335" y2="410" stroke="#2A2A2E" stroke-width="4"/>
+  <!-- Bottom -->
+  <rect x="65" y="405" width="270" height="12" rx="3" fill="#333338"/>
+  <!-- Stitching -->
+  <path d="M80 400 L200 400 L320 400" stroke="#2A2A2E" stroke-width="1.5" stroke-dasharray="4,4"/>
+</svg>
