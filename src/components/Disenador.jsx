@@ -397,8 +397,8 @@ export default function Disenador() {
     setRemovingBg(false)
   },[imagen,tolerancia])
 
-  var TILT_X_MAX=20
-  var ROT_Y_MAX=45
+  var TILT_X_MAX=85
+  var ROT_Y_MAX=180
 
   var onCanvasPointerDown=function(e){
     if(imagen&&modoLibre){
@@ -424,8 +424,8 @@ export default function Disenador() {
     if(isRotating){
       var dx=e.clientX-rotateStart.x
       var dy=e.clientY-rotateStart.y
-      setRotationY(Math.max(-ROT_Y_MAX,Math.min(ROT_Y_MAX,rotateStart.ry+dx*0.4)))
-      setTiltX(Math.max(-TILT_X_MAX,Math.min(TILT_X_MAX,rotateStart.tx-dy*0.3)))
+      setRotationY(Math.max(-ROT_Y_MAX,Math.min(ROT_Y_MAX,rotateStart.ry+dx*0.5)))
+      setTiltX(Math.max(-TILT_X_MAX,Math.min(TILT_X_MAX,rotateStart.tx-dy*0.4)))
     }
   }
 
@@ -501,7 +501,7 @@ export default function Disenador() {
           ),
           !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subí tu imagen para empezar')):null,
           imagen&&!zonaActiva&&!modoLibre?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Hacé clic en una zona del producto')):null,
-          React.createElement('div',{className:'canvas-tilt-hint'},modoLibre&&imagen?'Arrastrá para mover el diseño':'Arrastrá para rotar el producto 360°'),
+          React.createElement('div',{className:'canvas-tilt-hint'},modoLibre&&imagen?'Arrastrá para mover el diseño':'Arrastrá para rotar el producto en 3D'),
           telaSeleccionada?React.createElement('div',{className:'fabric-badge'},function(){for(var i=0;i<(telasData[producto]||[]).length;i++){if(telasData[producto][i].id===telaSeleccionada){return telasData[producto][i].nombre}};return''}()):null,
           React.createElement('button',{className:'btn-reset-view',onClick:resetView,title:'Vista frontal'},React.createElement(FiRotateCw,{size:14}))
         ),
