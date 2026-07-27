@@ -356,16 +356,21 @@ function CSS3DMochila(props) {
   var fabricColor=props.fb,selZ=props.selZ,onZC=props.onZC,zm=props.zm||[],applied=props.applied,appliedImg=props.appliedImg,appliedStyle=props.appliedStyle
   var c=calcColors(fabricColor)
   var W=React.createElement
-  var fb={position:'absolute',left:'55px',top:'30px',width:'170px',height:'280px',backfaceVisibility:'hidden'}
+  var FW=170,FH=280,FD=72,FX=55,FY=30
+  var faceBase={position:'absolute',width:FW+'px',height:FH+'px'}
   var s=[]
 
-  s.push(W('div',{key:'sh',style:{position:'absolute',left:'50%',bottom:'0',width:'55%',height:'18px',background:'radial-gradient(ellipse,rgba(0,0,0,0.6),transparent 72%)',transform:'translateX(-50%)',filter:'blur(3px)',pointerEvents:'none'}}))
+  s.push(W('div',{key:'sh',style:{position:'absolute',left:'50%',bottom:'-8px',width:'55%',height:'20px',background:'radial-gradient(ellipse,rgba(0,0,0,0.65),transparent 72%)',transform:'translateX(-50%)',filter:'blur(4px)',pointerEvents:'none',zIndex:0}}))
 
-  s.push(W('div',{key:'bk',style:Object.assign({},fb,{transform:'rotateY(180deg) translateZ(36px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 70%)'})}))
+  s.push(W('div',{key:'bk',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',transform:'rotateY(180deg) translateZ('+(FD/2)+'px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 70%)',boxShadow:'inset 0 0 20px rgba(0,0,0,0.6)'}),children:null}))
 
-  s.push(W('div',{key:'rt',style:Object.assign({},fb,{width:'72px',transform:'rotateY(90deg) translateZ(80px) translateX(-36px)',borderRadius:'0 40px 10px 0',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+' 60%,'+c.base+')'})}))
+  s.push(W('div',{key:'rt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'rotateY(90deg) translateZ('+(FW/2)+'px)',borderRadius:'0 36px 10px 0',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+' 50%,'+c.base+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)'}),children:null}))
 
-  s.push(W('div',{key:'lt',style:Object.assign({},fb,{width:'72px',transform:'rotateY(-90deg) translateZ(80px) translateX(36px)',borderRadius:'40px 0 0 10px',background:'linear-gradient(90deg,'+c.base+','+c.darker+' 60%,'+c.darkest+')'})}))
+  s.push(W('div',{key:'lt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'rotateY(-90deg) translateZ('+(FW/2)+'px)',borderRadius:'36px 0 0 10px',background:'linear-gradient(90deg,'+c.base+','+c.darker+' 50%,'+c.darkest+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)'}),children:null}))
+
+  s.push(W('div',{key:'tp',style:{position:'absolute',left:(FX)+'px',top:(FY)+'px',width:FW+'px',height:FD+'px',transform:'rotateX(90deg) translateZ('+(FD/2)+'px)',transformOrigin:'top center',borderRadius:'85px 85px 0 0',background:'linear-gradient(180deg,'+c.lighter+','+c.base+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.3)'},children:null}))
+
+  s.push(W('div',{key:'bt',style:{position:'absolute',left:(FX)+'px',top:(FY+FH-FD)+'px',width:FW+'px',height:FD+'px',transform:'rotateX(-90deg) translateZ('+(FD/2)+'px)',transformOrigin:'bottom center',borderRadius:'0 0 10px 10px',background:'linear-gradient(0deg,'+c.darkest+','+c.darker+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.5)'},children:null}))
 
   var fc=[]
   fc.push(W('div',{key:'hd',style:{position:'absolute',left:'50%',top:'-14px',width:'40px',height:'20px',transform:'translateX(-50%)',border:'4px solid '+c.darkest,borderBottom:'none',borderRadius:'12px 12px 0 0',boxSizing:'border-box'}}))
@@ -380,7 +385,7 @@ function CSS3DMochila(props) {
   if(!applied&&onZC){
     var zn=zonasPorProducto.mochila||[]
     zn.forEach(function(z){
-      var w=(z.size/100)*170*0.8,h=(z.size/100)*280*0.55,cx=(z.x/100)*170,cy=(z.y/100)*280
+      var w=(z.size/100)*FW*0.8,h=(z.size/100)*FH*0.55,cx=(z.x/100)*FW,cy=(z.y/100)*FH
       var isA=selZ===z.id,isM=zm.indexOf(z.id)>=0
       fc.push(W('div',{key:'z'+z.id,style:{position:'absolute',left:(cx-w/2)+'px',top:(cy-h/2)+'px',width:w+'px',height:h+'px',borderRadius:'6px',border:(isA||isM)?'2.5px solid #8B5CF6':'1.5px dashed rgba(255,255,255,0.3)',background:isA?'rgba(139,92,246,0.2)':isM?'rgba(16,185,129,0.2)':'rgba(255,255,255,0.03)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',transition:'all 0.2s ease'},onClick:function(){onZC(z.id)}},
         (!isA&&!isM)?W('span',{style:{fontSize:'8px',color:'rgba(255,255,255,0.4)'}},z.label):null))
@@ -391,7 +396,7 @@ function CSS3DMochila(props) {
     fc.push(W('img',{key:'ai',src:appliedImg,style:Object.assign({position:'absolute',pointerEvents:'none',userSelect:'none',mixBlendMode:'multiply',opacity:'0.94',filter:'contrast(1.15) saturate(0.9) brightness(0.94)'},appliedStyle)}))
   }
 
-  s.push(W('div',{key:'fr',style:Object.assign({},fb,{transform:'translateZ(36px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.lighter+','+c.base+' 55%,'+c.darker+')',boxShadow:'inset 0 0 26px rgba(0,0,0,0.5)',overflow:applied?'hidden':'visible'})},fc))
+  s.push(W('div',{key:'fr',style:{position:'absolute',left:FX+'px',top:FY+'px',width:FW+'px',height:FH+'px',transform:'translateZ('+(FD/2)+'px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.lighter+','+c.base+' 55%,'+c.darker+')',boxShadow:'inset 0 0 26px rgba(0,0,0,0.5)',overflow:applied?'hidden':'visible'},children:fc}))
 
   return W('div',{style:{width:'280px',height:'340px',position:'relative',transformStyle:'preserve-3d'}},s)
 }
