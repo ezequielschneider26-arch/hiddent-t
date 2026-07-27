@@ -357,6 +357,7 @@ function CSS3DMochila(props) {
   var c=calcColors(fabricColor)
   var W=React.createElement
   var FW=170,FH=280,FD=72,FX=55,FY=30
+  var HF=FW/2,HD=FD/2
   var faceBase={position:'absolute',width:FW+'px',height:FH+'px'}
   var s=[]
   var ftClass=fabricClassMap[telaId]||''
@@ -365,15 +366,15 @@ function CSS3DMochila(props) {
 
   s.push(W('div',{key:'sh',style:{position:'absolute',left:'50%',bottom:'-8px',width:'55%',height:'20px',background:'radial-gradient(ellipse,rgba(0,0,0,0.65),transparent 72%)',transform:'translateX(-50%)',filter:'blur(4px)',pointerEvents:'none',zIndex:0}}))
 
-  s.push(W('div',{key:'bk',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',transform:'rotateY(180deg) translateZ('+(FD/2)+'px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 70%)',boxShadow:'inset 0 0 20px rgba(0,0,0,0.6)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[fabricOverlay,fabricDepth]}))
+  s.push(W('div',{key:'bk',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',transform:'rotateY(180deg) translateZ('+HD+'px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 70%)',boxShadow:'inset 0 0 20px rgba(0,0,0,0.6)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[fabricOverlay,fabricDepth]}))
 
-  s.push(W('div',{key:'rt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'rotateY(90deg) translateZ('+(FW/2)+'px)',borderRadius:'0 36px 10px 0',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+' 50%,'+c.base+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
+  s.push(W('div',{key:'rt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'translateX('+(FW-HD)+'px) rotateY(90deg) translateZ('+HF+'px)',borderRadius:'0 36px 10px 0',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+' 50%,'+c.base+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
 
-  s.push(W('div',{key:'lt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'rotateY(-90deg) translateZ('+(FW/2)+'px)',borderRadius:'36px 0 0 10px',background:'linear-gradient(90deg,'+c.base+','+c.darker+' 50%,'+c.darkest+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
+  s.push(W('div',{key:'lt',style:Object.assign({},faceBase,{left:FX+'px',top:FY+'px',width:FD+'px',transform:'translateX(-'+HD+'px) rotateY(-90deg) translateZ('+HF+'px)',borderRadius:'36px 0 0 10px',background:'linear-gradient(90deg,'+c.base+','+c.darker+' 50%,'+c.darkest+')',boxShadow:'inset 0 0 15px rgba(0,0,0,0.4)',overflow:'hidden',transformStyle:'preserve-3d'}),children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
 
-  s.push(W('div',{key:'tp',style:{position:'absolute',left:FX+'px',top:FY+'px',width:FW+'px',height:FD+'px',transform:'rotateX(90deg) translateZ('+(FD/2)+'px)',transformOrigin:'top center',borderRadius:'85px 85px 0 0',background:'linear-gradient(180deg,'+c.lighter+','+c.base+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.3)',overflow:'hidden',transformStyle:'preserve-3d'},children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
+  s.push(W('div',{key:'tp',style:{position:'absolute',left:FX+'px',top:FY+'px',width:FW+'px',height:FD+'px',transform:'translateY(-'+HD+'px) rotateX(90deg) translateZ('+HD+'px)',borderRadius:'85px 85px 0 0',background:'linear-gradient(180deg,'+c.lighter+','+c.base+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.3)',overflow:'hidden',transformStyle:'preserve-3d'},children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
 
-  s.push(W('div',{key:'bt',style:{position:'absolute',left:FX+'px',top:(FY+FH-FD)+'px',width:FW+'px',height:FD+'px',transform:'rotateX(-90deg) translateZ('+(FD/2)+'px)',transformOrigin:'bottom center',borderRadius:'0 0 10px 10px',background:'linear-gradient(0deg,'+c.darkest+','+c.darker+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.5)',overflow:'hidden',transformStyle:'preserve-3d'},children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
+  s.push(W('div',{key:'bt',style:{position:'absolute',left:FX+'px',top:(FY+FH)+'px',width:FW+'px',height:FD+'px',transform:'translateY(-'+HD+'px) rotateX(-90deg) translateZ('+HD+'px)',borderRadius:'0 0 10px 10px',background:'linear-gradient(0deg,'+c.darkest+','+c.darker+')',boxShadow:'inset 0 0 12px rgba(0,0,0,0.5)',overflow:'hidden',transformStyle:'preserve-3d'},children:[React.cloneElement(fabricOverlay,{key:'fo'}),React.cloneElement(fabricDepth,{key:'fd'})]}))
 
   var fc=[]
 
