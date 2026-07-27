@@ -313,62 +313,60 @@
   align-items: center;
   gap: 20px;
 }
+
+/* ===== 3D Canvas Area ===== */
 .canvas-area {
   width: 100%;
   max-width: 560px;
-  aspect-ratio: 3/4;
-  background: radial-gradient(ellipse at 50% 30%, #191924, var(--bg-card) 70%);
+  background: var(--bg-card);
   border-radius: var(--radius);
   border: 1px solid #222;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 900px;
-  touch-action: none;
-  cursor: grab;
-}
-.canvas-area.mode-place { cursor: default; }
-.canvas-area.active-drag { cursor: grabbing; }
-
-/* 3D Product Model */
-.product-3d-model {
-  width: 78%;
-  max-width: 380px;
-  position: relative;
+  transition: transform 0.15s ease-out;
   transform-style: preserve-3d;
-  transition: transform 0.06s ease-out;
-  will-change: transform;
+  cursor: grab;
+  padding: 16px;
 }
-.canvas-area.active-drag .product-3d-model {
-  transition: none;
+.canvas-area:active {
+  cursor: grabbing;
 }
-.product-svg {
+.fabric-canvas-container {
   width: 100%;
-  height: auto;
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  transition: box-shadow 0.3s ease;
+}
+.fabric-canvas-container canvas {
   display: block;
-  filter: drop-shadow(0 14px 24px rgba(0,0,0,0.55));
+  width: 100% !important;
 }
 
-/* Fabric Texture Overlays — much more visible */
-.fabric-overlay {
+/* ===== Color Tint Overlay ===== */
+.color-tint-overlay {
   position: absolute;
-  inset: 0;
+  inset: 16px;
+  border-radius: var(--radius);
   pointer-events: none;
+  opacity: 0.2;
+  mix-blend-mode: multiply;
   z-index: 2;
-  mix-blend-mode: soft-light;
-  opacity: 1;
-  transition: opacity 0.2s ease;
 }
-/* second layer for extra texture depth */
-.fabric-overlay-depth {
+
+/* ===== Texture Overlay ===== */
+.texture-overlay {
   position: absolute;
-  inset: 0;
+  inset: 16px;
+  border-radius: var(--radius);
   pointer-events: none;
-  z-index: 2;
-  mix-blend-mode: overlay;
-  opacity: 0.5;
+  z-index: 3;
+  mix-blend-mode: soft-light;
+  opacity: 0.45;
 }
 .ft-nylon {
   background:
@@ -397,11 +395,6 @@
   background:
     repeating-linear-gradient(0deg, transparent 0px, transparent 1.5px, rgba(255,255,255,0.25) 1.5px, rgba(255,255,255,0.25) 2.8px),
     repeating-linear-gradient(90deg, transparent 0px, transparent 1.5px, rgba(0,0,0,0.18) 1.5px, rgba(0,0,0,0.18) 2.8px);
-}
-.ft-canvas-light {
-  background:
-    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(255,255,255,0.13) 3px, rgba(255,255,255,0.13) 4px),
-    repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(0,0,0,0.09) 3px, rgba(0,0,0,0.09) 4px);
 }
 .ft-mesh {
   background-image:
@@ -453,92 +446,7 @@
     radial-gradient(circle at 70% 60%, rgba(255,255,255,0.06) 0%, transparent 20%);
 }
 
-.canvas-groundshadow {
-  position: absolute;
-  left: 50%;
-  bottom: 8%;
-  width: 46%;
-  height: 16px;
-  background: radial-gradient(ellipse, rgba(0,0,0,0.55), transparent 72%);
-  filter: blur(2px);
-  z-index: 0;
-  pointer-events: none;
-  transition: transform 0.08s ease-out;
-}
-.canvas-area.active-drag .canvas-groundshadow {
-  transition: none;
-}
-.canvas-image {
-  position: absolute;
-  max-width: 50%;
-  max-height: 50%;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  z-index: 4;
-  mix-blend-mode: multiply;
-  opacity: 0.94;
-  filter: contrast(1.15) saturate(0.9) brightness(0.94) drop-shadow(0 2px 3px rgba(0,0,0,0.45));
-  transition: opacity 0.3s ease;
-}
-.canvas-image::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px),
-              repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px);
-  pointer-events: none;
-  mix-blend-mode: overlay;
-}
-.canvas-image:hover {
-  opacity: 0.97;
-}
-.canvas-area::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px),
-              repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px);
-  pointer-events: none;
-  z-index: 5;
-  mix-blend-mode: overlay;
-  border-radius: var(--radius);
-}
-.canvas-tilt-hint {
-  position: absolute;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  background: rgba(0,0,0,0.35);
-  padding: 4px 12px;
-  border-radius: 20px;
-  z-index: 6;
-  pointer-events: none;
-  letter-spacing: 0.3px;
-}
-.btn-reset-view {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #333;
-  background: rgba(18,18,26,0.85);
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 6;
-  transition: all 0.2s ease;
-}
-.btn-reset-view:hover {
-  color: var(--text);
-  border-color: var(--primary);
-}
+/* ===== Canvas Hints & UI ===== */
 .canvas-hint {
   position: absolute;
   inset: 0;
@@ -550,32 +458,39 @@
   color: var(--text-muted);
   opacity: 0.6;
   pointer-events: none;
-  z-index: 3;
+  z-index: 4;
 }
 .canvas-hint p {
   font-size: 0.85rem;
 }
-.fabric-badge {
+.canvas-tilt-hint {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: #fff;
-  background: rgba(139,92,246,0.85);
-  backdrop-filter: blur(6px);
-  padding: 5px 14px;
+  color: var(--text-muted);
+  background: rgba(0,0,0,0.5);
+  padding: 4px 12px;
   border-radius: 20px;
-  z-index: 6;
+  z-index: 5;
   pointer-events: none;
-  text-transform: uppercase;
-  box-shadow: 0 2px 10px rgba(139,92,246,0.4);
-  border: 1px solid rgba(255,255,255,0.12);
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(4px);
 }
 .disenador-send {
   font-size: 1rem;
   padding: 14px 28px;
+}
+.disenador-send-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.disenador-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .disenador-apply {
   width: 100%;
@@ -666,99 +581,74 @@
   .disenador-top-section {
     margin-bottom: 20px;
   }
-
   .disenador-top-section h3 {
     font-size: 0.95rem;
     margin-bottom: 8px;
   }
-
   .producto-selector-full {
     gap: 6px;
   }
-
   .producto-btn {
     padding: 8px 14px;
     font-size: 0.82rem;
   }
-
   .color-tela-btn {
     width: 28px;
     height: 28px;
   }
-
   .disenador-main {
     gap: 20px;
   }
-
   .disenador-panel {
     gap: 16px;
   }
-
   .panel-section h3 {
     font-size: 1rem;
     margin-bottom: 8px;
   }
-
   .upload-zone {
     padding: 24px 16px;
     min-height: 120px;
   }
-
   .canvas-area {
-    aspect-ratio: 3/4;
+    padding: 10px;
   }
-
   .control-group label {
     min-width: auto;
     font-size: 0.8rem;
   }
-
   .control-group span {
     font-size: 0.75rem;
     min-width: 32px;
   }
-
   .zonas-selector {
     gap: 6px;
   }
-
   .zona-btn {
     padding: 6px 10px;
     font-size: 0.75rem;
   }
-
   .telas-section {
     max-width: 100%;
   }
-
   .telas-grid {
     grid-template-columns: 1fr;
   }
-
   .tela-card {
     padding: 8px 12px;
   }
-
   .tela-card strong {
     font-size: 0.8rem;
   }
-
   .tela-card .tela-desc {
     font-size: 0.7rem;
   }
-
   .disenador-send {
     width: 100%;
     justify-content: center;
   }
-
   .canvas-tilt-hint {
     font-size: 0.65rem;
     padding: 3px 8px;
-  }
-
-  .fabric-badge {
-    font-size: 0.6rem;
-    padding: 4px 10px;
   }
 }
