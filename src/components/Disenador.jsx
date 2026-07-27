@@ -471,20 +471,44 @@ export default function Disenador() {
   return React.createElement('section',{id:'disenador',className:'section disenador'},
     React.createElement('h2',{className:'section-title'},'Diseñá tu Bordado'),
     React.createElement('p',{className:'section-subtitle'},'Elegí el artículo, el color, subí tu imagen y elegí dónde va el bordado'),
-    React.createElement('div',{className:'disenador-layout'},
+
+    React.createElement('div',{className:'disenador-top-section'},
+      React.createElement('h3',null,'1. Elegí el artículo'),
+      React.createElement('div',{className:'producto-selector-full'},productos.map(function(p){
+        return React.createElement('button',{key:p.id,className:producto===p.id?'producto-btn active':'producto-btn',style:{'--btn-color':p.color},onClick:function(){cambiarProd(p.id)}},p.nombre)
+      }))
+    ),
+
+    React.createElement('div',{className:'disenador-top-section'},
+      React.createElement('h3',null,'2. Color de tela'),
+      React.createElement('div',{className:'color-tela-full'},coloresTela.map(function(c){
+        return React.createElement('button',{key:c.id,className:colorTela===c.hex?'color-tela-btn active':'color-tela-btn',style:{'--swatch':c.hex},onClick:function(){setColorTela(c.hex)},title:c.nombre})
+      }))
+    ),
+
+    React.createElement('div',{className:'disenador-main'},
+      React.createElement('div',{className:'disenador-canvas'},
+        React.createElement('div',{
+          ref:canvasRef,
+          className:'canvas-area'+((modoLibre&&imagen)?' mode-place':' mode-3d')+(isDragging||isRotating?' active-drag':''),
+          onPointerDown:onCanvasPointerDown,onPointerMove:onCanvasPointerMove,onPointerUp:onCanvasPointerUp,onPointerLeave:onCanvasPointerUp,onPointerCancel:onCanvasPointerUp
+        },
+          React.createElement('div',{className:'canvas-light-shine',style:{transform:'translate('+(rotationY*0.3)+'%, '+(-tiltX*0.5)+'%)'}}),
+          React.createElement('div',{className:'canvas-groundshadow',style:{transform:'translateX(-50%) rotate('+(tiltX*0.15)+'deg) scaleX('+(1-Math.abs(tiltX)/90)+')'}}),
+          React.createElement('div',{className:'product-3d-model',style:{transform:boxTransform}},
+            React.createElement(SVGFrontProduct,{pid:producto,fb:colorTela,selZ:zonaActiva,onZC:imagen?selZona:undefined,zm:zonasyMarca,telaId:telaSeleccionada}),
+            imagen&&(zonaActiva||modoLibre)?React.createElement('img',{src:imagen,alt:'diseño',className:'canvas-image',style:imgStyle(),draggable:false}):null
+          ),
+          !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subí tu imagen para empezar')):null,
+          imagen&&!zonaActiva&&!modoLibre?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Hacé clic en una zona del producto')):null,
+          React.createElement('div',{className:'canvas-tilt-hint'},modoLibre&&imagen?'Arrastrá para mover el diseño':'Arrastrá para rotar el producto 360°'),
+          telaSeleccionada?React.createElement('div',{className:'fabric-badge'},function(){for(var i=0;i<(telasData[producto]||[]).length;i++){if(telasData[producto][i].id===telaSeleccionada){return telasData[producto][i].nombre}};return''}()):null,
+          React.createElement('button',{className:'btn-reset-view',onClick:resetView,title:'Vista frontal'},React.createElement(FiRotateCw,{size:14}))
+        ),
+        imagen&&(zonaActiva||modoLibre)?React.createElement('button',{className:'btn btn-whatsapp disenador-send',onClick:sendWA},'Enviar diseño por WhatsApp'):null
+      ),
+
       React.createElement('div',{className:'disenador-panel'},
-        React.createElement('div',{className:'panel-section'},
-          React.createElement('h3',null,'1. Elegí el artículo'),
-          React.createElement('div',{className:'producto-selector'},productos.map(function(p){
-            return React.createElement('button',{key:p.id,className:producto===p.id?'producto-btn active':'producto-btn',style:{'--btn-color':p.color},onClick:function(){cambiarProd(p.id)}},p.nombre)
-          }))
-        ),
-        React.createElement('div',{className:'panel-section'},
-          React.createElement('h3',null,'2. Color de tela'),
-          React.createElement('div',{className:'color-tela-grid'},coloresTela.map(function(c){
-            return React.createElement('button',{key:c.id,className:colorTela===c.hex?'color-tela-btn active':'color-tela-btn',style:{'--swatch':c.hex},onClick:function(){setColorTela(c.hex)},title:c.nombre})
-          }))
-        ),
         React.createElement('div',{className:'panel-section'},
           React.createElement('h3',null,'3. Subí tu imagen'),
           React.createElement('div',{className:'upload-zone'+(imagen?' has-image':''),onClick:function(){fileInputRef.current&&fileInputRef.current.click()},onDrop:handleDrop,onDragOver:function(e){e.preventDefault()}},
@@ -517,35 +541,17 @@ export default function Disenador() {
           ):null,
           React.createElement('button',{className:'btn btn-outline btn-small',onClick:reset},'Restablecer')
         ):null
-      ),
-      React.createElement('div',{className:'disenador-canvas'},
-        React.createElement('div',{
-          ref:canvasRef,
-          className:'canvas-area'+((modoLibre&&imagen)?' mode-place':' mode-3d')+(isDragging||isRotating?' active-drag':''),
-          onPointerDown:onCanvasPointerDown,onPointerMove:onCanvasPointerMove,onPointerUp:onCanvasPointerUp,onPointerLeave:onCanvasPointerUp,onPointerCancel:onCanvasPointerUp
-        },
-          React.createElement('div',{className:'canvas-groundshadow',style:{transform:'translateX(-50%) rotate('+(tiltX*0.15)+'deg) scaleX('+(1-Math.abs(tiltX)/90)+')'}}),
-          React.createElement('div',{className:'product-3d-model',style:{transform:boxTransform}},
-            React.createElement(SVGFrontProduct,{pid:producto,fb:colorTela,selZ:zonaActiva,onZC:imagen?selZona:undefined,zm:zonasyMarca,telaId:telaSeleccionada}),
-            imagen&&(zonaActiva||modoLibre)?React.createElement('img',{src:imagen,alt:'diseño',className:'canvas-image',style:imgStyle(),draggable:false}):null
-          ),
-          !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subí tu imagen para empezar')):null,
-          imagen&&!zonaActiva&&!modoLibre?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Hacé clic en una zona del producto')):null,
-          React.createElement('div',{className:'canvas-tilt-hint'},modoLibre&&imagen?'Arrastrá para mover el diseño':'Arrastrá para rotar el producto 360'),
-          telaSeleccionada?React.createElement('div',{className:'fabric-badge'},function(){for(var i=0;i<(telasData[producto]||[]).length;i++){if(telasData[producto][i].id===telaSeleccionada){return telasData[producto][i].nombre}};return''}()):null,
-          React.createElement('button',{className:'btn-reset-view',onClick:resetView,title:'Vista frontal'},React.createElement(FiRotateCw,{size:14}))
-        ),
-        imagen&&(zonaActiva||modoLibre)?React.createElement('button',{className:'btn btn-whatsapp disenador-send',onClick:sendWA},'Enviar diseño por WhatsApp'):null,
-        React.createElement('div',{className:'telas-section'},
-          React.createElement('h3',{className:'telas-title'},'Material recomendado'),
-          React.createElement('div',{className:'telas-grid'},(telasData[producto]||[]).map(function(tela){
-            return React.createElement('div',{key:tela.id,className:'tela-card'+(telaSeleccionada===tela.id?' active':''),onClick:function(){setTelaSeleccionada(tela.id)}},
-              React.createElement('strong',null,tela.nombre),
-              React.createElement('span',{className:'tela-desc'},tela.desc)
-            )
-          }))
-        )
       )
+    ),
+
+    React.createElement('div',{className:'telas-section'},
+      React.createElement('h3',{className:'telas-title'},'Material recomendado'),
+      React.createElement('div',{className:'telas-grid'},(telasData[producto]||[]).map(function(tela){
+        return React.createElement('div',{key:tela.id,className:'tela-card'+(telaSeleccionada===tela.id?' active':''),onClick:function(){setTelaSeleccionada(tela.id)}},
+          React.createElement('strong',null,tela.nombre),
+          React.createElement('span',{className:'tela-desc'},tela.desc)
+        )
+      }))
     )
   )
 }

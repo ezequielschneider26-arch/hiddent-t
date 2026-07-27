@@ -1,8 +1,32 @@
-﻿.disenador-layout {
+﻿.disenador-top-section {
+  margin-bottom: 28px;
+}
+.disenador-top-section h3 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+.producto-selector-full {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.color-tela-full {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.disenador-main {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 1fr 340px;
   gap: 32px;
   align-items: start;
+  margin-bottom: 32px;
 }
 .disenador-panel {
   display: flex;
@@ -11,15 +35,10 @@
 }
 .panel-section h3 {
   font-family: var(--font-heading);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   letter-spacing: 1px;
   margin-bottom: 12px;
   color: var(--text);
-}
-.producto-selector {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 .producto-btn {
   padding: 10px 18px;
@@ -296,7 +315,7 @@
 }
 .canvas-area {
   width: 100%;
-  max-width: 500px;
+  max-width: 560px;
   aspect-ratio: 3/4;
   background: radial-gradient(ellipse at 50% 30%, #191924, var(--bg-card) 70%);
   border-radius: var(--radius);
@@ -306,21 +325,39 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 900px;
+  perspective: 1200px;
   touch-action: none;
   cursor: grab;
 }
 .canvas-area.mode-place { cursor: default; }
 .canvas-area.active-drag { cursor: grabbing; }
 
+/* 4D Light Shine */
+.canvas-light-shine {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(ellipse at 35% 25%, rgba(255,255,255,0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.08s ease-out;
+  will-change: transform;
+}
+.canvas-area.active-drag .canvas-light-shine {
+  transition: none;
+}
+
 /* 3D Product Model */
 .product-3d-model {
   width: 78%;
-  max-width: 340px;
+  max-width: 380px;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.06s ease-out;
   will-change: transform;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
 }
 .canvas-area.active-drag .product-3d-model {
   transition: none;
@@ -329,7 +366,6 @@
   width: 100%;
   height: auto;
   display: block;
-  filter: drop-shadow(0 14px 24px rgba(0,0,0,0.55));
 }
 
 /* Fabric Texture Overlays — much more visible */
@@ -437,13 +473,17 @@
 .canvas-groundshadow {
   position: absolute;
   left: 50%;
-  bottom: 8%;
-  width: 46%;
-  height: 16px;
-  background: radial-gradient(ellipse, rgba(0,0,0,0.55), transparent 72%);
-  filter: blur(2px);
+  bottom: 6%;
+  width: 50%;
+  height: 20px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.65), transparent 72%);
+  filter: blur(4px);
   z-index: 0;
   pointer-events: none;
+  transition: transform 0.08s ease-out;
+}
+.canvas-area.active-drag .canvas-groundshadow {
+  transition: none;
 }
 .canvas-image {
   position: absolute;
@@ -556,8 +596,7 @@
 }
 .telas-section {
   width: 100%;
-  max-width: 500px;
-  margin-top: 16px;
+  margin-top: 8px;
 }
 .telas-title {
   font-family: var(--font-heading);
@@ -601,32 +640,31 @@
   line-height: 1.3;
 }
 @media (max-width: 900px) {
-  .disenador-layout {
+  .disenador-main {
     grid-template-columns: 1fr;
+  }
+  .disenador-canvas {
+    order: -1;
   }
   .canvas-area {
     max-width: 100%;
   }
   .telas-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .disenador-layout {
-    gap: 20px;
+  .disenador-top-section {
+    margin-bottom: 20px;
   }
 
-  .disenador-panel {
-    gap: 16px;
-  }
-
-  .panel-section h3 {
-    font-size: 1.05rem;
+  .disenador-top-section h3 {
+    font-size: 0.95rem;
     margin-bottom: 8px;
   }
 
-  .producto-selector {
+  .producto-selector-full {
     gap: 6px;
   }
 
@@ -640,13 +678,26 @@
     height: 28px;
   }
 
+  .disenador-main {
+    gap: 20px;
+  }
+
+  .disenador-panel {
+    gap: 16px;
+  }
+
+  .panel-section h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
   .upload-zone {
     padding: 24px 16px;
     min-height: 120px;
   }
 
   .canvas-area {
-    aspect-ratio: 1/1.2;
+    aspect-ratio: 3/4;
   }
 
   .control-group label {
