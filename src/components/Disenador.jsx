@@ -352,6 +352,50 @@ function SVGFrontProduct(props) {
   return React.createElement('svg',{viewBox:'0 0 280 400',className:'product-svg'},s)
 }
 
+function CSS3DMochila(props) {
+  var fabricColor=props.fb,selZ=props.selZ,onZC=props.onZC,zm=props.zm||[],applied=props.applied,appliedImg=props.appliedImg,appliedStyle=props.appliedStyle
+  var c=calcColors(fabricColor)
+  var W=React.createElement
+  var fb={position:'absolute',left:'55px',top:'30px',width:'170px',height:'280px',backfaceVisibility:'hidden'}
+  var s=[]
+
+  s.push(W('div',{key:'sh',style:{position:'absolute',left:'50%',bottom:'0',width:'55%',height:'18px',background:'radial-gradient(ellipse,rgba(0,0,0,0.6),transparent 72%)',transform:'translateX(-50%)',filter:'blur(3px)',pointerEvents:'none'}}))
+
+  s.push(W('div',{key:'bk',style:Object.assign({},fb,{transform:'rotateY(180deg) translateZ(36px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 70%)'})}))
+
+  s.push(W('div',{key:'rt',style:Object.assign({},fb,{width:'72px',transform:'rotateY(90deg) translateZ(80px) translateX(-36px)',borderRadius:'0 40px 10px 0',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+' 60%,'+c.base+')'})}))
+
+  s.push(W('div',{key:'lt',style:Object.assign({},fb,{width:'72px',transform:'rotateY(-90deg) translateZ(80px) translateX(36px)',borderRadius:'40px 0 0 10px',background:'linear-gradient(90deg,'+c.base+','+c.darker+' 60%,'+c.darkest+')'})}))
+
+  var fc=[]
+  fc.push(W('div',{key:'hd',style:{position:'absolute',left:'50%',top:'-14px',width:'40px',height:'20px',transform:'translateX(-50%)',border:'4px solid '+c.darkest,borderBottom:'none',borderRadius:'12px 12px 0 0',boxSizing:'border-box'}}))
+  fc.push(W('div',{key:'sl',style:{position:'absolute',left:'35px',top:'0',width:'18px',height:'200px',background:'linear-gradient(90deg,'+c.darkest+','+c.darker+')',borderRadius:'4px',opacity:'0.85'}}))
+  fc.push(W('div',{key:'sr',style:{position:'absolute',right:'35px',top:'0',width:'18px',height:'200px',background:'linear-gradient(90deg,'+c.darker+','+c.darkest+')',borderRadius:'4px',opacity:'0.85'}}))
+  fc.push(W('div',{key:'pk',style:{position:'absolute',left:'14px',top:'155px',width:'142px',height:'100px',borderRadius:'8px 8px 14px 14px',background:'linear-gradient(165deg,'+c.darker+','+c.darkest+' 60%)',boxShadow:'0 4px 8px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.5)'}},
+    W('div',{style:{position:'absolute',left:'8px',top:'8px',width:'110px',height:'3px',background:'repeating-linear-gradient(90deg,#666 0 4px,#333 4px 6px)',borderRadius:'3px'}}),
+    W('div',{style:{position:'absolute',right:'8px',top:'3px',width:'9px',height:'13px',background:'#888',borderRadius:'2px',boxShadow:'0 1px 2px rgba(0,0,0,0.6)'}})
+  ))
+  fc.push(W('div',{key:'ph',style:{position:'absolute',left:'50%',top:'146px',width:'34px',height:'14px',transform:'translateX(-50%)',background:c.darker,borderRadius:'6px',boxShadow:'0 2px 3px rgba(0,0,0,0.5)'}}))
+
+  if(!applied&&onZC){
+    var zn=zonasPorProducto.mochila||[]
+    zn.forEach(function(z){
+      var w=(z.size/100)*170*0.8,h=(z.size/100)*280*0.55,cx=(z.x/100)*170,cy=(z.y/100)*280
+      var isA=selZ===z.id,isM=zm.indexOf(z.id)>=0
+      fc.push(W('div',{key:'z'+z.id,style:{position:'absolute',left:(cx-w/2)+'px',top:(cy-h/2)+'px',width:w+'px',height:h+'px',borderRadius:'6px',border:(isA||isM)?'2.5px solid #8B5CF6':'1.5px dashed rgba(255,255,255,0.3)',background:isA?'rgba(139,92,246,0.2)':isM?'rgba(16,185,129,0.2)':'rgba(255,255,255,0.03)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',transition:'all 0.2s ease'},onClick:function(){onZC(z.id)}},
+        (!isA&&!isM)?W('span',{style:{fontSize:'8px',color:'rgba(255,255,255,0.4)'}},z.label):null))
+    })
+  }
+
+  if(applied&&appliedImg){
+    fc.push(W('img',{key:'ai',src:appliedImg,style:Object.assign({position:'absolute',pointerEvents:'none',userSelect:'none',mixBlendMode:'multiply',opacity:'0.94',filter:'contrast(1.15) saturate(0.9) brightness(0.94)'},appliedStyle)}))
+  }
+
+  s.push(W('div',{key:'fr',style:Object.assign({},fb,{transform:'translateZ(36px)',borderRadius:'85px 85px 10px 10px',background:'linear-gradient(165deg,'+c.lighter+','+c.base+' 55%,'+c.darker+')',boxShadow:'inset 0 0 26px rgba(0,0,0,0.5)',overflow:applied?'hidden':'visible'})},fc))
+
+  return W('div',{style:{width:'280px',height:'340px',position:'relative',transformStyle:'preserve-3d'}},s)
+}
+
 export default function Disenador() {
   var p=useState('mochila'),producto=p[0],setProducto=p[1]
   var q=useState('#1A1A1A'),colorTela=q[0],setColorTela=q[1]
@@ -373,6 +417,7 @@ export default function Disenador() {
   var rg=useState(-8),tiltX=rg[0],setTiltX=rg[1]
   var rh=useState(false),isRotating=rh[0],setIsRotating=rh[1]
   var ri=useState({x:0,y:0,ry:0,tx:0}),rotateStart=ri[0],setRotateStart=ri[1]
+  var rj=useState(false),aplicada=rj[0],setAplicada=rj[1]
   var canvasRef=useRef(null),fileInputRef=useRef(null)
 
   var zonas=zonasPorProducto[producto]||[]
@@ -396,6 +441,14 @@ export default function Disenador() {
     try{var res=await removeImageBg(imagen,tolerancia);setImagen(res);setBgRemoved(true)}catch(e){}
     setRemovingBg(false)
   },[imagen,tolerancia])
+
+  var aplicarImagen=function(){
+    if(!imagen)return
+    setAplicada(true)
+  }
+  var desaplicarImagen=function(){
+    setAplicada(false)
+  }
 
   var TILT_X_MAX=85
   var ROT_Y_MAX=180
@@ -439,13 +492,13 @@ export default function Disenador() {
   }
 
   var cambiarProd=function(id){
-    setProducto(id);setZonaActiva(null);setModoLibre(false);setZonasyMarca([]);setPosX(50);setPosY(50);setTelaSeleccionada(null);setRotationY(0);setTiltX(-8)
+    setProducto(id);setZonaActiva(null);setModoLibre(false);setZonasyMarca([]);setPosX(50);setPosY(50);setTelaSeleccionada(null);setRotationY(0);setTiltX(-8);setAplicada(false)
   }
 
   var reset=function(){setTamano(40);setRotacion(0);setPosX(50);setPosY(50)}
 
   var clearImg=function(){
-    setImagen(null);setZonaActiva(null);setZonasyMarca([]);setBgRemoved(false);reset()
+    setImagen(null);setZonaActiva(null);setZonasyMarca([]);setBgRemoved(false);setAplicada(false);reset()
     if(fileInputRef.current)fileInputRef.current.value=''
   }
 
@@ -467,6 +520,21 @@ export default function Disenador() {
   }
 
   var boxTransform='rotateX('+(-tiltX)+'deg) rotateY('+rotationY+'deg)'
+
+  var aplicadaStyle=(function(){
+    var FW=170,FH=280
+    if(modoLibre){
+      var s2=tamano/100
+      return{left:(posX/100*FW)+'px',top:(posY/100*FH)+'px',width:(FW*s2)+'px',transform:'translate(-50%,-50%) rotate('+rotacion+'deg)'}
+    }
+    if(zonaSel){
+      var cx=zonaSel.x/100*FW,cy=zonaSel.y/100*FH
+      var s3=tamano/40
+      var w=zonaSel.size*s3/100*FW
+      return{left:cx+'px',top:cy+'px',width:w+'px',transform:'translate(-50%,-50%) skew('+(zonaSel.skewX||0)+'deg,'+(zonaSel.skewY||0)+'deg) rotate('+rotacion+'deg)'}
+    }
+    return{left:'50%',top:'40%',width:'80px',transform:'translate(-50%,-50%)'}
+  })()
 
   return React.createElement('section',{id:'disenador',className:'section disenador'},
     React.createElement('h2',{className:'section-title'},'Diseñá tu Bordado'),
@@ -495,12 +563,13 @@ export default function Disenador() {
         },
           React.createElement('div',{className:'canvas-groundshadow',style:{transform:'translateX(-50%) rotate('+(tiltX*0.15)+'deg) scaleX('+(1-Math.abs(tiltX)/90)+')'}}),
           React.createElement('div',{className:'product-3d-model',style:{transform:boxTransform}},
-            React.createElement(SVGFrontProduct,{pid:producto,fb:colorTela,selZ:zonaActiva,onZC:imagen?selZona:undefined,zm:zonasyMarca,telaId:telaSeleccionada}),
-            imagen&&(zonaActiva||modoLibre)?React.createElement('img',{src:imagen,alt:'diseño',className:'canvas-image',style:imgStyle(),draggable:false}):null
+            producto==='mochila'?React.createElement(CSS3DMochila,{fb:colorTela,selZ:zonaActiva,onZC:(imagen&&!aplicada)?selZona:undefined,zm:zonasyMarca,applied:aplicada,appliedImg:aplicada?imagen:null,appliedStyle:aplicadaStyle}):
+              React.createElement(SVGFrontProduct,{pid:producto,fb:colorTela,selZ:zonaActiva,onZC:imagen?selZona:undefined,zm:zonasyMarca,telaId:telaSeleccionada}),
+            producto!=='mochila'&&imagen&&(zonaActiva||modoLibre)?React.createElement('img',{src:imagen,alt:'diseño',className:'canvas-image',style:imgStyle(),draggable:false}):null
           ),
           !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subí tu imagen para empezar')):null,
           imagen&&!zonaActiva&&!modoLibre?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Hacé clic en una zona del producto')):null,
-          React.createElement('div',{className:'canvas-tilt-hint'},modoLibre&&imagen?'Arrastrá para mover el diseño':'Arrastrá para rotar el producto en 3D'),
+          React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado — arrastrá para rotar':modoLibre&&imagen?'Arrastrá para mover el diseño':'Arrastrá para rotar el producto en 3D'),
           telaSeleccionada?React.createElement('div',{className:'fabric-badge'},function(){for(var i=0;i<(telasData[producto]||[]).length;i++){if(telasData[producto][i].id===telaSeleccionada){return telasData[producto][i].nombre}};return''}()):null,
           React.createElement('button',{className:'btn-reset-view',onClick:resetView,title:'Vista frontal'},React.createElement(FiRotateCw,{size:14}))
         ),
@@ -527,18 +596,21 @@ export default function Disenador() {
         ),
         imagen?React.createElement('div',{className:'panel-section controls'},
           React.createElement('h3',null,'4. Elegí la ubicación'),
-          React.createElement('div',{className:'zonas-selector'},
-            zonas.map(function(z){return React.createElement('button',{key:z.id,className:'zona-btn'+(zonaActiva===z.id?' active':'')+(zonasyMarca.indexOf(z.id)>=0&&zonaActiva!==z.id?' marcada':''),onClick:function(){selZona(z.id)}},zonasyMarca.indexOf(z.id)>=0?React.createElement(FiSliders,{size:12}):null,' '+z.label)}),
-            React.createElement('button',{className:'zona-btn libre-btn'+(modoLibre?' active':''),onClick:function(){setModoLibre(true);setZonaActiva(null)}},React.createElement(FiSliders,{size:12}),' Posición libre')
-          ),
-          React.createElement('hr',{className:'panel-divider'}),
-          React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiMaximize2,{size:14}),' Tamaño'),React.createElement('input',{type:'range',min:'10',max:'80',value:tamano,onChange:function(e){setTamano(Number(e.target.value))}}),React.createElement('span',null,tamano+'%')),
-          React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiRotateCw,{size:14}),' Rotación'),React.createElement('input',{type:'range',min:'-180',max:'180',value:rotacion,onChange:function(e){setRotacion(Number(e.target.value))}}),React.createElement('span',null,rotacion)),
-          modoLibre?React.createElement(React.Fragment,null,
-            React.createElement('div',{className:'control-group'},React.createElement('label',null,'X'),React.createElement('input',{type:'range',min:'0',max:'100',value:posX,onChange:function(e){setPosX(Number(e.target.value))}}),React.createElement('span',null,Math.round(posX)+'%')),
-            React.createElement('div',{className:'control-group'},React.createElement('label',null,'Y'),React.createElement('input',{type:'range',min:'0',max:'100',value:posY,onChange:function(e){setPosY(Number(e.target.value))}}),React.createElement('span',null,Math.round(posY)+'%'))
+          !aplicada?React.createElement(React.Fragment,null,
+            React.createElement('div',{className:'zonas-selector'},
+              zonas.map(function(z){return React.createElement('button',{key:z.id,className:'zona-btn'+(zonaActiva===z.id?' active':'')+(zonasyMarca.indexOf(z.id)>=0&&zonaActiva!==z.id?' marcada':''),onClick:function(){selZona(z.id)}},zonasyMarca.indexOf(z.id)>=0?React.createElement(FiSliders,{size:12}):null,' '+z.label)}),
+              React.createElement('button',{className:'zona-btn libre-btn'+(modoLibre?' active':''),onClick:function(){setModoLibre(true);setZonaActiva(null)}},React.createElement(FiSliders,{size:12}),' Posición libre')
+            ),
+            React.createElement('hr',{className:'panel-divider'}),
+            React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiMaximize2,{size:14}),' Tamaño'),React.createElement('input',{type:'range',min:'10',max:'80',value:tamano,onChange:function(e){setTamano(Number(e.target.value))}}),React.createElement('span',null,tamano+'%')),
+            React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiRotateCw,{size:14}),' Rotación'),React.createElement('input',{type:'range',min:'-180',max:'180',value:rotacion,onChange:function(e){setRotacion(Number(e.target.value))}}),React.createElement('span',null,rotacion)),
+            modoLibre?React.createElement(React.Fragment,null,
+              React.createElement('div',{className:'control-group'},React.createElement('label',null,'X'),React.createElement('input',{type:'range',min:'0',max:'100',value:posX,onChange:function(e){setPosX(Number(e.target.value))}}),React.createElement('span',null,Math.round(posX)+'%')),
+              React.createElement('div',{className:'control-group'},React.createElement('label',null,'Y'),React.createElement('input',{type:'range',min:'0',max:'100',value:posY,onChange:function(e){setPosY(Number(e.target.value))}}),React.createElement('span',null,Math.round(posY)+'%'))
+            ):null
           ):null,
-          React.createElement('button',{className:'btn btn-outline btn-small',onClick:reset},'Restablecer')
+          React.createElement('button',{className:'btn btn-outline btn-small',onClick:reset},'Restablecer'),
+          (zonaActiva||modoLibre)?React.createElement('button',{className:'disenador-apply'+(aplicada?' aplicada':''),onClick:aplicada?desaplicarImagen:aplicarImagen},aplicada?'Desaplicar bordado':'Aplicar bordado'):null
         ):null
       )
     ),
