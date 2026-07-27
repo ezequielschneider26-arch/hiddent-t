@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+<svg width="400" height="500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
   <!-- Wallet body - folded -->
   <rect x="60" y="150" width="280" height="200" rx="10" fill="#2A2A2E"/>
   <rect x="65" y="155" width="270" height="190" rx="8" fill="#3A3A40"/>

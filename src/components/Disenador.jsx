@@ -196,8 +196,11 @@ function FabricCanvas(props) {
     fabricRef.current=fc
 
     var fotoSrc=productoFotos[producto]||productoFotos.mochila
-    FabricImage.fromURL(fotoSrc).then(function(img){
-      var scale=Math.min(cw/img.width,ch/img.height)
+    var isSvg=fotoSrc.endsWith('.svg')
+    FabricImage.fromURL(fotoSrc,{crossOrigin:'anonymous'}).then(function(img){
+      var iw=img.width||400,ih=img.height||500
+      if(isSvg&&(!iw||iw<10)){iw=400;ih=500}
+      var scale=Math.min(cw/iw,ch/ih)*0.9
       img.set({scaleX:scale,scaleY:scale,originX:'center',originY:'center',left:cw/2,top:ch/2,selectable:false,evented:false})
       fc.backgroundImage=img
       fc.renderAll()
