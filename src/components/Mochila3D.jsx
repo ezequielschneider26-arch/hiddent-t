@@ -76,17 +76,17 @@ const POCKET_FRONT_Z = 0.92
 const POCKET_Z = POCKET_FRONT_Z - (0.12 / 2 + 0.08)
 
 const ZIPPER_CURVE = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(1.42, -0.55, 0.12),
-  new THREE.Vector3(1.38, 0.15, 0.3),
-  new THREE.Vector3(1.2, 0.95, 0.52),
-  new THREE.Vector3(0.75, 1.45, 0.72),
-  new THREE.Vector3(0, TOP_Y + 0.34, BODY_FRONT_Z + 0.3),
-  new THREE.Vector3(-0.75, 1.45, 0.72),
-  new THREE.Vector3(-1.2, 0.95, 0.52),
-  new THREE.Vector3(-1.38, 0.15, 0.3),
-  new THREE.Vector3(-1.42, -0.55, 0.12),
+  new THREE.Vector3(1.42, -0.5, 0.1),
+  new THREE.Vector3(1.32, 0.1, 0.3),
+  new THREE.Vector3(1.12, 0.85, 0.5),
+  new THREE.Vector3(0.72, 1.4, 0.62),
+  new THREE.Vector3(0, TOP_Y + 0.18, BODY_FRONT_Z + 0.16),
+  new THREE.Vector3(-0.72, 1.4, 0.62),
+  new THREE.Vector3(-1.12, 0.85, 0.5),
+  new THREE.Vector3(-1.32, 0.1, 0.3),
+  new THREE.Vector3(-1.42, -0.5, 0.1),
 ])
-const ZIPPER_GEOM = new THREE.TubeGeometry(ZIPPER_CURVE, 80, 0.03, 8, false)
+const ZIPPER_GEOM = new THREE.TubeGeometry(ZIPPER_CURVE, 80, 0.035, 8, false)
 
 const ZONE_DEF = {
   centro: { pos: [0, 0.35, BODY_FRONT_Z + 0.03], hit: [1.9, 1.2], pct: 35 },
@@ -226,7 +226,8 @@ function makeMats(hex, textureId) {
   const trim = new THREE.MeshStandardMaterial({ color: '#9a9a9a', map: fabric, roughness: 0.68 })
   const seam = new THREE.MeshStandardMaterial({ color: '#6a6a6a', map: fabric, roughness: 0.55 })
   const net = new THREE.MeshBasicMaterial({ color: base.clone().multiplyScalar(0.55), wireframe: true, transparent: true, opacity: 0.85 })
-  const zipper = new THREE.MeshStandardMaterial({ color: '#5b6472', roughness: 0.4, metalness: 0.7 })
+  const zip = new THREE.MeshStandardMaterial({ color: '#0c0c0c', roughness: 0.3, metalness: 0.35 })
+  const zipper = new THREE.MeshStandardMaterial({ color: '#141414', roughness: 0.35, metalness: 0.4 })
   if (!gloss) {
     const bump = makeBumpTexture(textureId)
     body.bumpMap = bump
@@ -238,7 +239,7 @@ function makeMats(hex, textureId) {
     seam.bumpMap = bump
     seam.bumpScale = 0.02
   }
-  return { body, pocket, trim, seam, net, zipper }
+  return { body, pocket, trim, seam, net, zip, zipper }
 }
 
 function Backpack({ mats }) {
@@ -275,8 +276,8 @@ function Backpack({ mats }) {
       <RoundedBox args={[1.8, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, 1.3, BODY_FRONT_Z + 0.005]} />
       <RoundedBox args={[1.8, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, -1.3, BODY_FRONT_Z + 0.005]} />
 
-      <mesh geometry={ZIPPER_GEOM} material={mats.net} />
-      <RoundedBox args={[0.07, 0.14, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0, TOP_Y + 0.31, BODY_FRONT_Z + 0.29]} />
+      <mesh geometry={ZIPPER_GEOM} material={mats.zip} />
+      <RoundedBox args={[0.07, 0.14, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0, TOP_Y + 0.16, BODY_FRONT_Z + 0.17]} />
       <RoundedBox args={[1.55, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 0.26, POCKET_FRONT_Z + 0.02]} />
 
       <RoundedBox args={[2.8, 0.09, 0.85]} radius={0.04} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y - 0.02, 0.04]} />
