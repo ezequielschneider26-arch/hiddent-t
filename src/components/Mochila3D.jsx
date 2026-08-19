@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, RoundedBox, ContactShadows } from '@react-three/drei'
+import { OrbitControls, RoundedBox, ContactShadows, Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
 
 const BODY_W = 2.6
@@ -212,24 +212,24 @@ function makeMats(hex, textureId) {
   const gloss = textureId === 'ft-glossy'
   const base = new THREE.Color(hex)
   const fabric = makeFabricTexture(hex, textureId)
-  const opt = { roughness: smoothish ? 0.32 : 0.62, metalness: gloss ? 0.12 : 0.02, color: '#ffffff', map: fabric }
+  const opt = { roughness: smoothish ? 0.32 : 0.62, metalness: gloss ? 0.12 : 0.02, color: '#ffffff', map: fabric, envMapIntensity: 0.5 }
   const body = new THREE.MeshStandardMaterial({ ...opt })
   const pocket = new THREE.MeshStandardMaterial({ ...opt })
-  const trim = new THREE.MeshStandardMaterial({ color: '#9a9a9a', map: fabric, roughness: 0.68 })
-  const seam = new THREE.MeshStandardMaterial({ color: '#6a6a6a', map: fabric, roughness: 0.55 })
+  const trim = new THREE.MeshStandardMaterial({ color: '#6c6c6c', map: fabric, roughness: 0.6, envMapIntensity: 0.45 })
+  const seam = new THREE.MeshStandardMaterial({ color: '#4a4a4a', map: fabric, roughness: 0.55, envMapIntensity: 0.45 })
   const net = new THREE.MeshBasicMaterial({ color: base.clone().multiplyScalar(0.55), wireframe: true, transparent: true, opacity: 0.85 })
   const zip = new THREE.MeshStandardMaterial({ color: '#0c0c0c', roughness: 0.3, metalness: 0.35 })
-  const zipper = new THREE.MeshStandardMaterial({ color: '#141414', roughness: 0.35, metalness: 0.4 })
+  const zipper = new THREE.MeshStandardMaterial({ color: '#22262c', roughness: 0.22, metalness: 0.92, envMapIntensity: 1.4 })
   if (!gloss) {
     const bump = makeBumpTexture(textureId)
     body.bumpMap = bump
-    body.bumpScale = 0.02
+    body.bumpScale = 0.028
     pocket.bumpMap = bump
-    pocket.bumpScale = 0.02
+    pocket.bumpScale = 0.028
     trim.bumpMap = bump
-    trim.bumpScale = 0.012
+    trim.bumpScale = 0.014
     seam.bumpMap = bump
-    seam.bumpScale = 0.02
+    seam.bumpScale = 0.014
   }
   return { body, pocket, trim, seam, net, zip, zipper }
 }
@@ -248,17 +248,50 @@ function Backpack({ mats }) {
       <RoundedBox args={[1.95, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.015]} />
       <RoundedBox args={[0.14, 0.13, 0.03]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.68, ZIPPER_Y, POCKET_FRONT_Z + 0.05]} />
 
-      <RoundedBox args={[POCKET_W, 0.022, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[0, POCKET_TOP_Y - 0.01, POCKET_FRONT_Z + 0.006]} />
-      <RoundedBox args={[POCKET_W, 0.022, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[0, POCKET_Y - POCKET_H / 2, POCKET_FRONT_Z + 0.006]} />
-      <RoundedBox args={[0.022, POCKET_H, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[-POCKET_W / 2, POCKET_Y, POCKET_FRONT_Z + 0.006]} />
-      <RoundedBox args={[0.022, POCKET_H, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[POCKET_W / 2, POCKET_Y, POCKET_FRONT_Z + 0.006]} />
+      <Stitch length={POCKET_W + 0.06} pos={[0, POCKET_TOP_Y + 0.025, POCKET_FRONT_Z + 0.012]} />
+      <Stitch length={POCKET_W + 0.06} pos={[0, POCKET_Y - POCKET_H / 2 - 0.025, POCKET_FRONT_Z + 0.012]} />
+      <Stitch length={POCKET_H + 0.06} pos={[-POCKET_W / 2 - 0.025, POCKET_Y, POCKET_FRONT_Z + 0.012]} />
+      <Stitch length={POCKET_H + 0.06} pos={[POCKET_W / 2 + 0.025, POCKET_Y, POCKET_FRONT_Z + 0.012]} />
 
-      <RoundedBox args={[0.035, 2.45, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[-1.18, 0, BODY_FRONT_Z + 0.004]} />
-      <RoundedBox args={[0.035, 2.45, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[1.18, 0, BODY_FRONT_Z + 0.004]} />
-      <RoundedBox args={[2.4, 0.035, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[0, -1.35, BODY_FRONT_Z + 0.004]} />
+      <Stitch length={2.45} pos={[-1.2, 0, BODY_FRONT_Z + 0.01]} />
+      <Stitch length={2.45} pos={[1.2, 0, BODY_FRONT_Z + 0.01]} />
+      <Stitch length={2.42} pos={[0, -1.36, BODY_FRONT_Z + 0.01]} />
 
       <RoundedBox args={[2.4, 0.14, 0.05]} radius={0.03} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y + 0.05, 0.04]} />
     </group>
+  )
+}
+
+function makeStitchTexture() {
+  const c = document.createElement('canvas')
+  c.width = 64
+  c.height = 16
+  const x = c.getContext('2d')
+  x.clearRect(0, 0, 64, 16)
+  x.fillStyle = 'rgba(0,0,0,0)'
+  for (let i = 2; i < 64; i += 8) {
+    x.fillStyle = 'rgba(30,32,36,0.6)'
+    x.fillRect(i, 1, 5, 14)
+    x.fillStyle = 'rgba(255,255,255,0.22)'
+    x.fillRect(i + 1, 2, 2, 12)
+  }
+  return c
+}
+const STITCH_CANVAS = makeStitchTexture()
+
+function Stitch({ length, pos }) {
+  const tex = useMemo(() => {
+    const t = new THREE.CanvasTexture(STITCH_CANVAS)
+    t.wrapS = t.wrapT = THREE.RepeatWrapping
+    t.colorSpace = THREE.SRGBColorSpace
+    t.repeat.set(Math.max(1, Math.round(length / 0.3)), 1)
+    return t
+  }, [length])
+  return (
+    <mesh position={pos} raycast={() => null}>
+      <planeGeometry args={[length, 0.05]} />
+      <meshBasicMaterial map={tex} transparent opacity={0.9} depthWrite={false} side={THREE.DoubleSide} />
+    </mesh>
   )
 }
 
@@ -355,19 +388,26 @@ export default function Mochila3D(props) {
       <Canvas
         camera={{ position: [0, 0.15, 7.4], fov: 38 }}
         dpr={[1, 2]}
+        gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.12 }}
         onCreated={({ gl }) => {
           if (onExportRef) onExportRef.current = () => gl.domElement.toDataURL('image/png')
         }}
       >
         <color attach="background" args={['#e9e9ec']} />
-        <ambientLight intensity={0.6} />
-        <hemisphereLight args={['#ffffff', '#3a3a3a', 0.5]} />
-        <directionalLight position={[5, 6, 5]} intensity={1.2} />
-        <directionalLight position={[-5, 3, -4]} intensity={0.6} />
+        <ambientLight intensity={0.35} />
+        <hemisphereLight args={['#ffffff', '#3a3a3a', 0.28]} />
+        <directionalLight position={[4, 6, 5]} intensity={1.1} />
+        <directionalLight position={[-4, 3, -4]} intensity={0.4} />
+        <Environment resolution={256}>
+          <Lightformer form="rect" intensity={3.2} position={[0, 3, 5]} scale={[4.5, 2.6]} color="#ffffff" />
+          <Lightformer form="rect" intensity={1.8} position={[-4, 1, 2]} rotation-y={Math.PI / 2} scale={[3, 2]} color="#cdd2da" />
+          <Lightformer form="rect" intensity={1.8} position={[4, 1, 2]} rotation-y={-Math.PI / 2} scale={[3, 2]} color="#cdd2da" />
+          <Lightformer form="ring" intensity={1.2} position={[0, 4, -4]} scale={3} color="#ffffff" />
+        </Environment>
         <Backpack mats={mats} />
         <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
         <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
-        <ContactShadows position={[0, BOTTOM_Y - 0.12, 0]} opacity={0.45} scale={9} blur={2.6} far={4} color="#000000" />
+        <ContactShadows position={[0, BOTTOM_Y - 0.12, 0]} opacity={0.4} scale={9} blur={2.6} far={4} color="#000000" />
         <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.3} maxPolarAngle={Math.PI - 0.3} target={[0, 0, 0]} />
       </Canvas>
     </div>
