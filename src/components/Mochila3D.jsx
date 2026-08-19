@@ -76,15 +76,15 @@ const POCKET_FRONT_Z = 0.92
 const POCKET_Z = POCKET_FRONT_Z - (0.12 / 2 + 0.08)
 
 const ZIPPER_CURVE = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(1.42, -0.5, 0.1),
-  new THREE.Vector3(1.32, 0.1, 0.3),
-  new THREE.Vector3(1.12, 0.85, 0.5),
-  new THREE.Vector3(0.72, 1.4, 0.62),
-  new THREE.Vector3(0, TOP_Y + 0.18, BODY_FRONT_Z + 0.16),
-  new THREE.Vector3(-0.72, 1.4, 0.62),
-  new THREE.Vector3(-1.12, 0.85, 0.5),
-  new THREE.Vector3(-1.32, 0.1, 0.3),
-  new THREE.Vector3(-1.42, -0.5, 0.1),
+  new THREE.Vector3(1.5, -0.5, 0.1),
+  new THREE.Vector3(1.42, 0.1, 0.3),
+  new THREE.Vector3(1.26, 0.85, 0.5),
+  new THREE.Vector3(0.85, 1.4, 0.62),
+  new THREE.Vector3(0, TOP_Y + 0.22, BODY_FRONT_Z + 0.2),
+  new THREE.Vector3(-0.85, 1.4, 0.62),
+  new THREE.Vector3(-1.26, 0.85, 0.5),
+  new THREE.Vector3(-1.42, 0.1, 0.3),
+  new THREE.Vector3(-1.5, -0.5, 0.1),
 ])
 const ZIPPER_GEOM = new THREE.TubeGeometry(ZIPPER_CURVE, 80, 0.035, 8, false)
 
@@ -277,7 +277,7 @@ function Backpack({ mats }) {
       <RoundedBox args={[1.8, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, -1.3, BODY_FRONT_Z + 0.005]} />
 
       <mesh geometry={ZIPPER_GEOM} material={mats.zip} />
-      <RoundedBox args={[0.07, 0.14, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0, TOP_Y + 0.16, BODY_FRONT_Z + 0.17]} />
+      <RoundedBox args={[0.07, 0.14, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0, TOP_Y + 0.2, BODY_FRONT_Z + 0.21]} />
       <RoundedBox args={[1.55, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 0.26, POCKET_FRONT_Z + 0.02]} />
 
       <RoundedBox args={[2.8, 0.09, 0.85]} radius={0.04} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y - 0.02, 0.04]} />
