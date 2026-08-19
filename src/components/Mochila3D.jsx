@@ -28,13 +28,13 @@ function roundedRectShape(w, h, r) {
 }
 
 function bodyShape() {
-  const wT = 2.6
+  const wT = 2.2
   const wB = 3.0
   const xT0 = -wT / 2
   const xT1 = wT / 2
   const xB0 = -wB / 2
   const xB1 = wB / 2
-  const rT = 0.45
+  const rT = 0.4
   const rB = 0.3
   const s = new THREE.Shape()
   s.moveTo(xB0, BOTTOM_Y + rB)
@@ -74,6 +74,15 @@ const POCKET_GEOM = extruded(roundedRectShape(1.9, 1.1, 0.2), 0.12, { bevelT: 0.
 const BODY_FRONT_Z = 1.0 / 2 + 0.14
 const POCKET_FRONT_Z = 0.92
 const POCKET_Z = POCKET_FRONT_Z - (0.12 / 2 + 0.08)
+
+const ZIPPER_CURVE = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-1.08, TOP_Y - 0.16, BODY_FRONT_Z + 0.01),
+  new THREE.Vector3(-0.5, TOP_Y + 0.14, BODY_FRONT_Z + 0.2),
+  new THREE.Vector3(0, TOP_Y + 0.28, BODY_FRONT_Z + 0.28),
+  new THREE.Vector3(0.5, TOP_Y + 0.14, BODY_FRONT_Z + 0.2),
+  new THREE.Vector3(1.08, TOP_Y - 0.16, BODY_FRONT_Z + 0.01),
+])
+const ZIPPER_GEOM = new THREE.TubeGeometry(ZIPPER_CURVE, 48, 0.028, 8, false)
 
 const ZONE_DEF = {
   centro: { pos: [0, 0.35, BODY_FRONT_Z + 0.03], hit: [2.0, 1.2], pct: 35 },
@@ -156,13 +165,13 @@ function Backpack({ mats }) {
 
       <RoundedBox args={[1.95, 0.14, 0.05]} radius={0.03} smoothness={4} material={mats.trim} position={[0, -0.35, -0.88]} />
 
-      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[-1.05, 0.0, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[1.05, 0.0, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[2.1, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, 1.36, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[2.1, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, -1.36, BODY_FRONT_Z + 0.005]} />
+      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[-0.98, 0.0, BODY_FRONT_Z + 0.005]} />
+      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.98, 0.0, BODY_FRONT_Z + 0.005]} />
+      <RoundedBox args={[1.96, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, 1.36, BODY_FRONT_Z + 0.005]} />
+      <RoundedBox args={[1.96, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, -1.36, BODY_FRONT_Z + 0.005]} />
 
-      <RoundedBox args={[2.0, 0.045, 0.035]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 1.45, BODY_FRONT_Z + 0.02]} />
-      <RoundedBox args={[0.09, 0.07, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.9, 1.41, BODY_FRONT_Z + 0.09]} />
+      <mesh geometry={ZIPPER_GEOM} material={mats.zipper} />
+      <RoundedBox args={[0.07, 0.14, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0, TOP_Y + 0.25, BODY_FRONT_Z + 0.27]} />
       <RoundedBox args={[1.55, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 0.26, POCKET_FRONT_Z + 0.02]} />
 
       <RoundedBox args={[2.8, 0.09, 0.85]} radius={0.04} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y - 0.02, 0.04]} />
