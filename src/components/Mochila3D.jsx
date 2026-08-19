@@ -8,21 +8,23 @@ const BODY_H = 3.4
 const TOP_Y = BODY_H / 2
 const BOTTOM_Y = -BODY_H / 2
 
-function roundedRectShape(w, h, r) {
-  const x0 = -w / 2
-  const x1 = w / 2
-  const y0 = -h / 2
-  const y1 = h / 2
+function pocketShape() {
+  const x0 = -POCKET_W / 2
+  const x1 = POCKET_W / 2
+  const y0 = -POCKET_H / 2
+  const y1 = POCKET_H / 2
+  const rT = 0.3
+  const rB = 0.14
   const s = new THREE.Shape()
-  s.moveTo(x0, y0 + r)
-  s.lineTo(x0, y1 - r)
-  s.quadraticCurveTo(x0, y1, x0 + r, y1)
-  s.lineTo(x1 - r, y1)
-  s.quadraticCurveTo(x1, y1, x1, y1 - r)
-  s.lineTo(x1, y0 + r)
-  s.quadraticCurveTo(x1, y0, x1 - r, y0)
-  s.lineTo(x0 + r, y0)
-  s.quadraticCurveTo(x0, y0, x0, y0 + r)
+  s.moveTo(x0, y0 + rB)
+  s.lineTo(x0, y1 - rT)
+  s.quadraticCurveTo(x0, y1, x0 + rT, y1)
+  s.lineTo(x1 - rT, y1)
+  s.quadraticCurveTo(x1, y1, x1, y1 - rT)
+  s.lineTo(x1, y0 + rB)
+  s.quadraticCurveTo(x1, y0, x1 - rB, y0)
+  s.lineTo(x0 + rB, y0)
+  s.quadraticCurveTo(x0, y0, x0, y0 + rB)
   s.closePath()
   return s
 }
@@ -66,21 +68,21 @@ function extruded(shape, depth, opts) {
 
 const BODY_GEOM = extruded(bodyShape(), 1.0, { bevelT: 0.14, bevelS: 0.12, bevelSeg: 5, curveSeg: 32 })
 
-const POCKET_W = 2.1
+const POCKET_W = 2.15
 const POCKET_H = 1.45
-const POCKET_Y = -0.625
+const POCKET_Y = -0.86
 const POCKET_TOP_Y = POCKET_Y + POCKET_H / 2
-const POCKET_GEOM = extruded(roundedRectShape(POCKET_W, POCKET_H, 0.25), 0.1, { bevelT: 0.07, bevelS: 0.06, bevelSeg: 4 })
+const POCKET_GEOM = extruded(pocketShape(), 0.1, { bevelT: 0.06, bevelS: 0.05, bevelSeg: 4 })
 
 const BODY_FRONT_Z = 1.0 / 2 + 0.12
 const POCKET_FRONT_Z = 0.8
 const POCKET_Z = POCKET_FRONT_Z - (0.1 / 2 + 0.07)
 
-const ZIPPER_Y = POCKET_TOP_Y - 0.05
+const ZIPPER_Y = POCKET_TOP_Y - 0.1
 
 const ZONE_DEF = {
   centro: { pos: [0, 0.15, BODY_FRONT_Z + 0.03], hit: [1.9, 1.05], pct: 32 },
-  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.03], hit: [1.8, 1.25], pct: 38 },
+  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.03], hit: [1.85, 1.3], pct: 38 },
   tapa: { pos: [0, 1.3, BODY_FRONT_Z + 0.03], hit: [1.9, 0.6], pct: 22 },
 }
 
@@ -239,7 +241,11 @@ function Backpack({ mats }) {
 
       <mesh geometry={POCKET_GEOM} material={mats.pocket} position={[0, POCKET_Y, POCKET_Z]} />
 
-      <RoundedBox args={[1.8, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.015]} />
+      <mesh material={mats.seam} position={[0, TOP_Y + 0.18, 0]}>
+        <torusGeometry args={[0.13, 0.028, 8, 22, Math.PI]} />
+      </mesh>
+
+      <RoundedBox args={[1.95, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.015]} />
       <RoundedBox args={[0.14, 0.13, 0.03]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.68, ZIPPER_Y, POCKET_FRONT_Z + 0.05]} />
 
       <RoundedBox args={[POCKET_W, 0.022, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[0, POCKET_TOP_Y - 0.01, POCKET_FRONT_Z + 0.006]} />
@@ -347,7 +353,7 @@ export default function Mochila3D(props) {
   return (
     <div className="mochila3d">
       <Canvas
-        camera={{ position: [0, 0.35, 7.2], fov: 38 }}
+        camera={{ position: [0, 0.15, 7.4], fov: 38 }}
         dpr={[1, 2]}
         onCreated={({ gl }) => {
           if (onExportRef) onExportRef.current = () => gl.domElement.toDataURL('image/png')
@@ -362,7 +368,7 @@ export default function Mochila3D(props) {
         <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
         <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
         <ContactShadows position={[0, BOTTOM_Y - 0.12, 0]} opacity={0.45} scale={9} blur={2.6} far={4} color="#000000" />
-        <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.25} maxPolarAngle={Math.PI - 0.25} target={[0, -0.1, 0]} />
+        <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.3} maxPolarAngle={Math.PI - 0.3} target={[0, 0, 0]} />
       </Canvas>
     </div>
   )
