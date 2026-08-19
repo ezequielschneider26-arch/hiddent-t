@@ -76,13 +76,17 @@ const POCKET_FRONT_Z = 0.92
 const POCKET_Z = POCKET_FRONT_Z - (0.12 / 2 + 0.08)
 
 const ZIPPER_CURVE = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-0.85, TOP_Y - 0.18, BODY_FRONT_Z + 0.01),
-  new THREE.Vector3(-0.45, TOP_Y + 0.16, BODY_FRONT_Z + 0.2),
-  new THREE.Vector3(0, TOP_Y + 0.3, BODY_FRONT_Z + 0.28),
-  new THREE.Vector3(0.45, TOP_Y + 0.16, BODY_FRONT_Z + 0.2),
-  new THREE.Vector3(0.85, TOP_Y - 0.18, BODY_FRONT_Z + 0.01),
+  new THREE.Vector3(1.42, -0.55, 0.12),
+  new THREE.Vector3(1.38, 0.15, 0.3),
+  new THREE.Vector3(1.2, 0.95, 0.52),
+  new THREE.Vector3(0.75, 1.45, 0.72),
+  new THREE.Vector3(0, TOP_Y + 0.34, BODY_FRONT_Z + 0.3),
+  new THREE.Vector3(-0.75, 1.45, 0.72),
+  new THREE.Vector3(-1.2, 0.95, 0.52),
+  new THREE.Vector3(-1.38, 0.15, 0.3),
+  new THREE.Vector3(-1.42, -0.55, 0.12),
 ])
-const ZIPPER_GEOM = new THREE.TubeGeometry(ZIPPER_CURVE, 48, 0.028, 8, false)
+const ZIPPER_GEOM = new THREE.TubeGeometry(ZIPPER_CURVE, 80, 0.03, 8, false)
 
 const ZONE_DEF = {
   centro: { pos: [0, 0.35, BODY_FRONT_Z + 0.03], hit: [1.9, 1.2], pct: 35 },
@@ -128,12 +132,16 @@ function makeFabricTexture(hex, textureId) {
   x.fillStyle = '#' + base.getHexString()
   x.fillRect(0, 0, 256, 256)
   const weave = (step, lw, la, da) => {
-    x.strokeStyle = 'rgba(0,0,0,' + da + ')'
-    for (let y = step / 2; y < 256; y += step) { x.beginPath(); x.moveTo(0, y); x.lineTo(256, y); x.stroke() }
     x.strokeStyle = 'rgba(255,255,255,' + la + ')'
-    for (let y = step / 2; y < 256; y += step) { x.beginPath(); x.moveTo(0, y + lw); x.lineTo(256, y + lw); x.stroke() }
-    x.strokeStyle = 'rgba(0,0,0,' + da * 0.7 + ')'
+    x.lineWidth = lw
+    for (let y = step / 2; y < 256; y += step) { x.beginPath(); x.moveTo(0, y); x.lineTo(256, y); x.stroke() }
+    x.strokeStyle = 'rgba(0,0,0,' + da + ')'
+    for (let y = step / 2; y < 256; y += step) { x.beginPath(); x.moveTo(0, y + lw * 2); x.lineTo(256, y + lw * 2); x.stroke() }
+    x.strokeStyle = 'rgba(255,255,255,' + la * 0.7 + ')'
     for (let X = step / 2; X < 256; X += step) { x.beginPath(); x.moveTo(X, 0); x.lineTo(X, 256); x.stroke() }
+    x.strokeStyle = 'rgba(0,0,0,' + da * 0.8 + ')'
+    for (let X = step / 2; X < 256; X += step) { x.beginPath(); x.moveTo(X + lw * 2, 0); x.lineTo(X + lw * 2, 256); x.stroke() }
+    x.lineWidth = 1
   }
   const diagonal = (step, off, da) => {
     x.strokeStyle = 'rgba(0,0,0,' + da + ')'
@@ -148,60 +156,61 @@ function makeFabricTexture(hex, textureId) {
   }
   switch (textureId) {
     case 'ft-nylon':
-      weave(7, 0.5, 0.1, 0.13)
+      weave(8, 0.9, 0.16, 0.22)
       break
     case 'ft-poliester':
-      weave(9, 0.6, 0.12, 0.11)
+      weave(10, 1.1, 0.2, 0.18)
       break
     case 'ft-canvas':
-      weave(13, 0.7, 0.15, 0.16)
+      weave(15, 1.4, 0.24, 0.26)
       break
     case 'ft-canvas-heavy':
-      weave(9, 0.8, 0.18, 0.2)
+      weave(10, 1.6, 0.3, 0.34)
       break
     case 'ft-leather':
-      speckle(280, 0.4, 2.2)
+      speckle(420, 0.5, 3.4)
+      diagonal(64, 0, 0.06)
       break
     case 'ft-mesh':
       for (let y = 8; y <= 256; y += 26) {
         for (let X = 8; X <= 256; X += 26) {
-          x.fillStyle = 'rgba(0,0,0,0.4)'
-          x.beginPath(); x.arc(X, y, 3.2, 0, Math.PI * 2); x.fill()
-          x.fillStyle = 'rgba(255,255,255,0.14)'
-          x.beginPath(); x.arc(X + 13, y + 13, 2, 0, Math.PI * 2); x.fill()
+          x.fillStyle = 'rgba(0,0,0,0.55)'
+          x.beginPath(); x.arc(X, y, 4.4, 0, Math.PI * 2); x.fill()
+          x.fillStyle = 'rgba(255,255,255,0.22)'
+          x.beginPath(); x.arc(X + 13, y + 13, 2.8, 0, Math.PI * 2); x.fill()
         }
       }
       break
     case 'ft-cotton':
-      weave(6, 0.5, 0.09, 0.1)
+      weave(7, 0.8, 0.14, 0.16)
       break
     case 'ft-denim':
-      diagonal(7, 0, 0.2)
-      diagonal(7, 3.5, 0.12)
+      diagonal(8, 0, 0.3)
+      diagonal(8, 4, 0.18)
       break
     case 'ft-ripstop':
-      weave(16, 0.9, 0.1, 0.12)
-      diagonal(48, 0, 0.08)
+      weave(18, 1.2, 0.16, 0.2)
+      diagonal(48, 0, 0.1)
       break
     case 'ft-polar':
-      speckle(500, 0.35, 3.2)
+      speckle(800, 0.45, 4.6)
       break
     case 'ft-neoprene':
-      speckle(700, 0.22, 1.6)
+      speckle(900, 0.3, 2.2)
       break
     case 'ft-glossy':
-      x.fillStyle = 'rgba(255,255,255,0.18)'
+      x.fillStyle = 'rgba(255,255,255,0.3)'
       x.beginPath(); x.moveTo(0, 0); x.lineTo(256, 0); x.lineTo(0, 256); x.closePath(); x.fill()
-      x.fillStyle = 'rgba(0,0,0,0.08)'
+      x.fillStyle = 'rgba(0,0,0,0.12)'
       x.beginPath(); x.moveTo(256, 0); x.lineTo(256, 256); x.lineTo(0, 256); x.closePath(); x.fill()
       break
     default:
-      weave(22, 0.6, 0.05, 0.06)
+      weave(22, 1, 0.1, 0.12)
   }
   const t = new THREE.CanvasTexture(c)
   t.colorSpace = THREE.SRGBColorSpace
   t.wrapS = t.wrapT = THREE.RepeatWrapping
-  t.repeat.set(3, 3)
+  t.repeat.set(2.4, 2.4)
   t.anisotropy = 8
   return t
 }
@@ -267,7 +276,7 @@ function Backpack({ mats }) {
       <RoundedBox args={[1.8, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, -1.3, BODY_FRONT_Z + 0.005]} />
 
       <mesh geometry={ZIPPER_GEOM} material={mats.net} />
-      <RoundedBox args={[0.07, 0.14, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0, TOP_Y + 0.25, BODY_FRONT_Z + 0.27]} />
+      <RoundedBox args={[0.07, 0.14, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0, TOP_Y + 0.31, BODY_FRONT_Z + 0.29]} />
       <RoundedBox args={[1.55, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 0.26, POCKET_FRONT_Z + 0.02]} />
 
       <RoundedBox args={[2.8, 0.09, 0.85]} radius={0.04} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y - 0.02, 0.04]} />
