@@ -92,26 +92,60 @@ const ZONES = [
   { id: 'tapa', ...ZONE_DEF.tapa },
 ]
 
-function makeBumpTexture(textureId) {
+function makeNormalTexture(textureId) {
+  const size = 256
   const c = document.createElement('canvas')
-  c.width = 128
-  c.height = 128
-  const x = c.getContext('2d')
-  x.fillStyle = '#7f7f7f'
-  x.fillRect(0, 0, 128, 128)
-  if (textureId !== 'ft-glossy') {
-    x.strokeStyle = 'rgba(255,255,255,0.12)'
-    for (let y = 0; y <= 128; y += 4) { x.beginPath(); x.moveTo(0, y); x.lineTo(128, y); x.stroke() }
-    x.strokeStyle = 'rgba(0,0,0,0.15)'
-    for (let y = 2; y <= 128; y += 4) { x.beginPath(); x.moveTo(0, y); x.lineTo(128, y); x.stroke() }
-    x.strokeStyle = 'rgba(255,255,255,0.09)'
-    for (let i = 0; i <= 128; i += 5) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 128); x.stroke() }
-    x.strokeStyle = 'rgba(0,0,0,0.10)'
-    for (let i = 3; i <= 128; i += 5) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 128); x.stroke() }
+  c.width = size
+  c.height = size
+  const ctx = c.getContext('2d')
+  const img = ctx.createImageData(size, size)
+  const h = new Float32Array(size * size)
+  const step = textureId === 'ft-canvas' || textureId === 'ft-canvas-heavy' ? 13 : 8
+  const groove = textureId === 'ft-leather' ? 3 : 7
+  const denim = textureId === 'ft-denim'
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      let v = 0
+      if (textureId === 'ft-glossy') {
+        v = 0
+      } else if (textureId === 'ft-leather') {
+        v += (Math.random() - 0.5) * 46
+      } else if (textureId === 'ft-polar' || textureId === 'ft-neoprene') {
+        v += (Math.random() - 0.5) * 30
+      } else {
+        if (denim && ((x % step < 2) || (y % step < 2))) v += -8
+        if ((x % step < 2) || (y % step < 2)) v += -groove
+        v += Math.sin(x * 0.09) * 2.4 + Math.sin(y * 0.11) * 2.4
+        v += (Math.random() - 0.5) * 5
+      }
+      h[y * size + x] = v
+    }
   }
+  const strength = 1.15
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const xl = h[y * size + ((x + size - 1) % size)]
+      const xr = h[y * size + ((x + 1) % size)]
+      const yu = h[((y + size - 1) % size) * size + x]
+      const yd = h[((y + 1) % size) * size + x]
+      let nx = xl - xr
+      let ny = yu - yd
+      let nz = 2 * strength
+      const inv = 1 / Math.sqrt(nx * nx + ny * ny + nz * nz)
+      nx *= inv
+      ny *= inv
+      nz *= inv
+      const i = (y * size + x) * 4
+      img.data[i] = Math.round((nx * 0.5 + 0.5) * 255)
+      img.data[i + 1] = Math.round((ny * 0.5 + 0.5) * 255)
+      img.data[i + 2] = Math.round((nz * 0.5 + 0.5) * 255)
+      img.data[i + 3] = 255
+    }
+  }
+  ctx.putImageData(img, 0, 0)
   const t = new THREE.CanvasTexture(c)
   t.wrapS = t.wrapT = THREE.RepeatWrapping
-  t.repeat.set(3, 3)
+  t.repeat.set(2.4, 2.4)
   return t
 }
 
@@ -220,18 +254,19 @@ function makeMats(hex, textureId) {
   const net = new THREE.MeshBasicMaterial({ color: base.clone().multiplyScalar(0.55), wireframe: true, transparent: true, opacity: 0.85 })
   const zip = new THREE.MeshStandardMaterial({ color: '#0c0c0c', roughness: 0.3, metalness: 0.35 })
   const zipper = new THREE.MeshStandardMaterial({ color: '#22262c', roughness: 0.22, metalness: 0.92, envMapIntensity: 1.4 })
+  const strap = new THREE.MeshStandardMaterial({ color: '#0d0d0f', map: fabric, roughness: 0.6, envMapIntensity: 0.4 })
   if (!gloss) {
-    const bump = makeBumpTexture(textureId)
-    body.bumpMap = bump
-    body.bumpScale = 0.028
-    pocket.bumpMap = bump
-    pocket.bumpScale = 0.028
-    trim.bumpMap = bump
-    trim.bumpScale = 0.014
-    seam.bumpMap = bump
-    seam.bumpScale = 0.014
+    const normal = makeNormalTexture(textureId)
+    body.normalMap = normal
+    body.normalScale = new THREE.Vector2(0.95, 0.95)
+    pocket.normalMap = normal
+    pocket.normalScale = new THREE.Vector2(0.95, 0.95)
+    trim.normalMap = normal
+    trim.normalScale = new THREE.Vector2(0.5, 0.5)
+    seam.normalMap = normal
+    seam.normalScale = new THREE.Vector2(0.5, 0.5)
   }
-  return { body, pocket, trim, seam, net, zip, zipper }
+  return { body, pocket, trim, seam, net, zip, zipper, strap }
 }
 
 function Backpack({ mats }) {
@@ -241,9 +276,7 @@ function Backpack({ mats }) {
 
       <mesh geometry={POCKET_GEOM} material={mats.pocket} position={[0, POCKET_Y, POCKET_Z]} />
 
-      <mesh material={mats.seam} position={[0, TOP_Y + 0.18, 0]}>
-        <torusGeometry args={[0.13, 0.028, 8, 22, Math.PI]} />
-      </mesh>
+      <RoundedBox args={[0.5, 0.035, 0.07]} radius={0.012} smoothness={4} material={mats.strap} position={[0, TOP_Y + 0.12, 0]} />
 
       <RoundedBox args={[1.95, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.015]} />
       <RoundedBox args={[0.14, 0.13, 0.03]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.68, ZIPPER_Y, POCKET_FRONT_Z + 0.05]} />
@@ -393,7 +426,7 @@ export default function Mochila3D(props) {
           if (onExportRef) onExportRef.current = () => gl.domElement.toDataURL('image/png')
         }}
       >
-        <color attach="background" args={['#e9e9ec']} />
+        <color attach="background" args={['#e5e5e8']} />
         <ambientLight intensity={0.35} />
         <hemisphereLight args={['#ffffff', '#3a3a3a', 0.28]} />
         <directionalLight position={[4, 6, 5]} intensity={1.1} />
