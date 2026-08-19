@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mochila 3D — Viewer fotorrealista</title>
+  <style>
+    :root {
+      --bg1: #e9e9ec;
+      --bg2: #d5d5da;
+      --accent: #8b5cf6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+    body {
+      background: linear-gradient(180deg, var(--bg1), var(--bg2));
+      color: #2a2c31;
+    }
+    #viewer { display: block; width: 100vw; height: 100vh; }
+
+    #overlay {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg1);
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+      z-index: 10;
+    }
+    #overlay.done { opacity: 0; visibility: hidden; }
+    #overlay .box {
+      width: min(320px, 80vw);
+      text-align: center;
+    }
+    #overlay .title { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
+    #bar {
+      width: 100%; height: 8px; border-radius: 999px;
+      background: #d7d7db; overflow: hidden;
+    }
+    #bar > div {
+      height: 100%; width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), #6d4fc4);
+      transition: width 0.15s ease;
+    }
+    #status { margin-top: 12px; font-size: 0.82rem; color: #6b6b70; min-height: 1.2em; }
+
+    #hint {
+      position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+      font-size: 0.78rem; color: rgba(40, 42, 48, 0.55);
+      pointer-events: none; z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay">
+    <div class="box">
+      <div class="title">Cargando mochila 3D</div>
+      <div id="bar"><div></div></div>
+      <div id="status">Conectando…</div>
+    </div>
+  </div>
+  <canvas id="viewer"></canvas>
+  <div id="hint">Arrastrá para girar 360° · Scroll para zoom</div>
+
+  <!-- Three.js v0.149 (ejemplos clásicos, incluye GLTFLoader + OrbitControls) -->
+  <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.149.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://unpkg.com/three@0.149.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
