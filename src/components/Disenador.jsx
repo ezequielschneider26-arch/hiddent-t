@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { FiUpload, FiTrash2, FiRotateCw, FiMaximize2, FiSliders, FiImage, FiDownload } from 'react-icons/fi'
 import { Canvas, FabricImage, Rect } from 'fabric'
+import Mochila3D from './Mochila3D'
 import './Disenador.css'
 
 var productos = [
@@ -376,6 +377,7 @@ export default function Disenador() {
   var dragStartRef=useRef(null)
 
   var zonas=zonasPorProducto[producto]||[]
+  var is3D=producto==='mochila'
 
   var handleUpload=useCallback(function(e){
     var f=e.target.files&&e.target.files[0]
@@ -446,6 +448,7 @@ export default function Disenador() {
   },[])
 
   useEffect(function(){
+    if(is3D)return
     var area=canvasAreaRef.current
     if(!area)return
     var opts={passive:false}
@@ -463,7 +466,7 @@ export default function Disenador() {
       window.removeEventListener('mouseup',handleCanvasDragEnd)
       window.removeEventListener('touchend',handleCanvasDragEnd)
     }
-  },[handleCanvasDragStart,handleCanvasDragMove,handleCanvasDragEnd])
+  },[handleCanvasDragStart,handleCanvasDragMove,handleCanvasDragEnd,is3D])
 
   var sendWA=function(){
     var prod='producto',tela='Personalizado'
@@ -509,20 +512,29 @@ export default function Disenador() {
 
     React.createElement('div',{className:'disenador-main'},
       React.createElement('div',{className:'disenador-canvas'},
-        React.createElement('div',{ref:canvasAreaRef,className:'canvas-area fabric-mode',style:{transform:canvasTransform}},
-          React.createElement(FabricCanvas,{
-            producto:producto,colorTela:colorTela,imagen:imagen,
-            zonaActiva:zonaActiva,modoLibre:modoLibre,
-            tamano:tamano,rotacion:rotacion,posX:posX,posY:posY,
-            onZoneClick:imagen&&!aplicada?selZona:null,
-            zonasyMarca:zonasyMarca,applied:aplicada,
-            onExportRef:exportRef
-          }),
-          textureClass?React.createElement('div',{className:'texture-overlay '+textureClass}):null,
-          colorTela&&colorTela!=='#1A1A1A'&&colorTela!=='#F5F5F5'?React.createElement('div',{className:'color-tint-overlay',style:{backgroundColor:colorTela}}):null,
+        React.createElement('div',{ref:canvasAreaRef,className:is3D?'canvas-area canvas-area-3d':'canvas-area fabric-mode',style:is3D?undefined:{transform:canvasTransform}},
+          is3D
+            ? React.createElement(Mochila3D,{
+                colorTela:colorTela,telaSeleccionada:telaSeleccionada,imagen:imagen,
+                zonaActiva:zonaActiva,modoLibre:modoLibre,
+                tamano:tamano,rotacion:rotacion,posX:posX,posY:posY,
+                onZoneClick:imagen&&!aplicada?selZona:null,
+                zonasyMarca:zonasyMarca,applied:aplicada,
+                onExportRef:exportRef
+              })
+            : React.createElement(FabricCanvas,{
+                producto:producto,colorTela:colorTela,imagen:imagen,
+                zonaActiva:zonaActiva,modoLibre:modoLibre,
+                tamano:tamano,rotacion:rotacion,posX:posX,posY:posY,
+                onZoneClick:imagen&&!aplicada?selZona:null,
+                zonasyMarca:zonasyMarca,applied:aplicada,
+                onExportRef:exportRef
+              }),
+          !is3D&&textureClass?React.createElement('div',{className:'texture-overlay '+textureClass}):null,
+          !is3D&&colorTela&&colorTela!=='#1A1A1A'&&colorTela!=='#F5F5F5'?React.createElement('div',{className:'color-tint-overlay',style:{backgroundColor:colorTela}}):null,
           !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subí tu imagen para empezar')):null,
           imagen&&!zonaActiva&&!modoLibre&&!aplicada?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Haz clic en una zona del producto')):null,
-          React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado':modoLibre&&imagen?'Arrastrá para mover el diseño':'Elegí una zona para tu bordado')
+          React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado':is3D&&imagen?'Arrastrá la mochila para girarla':modoLibre&&imagen?'Arrastrá para mover el diseño':'Elegí una zona para tu bordado')
         ),
         imagen?React.createElement('div',{className:'disenador-send-row'},
           React.createElement('button',{className:'btn btn-whatsapp disenador-send',onClick:sendWA},'Enviar diseño por WhatsApp'),
@@ -550,9 +562,10 @@ export default function Disenador() {
         ),
         React.createElement('div',{className:'panel-section controls'},
           React.createElement('h3',null,'4. Rotar y ubicar'),
-          React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiRotateCw,{size:14}),' Rotar vista'),React.createElement('input',{type:'range',min:'-30',max:'30',value:rotacionY,onChange:function(e){setRotacionY(Number(e.target.value))}}),React.createElement('span',null,rotacionY+'°')),
-          React.createElement('div',{className:'control-group'},React.createElement('label',null,' Inclinar'),React.createElement('input',{type:'range',min:'-20',max:'20',value:tiltX,onChange:function(e){setTiltX(Number(e.target.value))}}),React.createElement('span',null,tiltX+'°')),
-          (rotacionY!==0||tiltX!==0)?React.createElement('button',{className:'btn btn-outline btn-small',onClick:resetTilt},'Restaurar vista'):null,
+          is3D?React.createElement('p',{className:'vista3d-hint'},'Arrastrá la mochila para girarla y mirar cada parte en 3D'):null,
+          !is3D?React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiRotateCw,{size:14}),' Rotar vista'),React.createElement('input',{type:'range',min:'-30',max:'30',value:rotacionY,onChange:function(e){setRotacionY(Number(e.target.value))}}),React.createElement('span',null,rotacionY+'°')):null,
+          !is3D?React.createElement('div',{className:'control-group'},React.createElement('label',null,' Inclinar'),React.createElement('input',{type:'range',min:'-20',max:'20',value:tiltX,onChange:function(e){setTiltX(Number(e.target.value))}}),React.createElement('span',null,tiltX+'°')):null,
+          !is3D&&(rotacionY!==0||tiltX!==0)?React.createElement('button',{className:'btn btn-outline btn-small',onClick:resetTilt},'Restaurar vista'):null,
           imagen?React.createElement('hr',{className:'panel-divider'}):null,
           imagen&&!aplicada?React.createElement(React.Fragment,null,
             React.createElement('div',{className:'zonas-selector'},
