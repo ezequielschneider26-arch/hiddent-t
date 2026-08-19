@@ -3,8 +3,8 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, RoundedBox, ContactShadows } from '@react-three/drei'
 import * as THREE from 'three'
 
-const BODY_W = 3.0
-const BODY_H = 3.35
+const BODY_W = 2.5
+const BODY_H = 3.4
 const TOP_Y = BODY_H / 2
 const BOTTOM_Y = -BODY_H / 2
 
@@ -28,24 +28,20 @@ function roundedRectShape(w, h, r) {
 }
 
 function bodyShape() {
-  const wT = 2.0
-  const wB = 3.0
-  const xT0 = -wT / 2
-  const xT1 = wT / 2
-  const xB0 = -wB / 2
-  const xB1 = wB / 2
-  const rT = 0.6
-  const rB = 0.4
+  const w = 2.5
+  const x0 = -w / 2
+  const x1 = w / 2
+  const rB = 0.42
+  const shY = TOP_Y - 0.45
+  const arcH = 0.75
   const s = new THREE.Shape()
-  s.moveTo(xB0, BOTTOM_Y + rB)
-  s.lineTo(xT0, TOP_Y - rT)
-  s.quadraticCurveTo(xT0, TOP_Y, xT0 + rT, TOP_Y)
-  s.lineTo(xT1 - rT, TOP_Y)
-  s.quadraticCurveTo(xT1, TOP_Y, xT1, TOP_Y - rT)
-  s.lineTo(xB1, BOTTOM_Y + rB)
-  s.quadraticCurveTo(xB1, BOTTOM_Y, xB1 - rB, BOTTOM_Y)
-  s.lineTo(xB0 + rB, BOTTOM_Y)
-  s.quadraticCurveTo(xB0, BOTTOM_Y, xB0, BOTTOM_Y + rB)
+  s.moveTo(x0, BOTTOM_Y + rB)
+  s.lineTo(x0, shY)
+  s.quadraticCurveTo(0, TOP_Y + arcH, x1, shY)
+  s.lineTo(x1, BOTTOM_Y + rB)
+  s.quadraticCurveTo(x1, BOTTOM_Y, x1 - rB, BOTTOM_Y)
+  s.lineTo(x0 + rB, BOTTOM_Y)
+  s.quadraticCurveTo(x0, BOTTOM_Y, x0, BOTTOM_Y + rB)
   s.closePath()
   return s
 }
@@ -68,30 +64,24 @@ function extruded(shape, depth, opts) {
   return g
 }
 
-const BODY_GEOM = extruded(bodyShape(), 1.0, { bevelT: 0.16, bevelS: 0.14, bevelSeg: 6, curveSeg: 32 })
-const POCKET_GEOM = extruded(roundedRectShape(1.9, 1.1, 0.2), 0.12, { bevelT: 0.08, bevelS: 0.07, bevelSeg: 4 })
+const BODY_GEOM = extruded(bodyShape(), 1.0, { bevelT: 0.14, bevelS: 0.12, bevelSeg: 5, curveSeg: 32 })
 
-const BODY_FRONT_Z = 1.0 / 2 + 0.14
-const POCKET_FRONT_Z = 0.92
-const POCKET_Z = POCKET_FRONT_Z - (0.12 / 2 + 0.08)
+const POCKET_W = 1.72
+const POCKET_H = 1.15
+const POCKET_Y = -0.45
+const POCKET_TOP_Y = POCKET_Y + POCKET_H / 2
+const POCKET_GEOM = extruded(roundedRectShape(POCKET_W, POCKET_H, 0.22), 0.1, { bevelT: 0.07, bevelS: 0.06, bevelSeg: 4 })
 
-const ZIPPER_CURVE = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(1.5, -0.5, 0.1),
-  new THREE.Vector3(1.42, 0.1, 0.3),
-  new THREE.Vector3(1.26, 0.85, 0.5),
-  new THREE.Vector3(0.85, 1.4, 0.62),
-  new THREE.Vector3(0, TOP_Y + 0.22, BODY_FRONT_Z + 0.2),
-  new THREE.Vector3(-0.85, 1.4, 0.62),
-  new THREE.Vector3(-1.26, 0.85, 0.5),
-  new THREE.Vector3(-1.42, 0.1, 0.3),
-  new THREE.Vector3(-1.5, -0.5, 0.1),
-])
-const ZIPPER_GEOM = new THREE.TubeGeometry(ZIPPER_CURVE, 80, 0.035, 8, false)
+const BODY_FRONT_Z = 1.0 / 2 + 0.12
+const POCKET_FRONT_Z = 0.82
+const POCKET_Z = POCKET_FRONT_Z - (0.1 / 2 + 0.07)
+
+const ZIPPER_Y = POCKET_TOP_Y - 0.05
 
 const ZONE_DEF = {
-  centro: { pos: [0, 0.35, BODY_FRONT_Z + 0.03], hit: [1.9, 1.2], pct: 35 },
-  bolsillo: { pos: [0, -0.4, POCKET_FRONT_Z + 0.03], hit: [1.9, 1.1], pct: 22 },
-  tapa: { pos: [0, 1.35, BODY_FRONT_Z + 0.03], hit: [1.8, 0.9], pct: 20 },
+  centro: { pos: [0, 0.15, BODY_FRONT_Z + 0.03], hit: [1.9, 1.1], pct: 32 },
+  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.03], hit: [1.5, 0.95], pct: 38 },
+  tapa: { pos: [0, 1.3, BODY_FRONT_Z + 0.03], hit: [1.9, 0.65], pct: 22 },
 }
 
 const ZONES = [
@@ -247,40 +237,25 @@ function Backpack({ mats }) {
     <group position={[0, 0, 0]}>
       <mesh geometry={BODY_GEOM} material={mats.body} />
 
-      <mesh geometry={POCKET_GEOM} material={mats.pocket} position={[0, -0.4, POCKET_Z]} />
+      <mesh geometry={POCKET_GEOM} material={mats.pocket} position={[0, POCKET_Y, POCKET_Z]} />
 
-      <mesh material={mats.trim} position={[-1.05, 0, -0.74]}>
-        <capsuleGeometry args={[0.1, 2.2, 6, 14]} />
-      </mesh>
-      <mesh material={mats.trim} position={[1.05, 0, -0.74]}>
-        <capsuleGeometry args={[0.1, 2.2, 6, 14]} />
+      <mesh material={mats.trim} position={[0, TOP_Y + 0.32, 0]}>
+        <torusGeometry args={[0.26, 0.05, 10, 28, Math.PI]} />
       </mesh>
 
-      <mesh material={mats.trim} position={[0, TOP_Y + 0.14, 0]}>
-        <torusGeometry args={[0.28, 0.05, 10, 28, Math.PI]} />
-      </mesh>
+      <RoundedBox args={[1.4, 0.045, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.015]} />
+      <RoundedBox args={[0.16, 0.14, 0.03]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.66, ZIPPER_Y, POCKET_FRONT_Z + 0.05]} />
 
-      <RoundedBox args={[1.95, 0.13, 0.09]} radius={0.03} smoothness={4} material={mats.seam} position={[0, 0.19, POCKET_Z + 0.15]} />
+      <RoundedBox args={[POCKET_W, 0.022, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[0, POCKET_TOP_Y - 0.01, POCKET_FRONT_Z + 0.006]} />
+      <RoundedBox args={[POCKET_W, 0.022, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[0, POCKET_Y - POCKET_H / 2, POCKET_FRONT_Z + 0.006]} />
+      <RoundedBox args={[0.022, POCKET_H, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[-POCKET_W / 2, POCKET_Y, POCKET_FRONT_Z + 0.006]} />
+      <RoundedBox args={[0.022, POCKET_H, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[POCKET_W / 2, POCKET_Y, POCKET_FRONT_Z + 0.006]} />
 
-      <RoundedBox args={[1.95, 0.14, 0.05]} radius={0.03} smoothness={4} material={mats.trim} position={[0, -0.35, -0.88]} />
+      <RoundedBox args={[0.035, 2.45, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[-1.12, 0, BODY_FRONT_Z + 0.004]} />
+      <RoundedBox args={[0.035, 2.45, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[1.12, 0, BODY_FRONT_Z + 0.004]} />
+      <RoundedBox args={[2.3, 0.035, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[0, -1.35, BODY_FRONT_Z + 0.004]} />
 
-      <mesh material={mats.net} position={[-1.7, -0.5, 0.05]} rotation={[0, 0, 0.12]}>
-        <cylinderGeometry args={[0.28, 0.34, 0.72, 16, 1, true]} />
-      </mesh>
-      <mesh material={mats.net} position={[1.7, -0.5, 0.05]} rotation={[0, 0, -0.12]}>
-        <cylinderGeometry args={[0.28, 0.34, 0.72, 16, 1, true]} />
-      </mesh>
-
-      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[-0.9, 0.0, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.9, 0.0, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[1.8, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, 1.3, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[1.8, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, -1.3, BODY_FRONT_Z + 0.005]} />
-
-      <mesh geometry={ZIPPER_GEOM} material={mats.zip} />
-      <RoundedBox args={[0.07, 0.14, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0, TOP_Y + 0.2, BODY_FRONT_Z + 0.21]} />
-      <RoundedBox args={[1.55, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 0.26, POCKET_FRONT_Z + 0.02]} />
-
-      <RoundedBox args={[2.8, 0.09, 0.85]} radius={0.04} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y - 0.02, 0.04]} />
+      <RoundedBox args={[2.4, 0.14, 0.05]} radius={0.03} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y + 0.05, 0.04]} />
     </group>
   )
 }
