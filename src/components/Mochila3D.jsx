@@ -115,13 +115,13 @@ function makeNormalTexture(textureId) {
       } else {
         if (denim && ((x % step < 2) || (y % step < 2))) v += -8
         if ((x % step < 2) || (y % step < 2)) v += -groove
-        v += Math.sin(x * 0.09) * 2.4 + Math.sin(y * 0.11) * 2.4
+        v += Math.sin(x * 0.09) * 3.1 + Math.sin(y * 0.11) * 3.1
         v += (Math.random() - 0.5) * 5
       }
       h[y * size + x] = v
     }
   }
-  const strength = 1.15
+  const strength = 1.2
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const xl = h[y * size + ((x + size - 1) % size)]
@@ -278,8 +278,8 @@ function Backpack({ mats }) {
 
       <RoundedBox args={[0.5, 0.035, 0.07]} radius={0.012} smoothness={4} material={mats.strap} position={[0, TOP_Y + 0.12, 0]} />
 
-      <RoundedBox args={[1.95, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.015]} />
-      <RoundedBox args={[0.14, 0.13, 0.03]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.68, ZIPPER_Y, POCKET_FRONT_Z + 0.05]} />
+      <Stitch length={1.95} pos={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.008]} />
+      <RoundedBox args={[0.13, 0.1, 0.03]} radius={0.018} smoothness={4} material={mats.zipper} position={[0.72, ZIPPER_Y - 0.02, POCKET_FRONT_Z + 0.045]} rotation={[0, 0, -0.3]} />
 
       <Stitch length={POCKET_W + 0.06} pos={[0, POCKET_TOP_Y + 0.025, POCKET_FRONT_Z + 0.012]} />
       <Stitch length={POCKET_W + 0.06} pos={[0, POCKET_Y - POCKET_H / 2 - 0.025, POCKET_FRONT_Z + 0.012]} />
