@@ -28,13 +28,13 @@ function roundedRectShape(w, h, r) {
 }
 
 function bodyShape() {
-  const wT = BODY_W
-  const wB = 2.6
+  const wT = 2.6
+  const wB = 3.0
   const xT0 = -wT / 2
   const xT1 = wT / 2
   const xB0 = -wB / 2
   const xB1 = wB / 2
-  const rT = 0.55
+  const rT = 0.45
   const rB = 0.3
   const s = new THREE.Shape()
   s.moveTo(xB0, BOTTOM_Y + rB)
@@ -70,18 +70,15 @@ function extruded(shape, depth, opts) {
 
 const BODY_GEOM = extruded(bodyShape(), 1.0, { bevelT: 0.14, bevelS: 0.11, bevelSeg: 6, curveSeg: 32 })
 const POCKET_GEOM = extruded(roundedRectShape(1.9, 1.1, 0.2), 0.12, { bevelT: 0.08, bevelS: 0.07, bevelSeg: 4 })
-const FLAP_GEOM = extruded(roundedRectShape(2.6, 0.95, 0.26), 0.5, { bevelT: 0.09, bevelS: 0.09, bevelSeg: 5 })
 
 const BODY_FRONT_Z = 1.0 / 2 + 0.14
 const POCKET_FRONT_Z = 0.92
-const FLAP_FRONT_Z = 1.14
 const POCKET_Z = POCKET_FRONT_Z - (0.12 / 2 + 0.08)
-const FLAP_Z = FLAP_FRONT_Z - (0.5 / 2 + 0.09)
 
 const ZONE_DEF = {
   centro: { pos: [0, 0.35, BODY_FRONT_Z + 0.03], hit: [2.0, 1.2], pct: 35 },
   bolsillo: { pos: [0, -0.4, POCKET_FRONT_Z + 0.03], hit: [1.9, 1.1], pct: 22 },
-  tapa: { pos: [0, 1.35, FLAP_FRONT_Z + 0.03], hit: [2.5, 0.9], pct: 20 },
+  tapa: { pos: [0, 1.35, BODY_FRONT_Z + 0.03], hit: [2.0, 0.9], pct: 20 },
 }
 
 const ZONES = [
@@ -120,10 +117,8 @@ function makeMats(hex, textureId) {
   const opt = { roughness: smoothish ? 0.32 : 0.62, metalness: gloss ? 0.12 : 0.02 }
   const body = new THREE.MeshStandardMaterial({ color: base, ...opt })
   const pocket = new THREE.MeshStandardMaterial({ color: base.clone().multiplyScalar(1.08), ...opt })
-  const flap = new THREE.MeshStandardMaterial({ color: base.clone().multiplyScalar(0.94), ...opt })
   const trim = new THREE.MeshStandardMaterial({ color: base.clone().multiplyScalar(0.78), roughness: 0.68 })
   const seam = new THREE.MeshStandardMaterial({ color: base.clone().multiplyScalar(0.66), roughness: 0.55 })
-  const net = new THREE.MeshBasicMaterial({ color: base.clone().multiplyScalar(0.5), wireframe: true, transparent: true, opacity: 0.9 })
   const zipper = new THREE.MeshStandardMaterial({ color: '#5b6472', roughness: 0.4, metalness: 0.7 })
   if (!gloss) {
     const bump = makeBumpTexture(textureId)
@@ -131,14 +126,12 @@ function makeMats(hex, textureId) {
     body.bumpScale = 0.018
     pocket.bumpMap = bump
     pocket.bumpScale = 0.018
-    flap.bumpMap = bump
-    flap.bumpScale = 0.018
     trim.bumpMap = bump
     trim.bumpScale = 0.01
     seam.bumpMap = bump
     seam.bumpScale = 0.02
   }
-  return { body, pocket, flap, trim, seam, net, zipper }
+  return { body, pocket, trim, seam, zipper }
 }
 
 function Backpack({ mats }) {
@@ -146,7 +139,6 @@ function Backpack({ mats }) {
     <group position={[0, 0, 0]}>
       <mesh geometry={BODY_GEOM} material={mats.body} />
 
-      <mesh geometry={FLAP_GEOM} material={mats.flap} position={[0, 1.35, FLAP_Z]} />
       <mesh geometry={POCKET_GEOM} material={mats.pocket} position={[0, -0.4, POCKET_Z]} />
 
       <mesh material={mats.trim} position={[-1.05, 0, -0.74]}>
@@ -160,30 +152,17 @@ function Backpack({ mats }) {
         <torusGeometry args={[0.28, 0.05, 10, 28, Math.PI]} />
       </mesh>
 
-      <RoundedBox args={[2.6, 1.0, 0.5]} radius={0.12} smoothness={6} material={mats.flap} position={[0, 1.35, FLAP_Z]} />
-      <RoundedBox args={[0.55, 0.13, 0.09]} radius={0.03} smoothness={4} material={mats.seam} position={[0, 0.94, FLAP_FRONT_Z + 0.02]} />
-      <RoundedBox args={[0.07, 0.18, 0.12]} radius={0.02} smoothness={4} material={mats.seam} position={[0.24, 0.94, FLAP_FRONT_Z + 0.08]} />
-
-      <RoundedBox args={[1.95, 1.12, 0.24]} radius={0.1} smoothness={6} material={mats.pocket} position={[0, -0.4, POCKET_Z]} />
-
       <RoundedBox args={[1.95, 0.13, 0.09]} radius={0.03} smoothness={4} material={mats.seam} position={[0, 0.19, POCKET_Z + 0.15]} />
 
       <RoundedBox args={[1.95, 0.14, 0.05]} radius={0.03} smoothness={4} material={mats.trim} position={[0, -0.35, -0.88]} />
 
-      <mesh material={mats.net} position={[-1.72, -0.52, 0.0]} rotation={[0, 0, 0.1]}>
-        <cylinderGeometry args={[0.3, 0.36, 0.72, 16, 1, true]} />
-      </mesh>
-      <mesh material={mats.net} position={[1.72, -0.52, 0.0]} rotation={[0, 0, -0.1]}>
-        <cylinderGeometry args={[0.3, 0.36, 0.72, 16, 1, true]} />
-      </mesh>
+      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[-1.05, 0.0, BODY_FRONT_Z + 0.005]} />
+      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[1.05, 0.0, BODY_FRONT_Z + 0.005]} />
+      <RoundedBox args={[2.1, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, 1.36, BODY_FRONT_Z + 0.005]} />
+      <RoundedBox args={[2.1, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, -1.36, BODY_FRONT_Z + 0.005]} />
 
-      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[-1.28, 0.0, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[0.045, 2.7, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[1.28, 0.0, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[2.56, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, 1.36, BODY_FRONT_Z + 0.005]} />
-      <RoundedBox args={[2.56, 0.045, 0.04]} radius={0.012} smoothness={4} material={mats.seam} position={[0.0, -1.36, BODY_FRONT_Z + 0.005]} />
-
-      <RoundedBox args={[2.5, 0.045, 0.035]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 0.78, BODY_FRONT_Z + 0.02]} />
-      <RoundedBox args={[0.09, 0.07, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[1.18, 0.74, BODY_FRONT_Z + 0.09]} />
+      <RoundedBox args={[2.0, 0.045, 0.035]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 1.45, BODY_FRONT_Z + 0.02]} />
+      <RoundedBox args={[0.09, 0.07, 0.05]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.9, 1.41, BODY_FRONT_Z + 0.09]} />
       <RoundedBox args={[1.55, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, 0.26, POCKET_FRONT_Z + 0.02]} />
 
       <RoundedBox args={[2.8, 0.09, 0.85]} radius={0.04} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y - 0.02, 0.04]} />
