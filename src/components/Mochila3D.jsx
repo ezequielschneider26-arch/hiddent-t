@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, RoundedBox, ContactShadows } from '@react-three/drei'
 import * as THREE from 'three'
 
-const BODY_W = 2.5
+const BODY_W = 2.6
 const BODY_H = 3.4
 const TOP_Y = BODY_H / 2
 const BOTTOM_Y = -BODY_H / 2
@@ -28,12 +28,12 @@ function roundedRectShape(w, h, r) {
 }
 
 function bodyShape() {
-  const w = 2.5
+  const w = 2.6
   const x0 = -w / 2
   const x1 = w / 2
-  const rB = 0.42
-  const shY = TOP_Y - 0.45
-  const arcH = 0.75
+  const rB = 0.4
+  const shY = TOP_Y - 0.3
+  const arcH = 0.55
   const s = new THREE.Shape()
   s.moveTo(x0, BOTTOM_Y + rB)
   s.lineTo(x0, shY)
@@ -66,22 +66,22 @@ function extruded(shape, depth, opts) {
 
 const BODY_GEOM = extruded(bodyShape(), 1.0, { bevelT: 0.14, bevelS: 0.12, bevelSeg: 5, curveSeg: 32 })
 
-const POCKET_W = 1.72
-const POCKET_H = 1.15
-const POCKET_Y = -0.45
+const POCKET_W = 2.1
+const POCKET_H = 1.45
+const POCKET_Y = -0.625
 const POCKET_TOP_Y = POCKET_Y + POCKET_H / 2
-const POCKET_GEOM = extruded(roundedRectShape(POCKET_W, POCKET_H, 0.22), 0.1, { bevelT: 0.07, bevelS: 0.06, bevelSeg: 4 })
+const POCKET_GEOM = extruded(roundedRectShape(POCKET_W, POCKET_H, 0.25), 0.1, { bevelT: 0.07, bevelS: 0.06, bevelSeg: 4 })
 
 const BODY_FRONT_Z = 1.0 / 2 + 0.12
-const POCKET_FRONT_Z = 0.82
+const POCKET_FRONT_Z = 0.8
 const POCKET_Z = POCKET_FRONT_Z - (0.1 / 2 + 0.07)
 
 const ZIPPER_Y = POCKET_TOP_Y - 0.05
 
 const ZONE_DEF = {
-  centro: { pos: [0, 0.15, BODY_FRONT_Z + 0.03], hit: [1.9, 1.1], pct: 32 },
-  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.03], hit: [1.5, 0.95], pct: 38 },
-  tapa: { pos: [0, 1.3, BODY_FRONT_Z + 0.03], hit: [1.9, 0.65], pct: 22 },
+  centro: { pos: [0, 0.15, BODY_FRONT_Z + 0.03], hit: [1.9, 1.05], pct: 32 },
+  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.03], hit: [1.8, 1.25], pct: 38 },
+  tapa: { pos: [0, 1.3, BODY_FRONT_Z + 0.03], hit: [1.9, 0.6], pct: 22 },
 }
 
 const ZONES = [
@@ -239,21 +239,17 @@ function Backpack({ mats }) {
 
       <mesh geometry={POCKET_GEOM} material={mats.pocket} position={[0, POCKET_Y, POCKET_Z]} />
 
-      <mesh material={mats.trim} position={[0, TOP_Y + 0.32, 0]}>
-        <torusGeometry args={[0.26, 0.05, 10, 28, Math.PI]} />
-      </mesh>
-
-      <RoundedBox args={[1.4, 0.045, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.015]} />
-      <RoundedBox args={[0.16, 0.14, 0.03]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.66, ZIPPER_Y, POCKET_FRONT_Z + 0.05]} />
+      <RoundedBox args={[1.8, 0.04, 0.03]} radius={0.015} smoothness={4} material={mats.zipper} position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.015]} />
+      <RoundedBox args={[0.14, 0.13, 0.03]} radius={0.02} smoothness={4} material={mats.zipper} position={[0.68, ZIPPER_Y, POCKET_FRONT_Z + 0.05]} />
 
       <RoundedBox args={[POCKET_W, 0.022, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[0, POCKET_TOP_Y - 0.01, POCKET_FRONT_Z + 0.006]} />
       <RoundedBox args={[POCKET_W, 0.022, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[0, POCKET_Y - POCKET_H / 2, POCKET_FRONT_Z + 0.006]} />
       <RoundedBox args={[0.022, POCKET_H, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[-POCKET_W / 2, POCKET_Y, POCKET_FRONT_Z + 0.006]} />
       <RoundedBox args={[0.022, POCKET_H, 0.02]} radius={0.01} smoothness={4} material={mats.seam} position={[POCKET_W / 2, POCKET_Y, POCKET_FRONT_Z + 0.006]} />
 
-      <RoundedBox args={[0.035, 2.45, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[-1.12, 0, BODY_FRONT_Z + 0.004]} />
-      <RoundedBox args={[0.035, 2.45, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[1.12, 0, BODY_FRONT_Z + 0.004]} />
-      <RoundedBox args={[2.3, 0.035, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[0, -1.35, BODY_FRONT_Z + 0.004]} />
+      <RoundedBox args={[0.035, 2.45, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[-1.18, 0, BODY_FRONT_Z + 0.004]} />
+      <RoundedBox args={[0.035, 2.45, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[1.18, 0, BODY_FRONT_Z + 0.004]} />
+      <RoundedBox args={[2.4, 0.035, 0.03]} radius={0.012} smoothness={4} material={mats.seam} position={[0, -1.35, BODY_FRONT_Z + 0.004]} />
 
       <RoundedBox args={[2.4, 0.14, 0.05]} radius={0.03} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y + 0.05, 0.04]} />
     </group>
@@ -351,7 +347,7 @@ export default function Mochila3D(props) {
   return (
     <div className="mochila3d">
       <Canvas
-        camera={{ position: [4.6, 1.1, 5.4], fov: 38 }}
+        camera={{ position: [0, 0.35, 7.2], fov: 38 }}
         dpr={[1, 2]}
         onCreated={({ gl }) => {
           if (onExportRef) onExportRef.current = () => gl.domElement.toDataURL('image/png')
@@ -366,7 +362,7 @@ export default function Mochila3D(props) {
         <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
         <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
         <ContactShadows position={[0, BOTTOM_Y - 0.12, 0]} opacity={0.45} scale={9} blur={2.6} far={4} color="#000000" />
-        <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={3.4} maxDistance={9.5} minPolarAngle={0.15} maxPolarAngle={Math.PI - 0.15} target={[0, 0.1, 0]} />
+        <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.25} maxPolarAngle={Math.PI - 0.25} target={[0, -0.1, 0]} />
       </Canvas>
     </div>
   )
