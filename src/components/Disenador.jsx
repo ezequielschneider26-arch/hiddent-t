@@ -469,14 +469,12 @@ export default function Disenador() {
   },[handleCanvasDragStart,handleCanvasDragMove,handleCanvasDragEnd,is3D])
 
   var sendWA=function(){
-    var prod='producto',tela='Personalizado'
+    if(!aplicada)return
+    var prod='producto'
     for(var i=0;i<productos.length;i++){if(productos[i].id===producto){prod=productos[i].nombre;break}}
-    for(var i=0;i<coloresTela.length;i++){if(coloresTela[i].hex===colorTela){tela=coloresTela[i].nombre;break}}
-    var msg='Hola! Quiero un '+prod+' bordado.\n\nColor de tela: '+tela+'\n'
-    if(zonaActiva){var zl=zonaActiva;for(var i=0;i<zonas.length;i++){if(zonas[i].id===zonaActiva){zl=zonas[i].label;break}};msg+='Ubicación: '+zl+'\n'}
-    else if(modoLibre){msg+='Posición personalizada\n'}
-    msg+='Tamaño: '+tamano+'%\nRotación: '+rotacion+'\n\nAdjunto la imagen del bordado.'
+    var msg='Hola! Quiero un '+prod+' bordado.'
     window.open('https://wa.me/5493454497729?text='+encodeURIComponent(msg),'_blank')
+    handleExport()
   }
 
   var handleExport=function(){
@@ -537,8 +535,9 @@ export default function Disenador() {
           React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado':is3D&&imagen?'Arrastrá la mochila para girarla':modoLibre&&imagen?'Arrastrá para mover el diseño':'Elegí una zona para tu bordado')
         ),
         imagen?React.createElement('div',{className:'disenador-send-row'},
-          React.createElement('button',{className:'btn btn-whatsapp disenador-send',onClick:sendWA},'Enviar diseño por WhatsApp'),
-          React.createElement('button',{className:'btn btn-outline disenador-export',onClick:handleExport},React.createElement(FiDownload,{size:14}),' Descargar PNG')
+          React.createElement('button',{className:'btn btn-whatsapp disenador-send'+(aplicada?'':' is-disabled'),onClick:sendWA,disabled:!aplicada},'Enviar diseño por WhatsApp'),
+          React.createElement('button',{className:'btn btn-outline disenador-export',onClick:handleExport},React.createElement(FiDownload,{size:14}),' Descargar PNG'),
+          React.createElement('p',{className:'send-hint'},aplicada?'El diseño se descarga en PNG para que lo adjuntes al chat':'Primero tocá "Aplicar bordado" para poder enviarlo')
         ):null
       ),
 

@@ -514,6 +514,19 @@
   display: flex;
   gap: 12px;
   justify-content: center;
+  flex-wrap: wrap;
+}
+.disenador-send.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.4);
+}
+.send-hint {
+  width: 100%;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 .disenador-export {
   display: inline-flex;
