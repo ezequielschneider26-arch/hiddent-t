@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
 import { OrbitControls } from './vendor/OrbitControls.js';
+import { buildFallbackBackpack } from './vendor/fallback.js';
 
 /* ============================================================
    Viewer de mochila 3D fotorrealista (Three.js)
@@ -169,7 +170,19 @@ function onModelLoaded(gltf) {
 
 function loadNextSource(index) {
   if (index >= MODEL_SOURCES.length) {
-    setProgress(0, 'No se pudo cargar ninguna fuente de modelo. Guardá el archivo en ./assets/mochila.glb y recargá.');
+    // Sin .glb disponible: mostramos la vista previa procedural para que se vea algo.
+    const fallback = buildFallbackBackpack();
+    normalizeModel(fallback);
+    scene.add(fallback);
+    const box = new THREE.Box3().setFromObject(fallback);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const centerY = (box.min.y + box.max.y) / 2;
+    const radius = size.length() / 2;
+    camera.position.set(radius * 1.6, centerY, radius * 1.6);
+    controls.target.set(0, centerY, 0);
+    setProgress(1, 'Vista previa. Falta el archivo ./assets/mochila.glb para el modelo real.');
+    setTimeout(() => OVERLAY.classList.add('done'), 250);
     return;
   }
   const url = MODEL_SOURCES[index];
