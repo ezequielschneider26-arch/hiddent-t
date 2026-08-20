@@ -61,10 +61,14 @@
   <canvas id="viewer"></canvas>
   <div id="hint">Arrastrá para girar 360° · Scroll para zoom</div>
 
-  <!-- Three.js v0.149 (ejemplos clásicos, incluye GLTFLoader + OrbitControls) -->
-  <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.149.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="https://unpkg.com/three@0.149.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="./script.js"></script>
+  <!-- Three.js local (sin CDN) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="./script.js"></script>
 </body>
 </html>

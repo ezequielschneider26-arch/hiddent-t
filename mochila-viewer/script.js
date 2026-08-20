@@ -1,3 +1,7 @@
+import * as THREE from 'three';
+import { GLTFLoader } from './vendor/GLTFLoader.js';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
 /* ============================================================
    Viewer de mochila 3D fotorrealista (Three.js)
    - Carga GLB externo (URL/CDN) con fallback a archivo local.
@@ -6,11 +10,11 @@
    ============================================================ */
 
 // Orden de fuentes del modelo .glb. Se prueban en secuencia.
-// 1) URL pública directa (GitHub raw / CDN con CORS habilitado).
-// 2) Archivo local: ./assets/mochila.glb (p. ej. exportado desde Blender).
+// 1) Archivo local: ./assets/mochila.glb (p. ej. exportado desde Blender).
+// 2) URL pública directa (GitHub raw / CDN con CORS habilitado).
 const MODEL_SOURCES = [
-  'https://raw.githubusercontent.com/ezequielschneider26-arch/hiddent-t/main/public/assets/mochila.glb',
   './assets/mochila.glb',
+  'https://raw.githubusercontent.com/ezequielschneider26-arch/hiddent-t/main/public/assets/mochila.glb',
 ];
 
 const OVERLAY = document.getElementById('overlay');
@@ -29,7 +33,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputEncoding = THREE.sRGBEncoding; // corrección de color
+renderer.outputColorSpace = THREE.SRGBColorSpace; // corrección de color
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xe9e9ec); // gris claro de estudio
@@ -165,19 +169,25 @@ function onModelLoaded(gltf) {
 
 function loadNextSource(index) {
   if (index >= MODEL_SOURCES.length) {
-    setProgress(0, 'No se pudo cargar ninguna fuente de modelo.');
+    setProgress(0, 'No se pudo cargar ninguna fuente de modelo. Guardá el archivo en ./assets/mochila.glb y recargá.');
     return;
   }
   const url = MODEL_SOURCES[index];
-  STATUS.textContent = 'Intentando: ' + url.split('/').pop() + (index > 0 ? ' (local)' : ' (remoto)');
+  STATUS.textContent = 'Intentando: ' + url.split('/').pop() + (index === 0 ? ' (local)' : ' (remoto)');
 
-  new THREE.GLTFLoader(manager).load(
+  // Timeout por fuente: evita quedarse colgado en "Conectando…"
+  let timer = setTimeout(() => {
+    STATUS.textContent = 'Tiempo agotado para ' + url.split('/').pop() + '. Probando siguiente fuente…';
+    loadNextSource(index + 1);
+  }, 12000);
+
+  new GLTFLoader(manager).load(
     url,
-    (gltf) => onModelLoaded(gltf),
+    (gltf) => { clearTimeout(timer); onModelLoaded(gltf); },
     (xhr) => {
       if (xhr.total > 0) setProgress(xhr.loaded / xhr.total, xhr.loaded + ' / ' + xhr.total + ' bytes');
     },
-    () => loadNextSource(index + 1) // fuente fallida → siguiente
+    () => { clearTimeout(timer); loadNextSource(index + 1); } // fuente fallida → siguiente
   );
 }
 
