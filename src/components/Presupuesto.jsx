@@ -3,7 +3,7 @@ import { FiSend, FiImage, FiX } from 'react-icons/fi'
 import './Presupuesto.css'
 
 const productos = [
-  'Mochila', 'Yerbera', 'Bolso', 'Estuche', 'Cartera', 'Gorra', 'Botinera', 'Matera', 'Riñonera', 'Otro'
+  'Mochila', 'Yerbera', 'Bolso', 'Estuche', 'Cartera', 'Gorra', 'Botinera', 'Taza Sublimada', 'Matera', 'Riñonera', 'Otro'
 ]
 
 export default function Presupuesto() {

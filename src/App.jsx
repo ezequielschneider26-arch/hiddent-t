@@ -1,6 +1,7 @@
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Disenador from './components/Disenador'
+import Sublimador from './components/Sublimador'
 import Galeria from './components/Galeria'
 import SobreNosotros from './components/SobreNosotros'
 import Presupuesto from './components/Presupuesto'
@@ -14,6 +15,7 @@ function App() {
       <Hero />
       <Galeria />
       <Disenador />
+      <Sublimador />
       <SobreNosotros />
       <Presupuesto />
       <Contacto />

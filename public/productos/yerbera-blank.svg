@@ -1,16 +1,26 @@
 <svg width="400" height="500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <defs>
+    <linearGradient id="bodyG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8A8A92"/>
+      <stop offset="50%" stop-color="#A8A8B0"/>
+      <stop offset="100%" stop-color="#8A8A92"/>
+    </linearGradient>
+  </defs>
   <!-- Triangular yerbera body -->
-  <path d="M200 60 L340 400 L60 400 Z" fill="#2A2A2E"/>
-  <path d="M200 80 L325 390 L75 390 Z" fill="#3A3A40"/>
+  <path d="M200 60 L340 400 L60 400 Z" fill="url(#bodyG)"/>
+  <path d="M200 80 L325 390 L75 390 Z" fill="url(#bodyG)" opacity="0.4"/>
   <!-- Right slope zipper -->
-  <line x1="210" y1="95" x2="320" y2="380" stroke="#555" stroke-width="3"/>
-  <circle cx="310" cy="370" r="6" fill="#777"/>
+  <line x1="210" y1="95" x2="320" y2="380" stroke="#5A5A62" stroke-width="3"/>
+  <circle cx="310" cy="370" r="6" fill="#B8860B"/>
+  <circle cx="310" cy="370" r="3" fill="#D4A017"/>
   <!-- Left slope piping -->
-  <line x1="190" y1="95" x2="80" y2="380" stroke="#2A2A2E" stroke-width="5"/>
+  <line x1="190" y1="95" x2="80" y2="380" stroke="#5A5A62" stroke-width="5"/>
   <!-- Bottom reinforcement -->
-  <rect x="65" y="390" width="270" height="16" rx="4" fill="#333338"/>
+  <rect x="65" y="390" width="270" height="16" rx="4" fill="#6A6A72"/>
   <!-- Top handle ring -->
-  <circle cx="200" cy="68" r="10" fill="none" stroke="#777" stroke-width="3"/>
-  <!-- Stitching -->
-  <path d="M100 385 L200 385 L300 385" stroke="#2A2A2E" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <circle cx="200" cy="68" r="10" fill="none" stroke="#B8860B" stroke-width="3"/>
+  <!-- Stitching on edges -->
+  <path d="M205 105 L318 385" stroke="#5A5A62" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M195 105 L82 385" stroke="#5A5A62" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M100 385 L200 385 L300 385" stroke="#5A5A62" stroke-width="1.5" stroke-dasharray="4,4"/>
 </svg>

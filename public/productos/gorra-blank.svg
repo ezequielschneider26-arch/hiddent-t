@@ -1,23 +1,32 @@
 <svg width="400" height="500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <defs>
+    <linearGradient id="domeG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8A8A92"/>
+      <stop offset="50%" stop-color="#A8A8B0"/>
+      <stop offset="100%" stop-color="#8A8A92"/>
+    </linearGradient>
+  </defs>
   <!-- Cap dome -->
-  <path d="M80 280 Q80 120 200 100 Q320 120 320 280" fill="#3A3A40"/>
-  <path d="M85 278 Q85 130 200 112 Q315 130 315 278" fill="#44444A"/>
+  <path d="M80 280 Q80 120 200 100 Q320 120 320 280" fill="url(#domeG)"/>
   <!-- Brim -->
-  <ellipse cx="200" cy="285" rx="140" ry="30" fill="#333338"/>
-  <ellipse cx="200" cy="282" rx="135" ry="26" fill="#3A3A40"/>
+  <ellipse cx="200" cy="285" rx="140" ry="30" fill="#6A6A72"/>
+  <ellipse cx="200" cy="280" rx="135" ry="26" fill="#77777E"/>
   <!-- Panel seams -->
-  <path d="M200 112 L200 278" stroke="#2A2A2E" stroke-width="1.5"/>
-  <path d="M140 130 L120 278" stroke="#2A2A2E" stroke-width="1.5"/>
-  <path d="M260 130 L280 278" stroke="#2A2A2E" stroke-width="1.5"/>
+  <path d="M200 112 L200 278" stroke="#5A5A62" stroke-width="1.5"/>
+  <path d="M140 130 L120 278" stroke="#5A5A62" stroke-width="1.5"/>
+  <path d="M260 130 L280 278" stroke="#5A5A62" stroke-width="1.5"/>
   <!-- Eyelets -->
-  <circle cx="160" cy="170" r="4" fill="#777"/>
-  <circle cx="240" cy="170" r="4" fill="#777"/>
-  <circle cx="140" cy="220" r="4" fill="#777"/>
-  <circle cx="260" cy="220" r="4" fill="#777"/>
+  <circle cx="160" cy="170" r="4" fill="#B8860B"/>
+  <circle cx="240" cy="170" r="4" fill="#B8860B"/>
+  <circle cx="140" cy="220" r="4" fill="#B8860B"/>
+  <circle cx="260" cy="220" r="4" fill="#B8860B"/>
   <!-- Top button -->
-  <circle cx="200" cy="108" r="6" fill="#333338"/>
+  <circle cx="200" cy="108" r="6" fill="#6A6A72"/>
   <!-- Back strap -->
-  <rect x="170" y="270" width="60" height="12" rx="3" fill="#333338"/>
+  <rect x="170" y="270" width="60" height="12" rx="3" fill="#6A6A72"/>
   <!-- Buckle -->
-  <rect x="195" y="268" width="10" height="16" rx="2" fill="#777"/>
+  <rect x="195" y="268" width="10" height="16" rx="2" fill="#B8860B"/>
+  <!-- Stitching on dome -->
+  <path d="M85 275 Q115 300 95 285" stroke="#5A5A62" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <path d="M315 275 Q285 300 305 285" stroke="#5A5A62" stroke-width="1.5" stroke-dasharray="3,3"/>
 </svg>

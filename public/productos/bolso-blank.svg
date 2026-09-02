@@ -1,18 +1,26 @@
 <svg width="400" height="500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <defs>
+    <linearGradient id="bodyG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8A8A92"/>
+      <stop offset="50%" stop-color="#A8A8B0"/>
+      <stop offset="100%" stop-color="#8A8A92"/>
+    </linearGradient>
+  </defs>
   <!-- Bag body -->
-  <rect x="60" y="140" width="280" height="280" rx="16" fill="#2A2A2E"/>
-  <rect x="70" y="150" width="260" height="260" rx="12" fill="#3A3A40"/>
+  <rect x="60" y="140" width="280" height="280" rx="16" fill="url(#bodyG)"/>
+  <rect x="66" y="146" width="268" height="268" rx="12" fill="url(#bodyG)" opacity="0.4"/>
   <!-- Handles -->
-  <path d="M130 140 Q130 80 160 80" stroke="#333338" stroke-width="10" fill="none" stroke-linecap="round"/>
-  <path d="M270 140 Q270 80 240 80" stroke="#333338" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M130 140 Q130 80 160 80" stroke="#6A6A72" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M270 140 Q270 80 240 80" stroke="#6A6A72" stroke-width="10" fill="none" stroke-linecap="round"/>
   <!-- Closure -->
-  <circle cx="200" cy="165" r="8" fill="#777"/>
-  <line x1="200" y1="173" x2="200" y2="190" stroke="#777" stroke-width="2"/>
+  <circle cx="200" cy="165" r="9" fill="#B8860B"/>
+  <circle cx="200" cy="165" r="4" fill="#D4A017"/>
+  <line x1="200" y1="174" x2="200" y2="195" stroke="#5A5A62" stroke-width="2.5"/>
   <!-- Side seams -->
-  <line x1="65" y1="160" x2="65" y2="410" stroke="#2A2A2E" stroke-width="4"/>
-  <line x1="335" y1="160" x2="335" y2="410" stroke="#2A2A2E" stroke-width="4"/>
+  <line x1="65" y1="160" x2="65" y2="410" stroke="#5A5A62" stroke-width="4"/>
+  <line x1="335" y1="160" x2="335" y2="410" stroke="#5A5A62" stroke-width="4"/>
   <!-- Bottom -->
-  <rect x="65" y="405" width="270" height="12" rx="3" fill="#333338"/>
+  <rect x="65" y="405" width="270" height="12" rx="3" fill="#6A6A72"/>
   <!-- Stitching -->
-  <path d="M80 400 L200 400 L320 400" stroke="#2A2A2E" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M80 400 L200 400 L320 400" stroke="#5A5A62" stroke-width="1.5" stroke-dasharray="4,4"/>
 </svg>

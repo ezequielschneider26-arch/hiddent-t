@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
-import { FiUpload, FiTrash2, FiRotateCw, FiMaximize2, FiSliders, FiImage, FiDownload } from 'react-icons/fi'
+import { FiUpload, FiTrash2, FiRotateCw, FiMaximize2, FiSliders, FiImage, FiDownload, FiZap } from 'react-icons/fi'
 import { Canvas, FabricImage, Rect } from 'fabric'
 import Mochila3D from './Mochila3D'
+import { removeBackground } from '../utils/removeBg'
 import './Disenador.css'
 
 var productos = [
@@ -130,43 +131,6 @@ var telaTextureMap = {
   mezclilla: 'ft-denim', tela_imp: 'ft-waterproof',
 }
 
-function removeImageBg(dataUrl, tolerance) {
-  return new Promise(function(resolve) {
-    var img = new Image()
-    img.onload = function() {
-      var c = document.createElement('canvas')
-      c.width = img.width; c.height = img.height
-      var ctx = c.getContext('2d')
-      ctx.drawImage(img, 0, 0)
-      var d = ctx.getImageData(0, 0, c.width, c.height)
-      var px = d.data
-      var edge = {}
-      for (var x = 0; x < c.width; x++) {
-        var i1=(x*c.height)*4, i2=(x*c.height+c.height-1)*4
-        var k1=px[i1]+','+px[i1+1]+','+px[i1+2], k2=px[i2]+','+px[i2+1]+','+px[i2+2]
-        edge[k1]=(edge[k1]||0)+1; edge[k2]=(edge[k2]||0)+1
-      }
-      for (var y = 0; y < c.height; y++) {
-        var i1=y*4, i2=((c.width-1)*c.height+y)*4
-        var k1=px[i1]+','+px[i1+1]+','+px[i1+2], k2=px[i2]+','+px[i2+1]+','+px[i2+2]
-        edge[k1]=(edge[k1]||0)+1; edge[k2]=(edge[k2]||0)+1
-      }
-      var bgKey='',bgCount=0
-      for(var k in edge){if(edge[k]>bgCount){bgCount=edge[k];bgKey=k}}
-      var bgp=bgKey.split(',')
-      var bgR=parseInt(bgp[0]),bgG=parseInt(bgp[1]),bgB=parseInt(bgp[2])
-      var t=tolerance*2.55
-      for(var i=0;i<px.length;i+=4){
-        var dr=px[i]-bgR,dg=px[i+1]-bgG,db=px[i+2]-bgB
-        if(Math.sqrt(dr*dr+dg*dg+db*db)<t)px[i+3]=0
-      }
-      ctx.putImageData(d,0,0)
-      resolve(c.toDataURL('image/png'))
-    }
-    img.src = dataUrl
-  })
-}
-
 function FabricCanvas(props) {
   var producto=props.producto,colorTela=props.colorTela,imagen=props.imagen
   var zonaActiva=props.zonaActiva,modoLibre=props.modoLibre
@@ -180,7 +144,6 @@ function FabricCanvas(props) {
   var fabricRef=useRef(null)
   var userImgRef=useRef(null)
   var zonesRef=useRef([])
-  var tintRef=useRef(null)
 
   var zonas=zonasPorProducto[producto]||[]
 
@@ -216,23 +179,6 @@ function FabricCanvas(props) {
   useEffect(function(){
     var fc=fabricRef.current
     if(!fc)return
-
-    if(tintRef.current){fc.remove(tintRef.current);tintRef.current=null}
-    if(colorTela&&colorTela!=='#1A1A1A'&&colorTela!=='#F5F5F5'){
-      var r=parseInt(colorTela.slice(1,3),16),g=parseInt(colorTela.slice(3,5),16),b=parseInt(colorTela.slice(5,7),16)
-      var brightness=(r*299+g*587+b*114)/1000
-      if(brightness>40&&brightness<215){
-        var tint=new Rect({
-          left:0,top:0,width:fc.width,height:fc.height,
-          fill:'rgba('+r+','+g+','+b+',0.25)',
-          selectable:false,evented:false,
-          excludeFromExport:true
-        })
-        fc.add(tint)
-        fc.renderAll()
-        tintRef.current=tint
-      }
-    }
     fc.renderAll()
   },[colorTela,producto])
 
@@ -365,6 +311,7 @@ export default function Disenador() {
   var x=useState(50),posY=x[0],setPosY=x[1]
   var ra=useState(false),removingBg=ra[0],setRemovingBg=ra[1]
   var rb=useState(30),tolerancia=rb[0],setTolerancia=rb[1]
+  var mbg=useState('edge'),metodoBg=mbg[0],setMetodoBg=mbg[1]
   var rc=useState(false),bgRemoved=rc[0],setBgRemoved=rc[1]
   var rd=useState([]),zonasyMarca=rd[0],setZonasyMarca=rd[1]
   var re=useState(null),telaSeleccionada=re[0],setTelaSeleccionada=re[1]
@@ -393,9 +340,9 @@ export default function Disenador() {
   var handleRemoveBg=useCallback(async function(){
     if(!imagen)return
     setRemovingBg(true)
-    try{var res=await removeImageBg(imagen,tolerancia);setImagen(res);setBgRemoved(true)}catch(e){}
+    try{var res=await removeBackground(imagen,tolerancia,metodoBg);setImagen(res);setBgRemoved(true)}catch (_e){}
     setRemovingBg(false)
-  },[imagen,tolerancia])
+  },[imagen,tolerancia,metodoBg])
 
   var aplicarImagen=function(){
     if(!imagen)return
@@ -529,7 +476,7 @@ export default function Disenador() {
                 onExportRef:exportRef
               }),
           !is3D&&textureClass?React.createElement('div',{className:'texture-overlay '+textureClass}):null,
-          !is3D&&colorTela&&colorTela!=='#1A1A1A'&&colorTela!=='#F5F5F5'?React.createElement('div',{className:'color-tint-overlay',style:{backgroundColor:colorTela}}):null,
+          !is3D&&colorTela&&colorTela!=='#F5F5F5'?React.createElement('div',{className:'color-tint-overlay'+(colorTela==='#1A1A1A'?' negro':''),style:{backgroundColor:colorTela}}):null,
           !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subí tu imagen para empezar')):null,
           imagen&&!zonaActiva&&!modoLibre&&!aplicada?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Haz clic en una zona del producto')):null,
           React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado':is3D&&imagen?'Arrastrá la mochila para girarla':modoLibre&&imagen?'Arrastrá para mover el diseño':'Elegí una zona para tu bordado')
@@ -553,6 +500,10 @@ export default function Disenador() {
             React.createElement('button',{className:'btn-clear',onClick:clearImg},React.createElement(FiTrash2,{size:14}),' Quitar'),
             React.createElement('button',{className:'btn-bg-remove'+(removingBg?' loading':''),onClick:handleRemoveBg,disabled:removingBg},
               React.createElement(FiImage,{size:14}),removingBg?' Procesando...':bgRemoved?' Re-quitar fondo':' Quitar fondo')
+          ):null,
+          imagen?React.createElement('div',{className:'bgmethod-selector'},
+            React.createElement('button',{type:'button',className:'bgmethod-btn'+(metodoBg==='edge'?' active':''),onClick:function(){setMetodoBg('edge')}},React.createElement(FiZap,{size:12}),' Simple'),
+            React.createElement('button',{type:'button',className:'bgmethod-btn'+(metodoBg==='flood'?' active':''),onClick:function(){setMetodoBg('flood')}},React.createElement(FiZap,{size:12}),' Inteligente')
           ):null,
           imagen?React.createElement('div',{className:'tolerancia-control'},
             React.createElement('label',null,'Tolerancia: '+tolerancia+'%'),

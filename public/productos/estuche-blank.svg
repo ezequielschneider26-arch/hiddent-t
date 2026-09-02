@@ -1,17 +1,26 @@
 <svg width="400" height="500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <defs>
+    <linearGradient id="bodyG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8A8A92"/>
+      <stop offset="50%" stop-color="#A8A8B0"/>
+      <stop offset="100%" stop-color="#8A8A92"/>
+    </linearGradient>
+  </defs>
   <!-- Case body -->
-  <rect x="50" y="120" width="300" height="260" rx="20" fill="#2A2A2E"/>
-  <rect x="60" y="130" width="280" height="240" rx="16" fill="#3A3A40"/>
+  <rect x="50" y="120" width="300" height="260" rx="20" fill="url(#bodyG)"/>
+  <rect x="56" y="126" width="288" height="248" rx="16" fill="url(#bodyG)" opacity="0.4"/>
   <!-- Lid line -->
-  <line x1="55" y1="200" x2="345" y2="200" stroke="#2A2A2E" stroke-width="4"/>
+  <line x1="55" y1="200" x2="345" y2="200" stroke="#5A5A62" stroke-width="4"/>
   <!-- Zipper -->
-  <path d="M70 205 Q200 195 330 205" stroke="#555" stroke-width="3" fill="none"/>
-  <circle cx="315" cy="208" r="6" fill="#777"/>
+  <path d="M70 205 Q200 195 330 205" stroke="#5A5A62" stroke-width="3" fill="none"/>
+  <circle cx="315" cy="208" r="6" fill="#B8860B"/>
+  <circle cx="315" cy="208" r="3" fill="#D4A017"/>
   <!-- Corners -->
-  <path d="M70 140 Q50 140 50 160" stroke="#333338" stroke-width="3" fill="none"/>
-  <path d="M330 140 Q350 140 350 160" stroke="#333338" stroke-width="3" fill="none"/>
-  <path d="M70 360 Q50 360 50 340" stroke="#333338" stroke-width="3" fill="none"/>
-  <path d="M330 360 Q350 360 350 340" stroke="#333338" stroke-width="3" fill="none"/>
+  <path d="M70 140 Q50 140 50 160" stroke="#6A6A72" stroke-width="3" fill="none"/>
+  <path d="M330 140 Q350 140 350 160" stroke="#6A6A72" stroke-width="3" fill="none"/>
+  <path d="M70 360 Q50 360 50 340" stroke="#6A6A72" stroke-width="3" fill="none"/>
+  <path d="M330 360 Q350 360 350 340" stroke="#6A6A72" stroke-width="3" fill="none"/>
   <!-- Stitching -->
-  <path d="M75 355 L200 355 L325 355" stroke="#2A2A2E" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M75 355 L200 355 L325 355" stroke="#5A5A62" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <path d="M75 133 L325 133" stroke="#5A5A62" stroke-width="1.5" stroke-dasharray="4,4"/>
 </svg>
