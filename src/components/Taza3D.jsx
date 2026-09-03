@@ -51,9 +51,11 @@ function drawWrapPlain(blank) {
   ctx.fillRect(0, 0, W, H)
 }
 
-// Zona de impresion sobre la pared del cuerpo (mitad superior de la lamina).
-// La imagen se ve completa y sin deformar (contain), centrada dentro de esa
-// zona, en la parte alta/media de la taza y sin tocar el fondo ni el borde.
+// Zona de impresion sobre la pared del cuerpo (mitad superior del canvas).
+// Por el volteo vertical del CanvasTexture, la mitad superior del canvas
+// corresponde a la pared de la taza y la mitad inferior al fondo. La imagen se
+// ve completa y sin deformar (contain), centrada en la pared, sin tocar el
+// fondo (abajo) ni el borde (arriba).
 function drawWrapOnto(blank, imagen) {
   const { ctx, W, H } = blank
   const iw = imagen.naturalWidth || imagen.width
@@ -64,8 +66,8 @@ function drawWrapOnto(blank, imagen) {
   ctx.fillRect(0, 0, W, H)
 
   const maxW = W * 0.9
-  const maxTop = H * 0.5
-  const maxBot = H * 0.97
+  const maxTop = H * 0.05
+  const maxBot = H * 0.48
   const maxAH = maxBot - maxTop
 
   const s = Math.min(maxW / iw, maxAH / ih)

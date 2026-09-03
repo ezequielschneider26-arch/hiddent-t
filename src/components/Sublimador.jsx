@@ -70,7 +70,7 @@ export default function Sublimador() {
       React.createElement('div', { className: 'sublimador-panel' },
         React.createElement('div', { className: 'panel-section' },
           React.createElement('h3', null, '1. Subí tu imagen'),
-          React.createElement('p', { className: 'taza-measure-hint' }, 'Medida óptima de la imagen: 2000×420 px (proporción ≈ 4.8:1). Así llena la pared del cuerpo de la taza sin deformarse, sin llegar al fondo ni al borde.'),
+          React.createElement('p', { className: 'taza-measure-hint' }, 'Medida óptima de la imagen: 2000×380 px (proporción ≈ 5:1). Así llena la pared del cuerpo de la taza sin deformarse, sin llegar al fondo ni al borde.'),
           React.createElement('div', { className: 'upload-zone' + (imagen ? ' has-image' : ''), onClick: function () { fileInputRef.current && fileInputRef.current.click() }, onDrop: handleDrop, onDragOver: function (e) { e.preventDefault() } },
             imagen ? React.createElement('img', { src: imagen, alt: 'diseno', className: 'upload-preview' })
               : React.createElement(React.Fragment, null, React.createElement(FiUpload, { size: 32 }), React.createElement('p', null, 'Haz clic o arrastra tu imagen'), React.createElement('span', null, 'JPG, PNG, SVG'))
