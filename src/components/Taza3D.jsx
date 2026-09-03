@@ -64,9 +64,9 @@ function drawWrapPlain(blank) {
   ctx.fillRect(0, 0, W, H)
 }
 
-// Estira la imagen para llenar exactamente el area frontal (ancha y baja) de la
-// taza, sin depender de la proporcion del archivo. Queda limitada para que no
-// llegue al fondo ni al borde, y el resto de la lamina en blanco.
+// Estira la imagen para llenar exactamente el area frontal (ancha y baja, ~4:1)
+// de la taza, sin depender de la proporcion del archivo. Queda limitada para que
+// no llegue al fondo ni al borde, y el resto de la lamina en blanco.
 function drawWrapOnto(blank, imagen) {
   const { ctx, W, H } = blank
   const iw = imagen.naturalWidth || imagen.width
@@ -77,8 +77,8 @@ function drawWrapOnto(blank, imagen) {
   ctx.fillRect(0, 0, W, H)
 
   const areaW = W * 0.62
-  const areaTop = H * 0.28
-  const areaBot = H * 0.78
+  const areaTop = H * 0.26
+  const areaBot = H * 0.65
   const areaH = areaBot - areaTop
 
   ctx.drawImage(imagen, W / 2 - areaW / 2, areaTop, areaW, areaH)
