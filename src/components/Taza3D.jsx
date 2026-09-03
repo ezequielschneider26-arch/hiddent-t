@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
@@ -46,18 +46,81 @@ const HANDLE_GEOMETRY = makeHandleGeometry()
 const WHITE = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.16, metalness: 0.0, envMapIntensity: 0.5 })
 const INNER = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.12, metalness: 0.0, envMapIntensity: 0.5, side: THREE.DoubleSide })
 
-function Mug({ tex }) {
-  const hasTex = !!tex
+function makeBlankWrap() {
+  const W = 1200
+  const H = 480
+  const c = document.createElement('canvas')
+  c.width = W
+  c.height = H
+  const ctx = c.getContext('2d')
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, W, H)
+  return { c, ctx, W, H }
+}
+
+function drawWrapPlain(blank) {
+  const { ctx, W, H } = blank
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, W, H)
+}
+
+function drawWrapOnto(blank, imagen) {
+  const { ctx, W, H } = blank
+  const iw = imagen.naturalWidth || imagen.width
+  const ih = imagen.naturalHeight || imagen.height
+  if (!iw || !ih) return
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, W, H)
+  const gap = W * 0.09
+  const x0 = gap / 2
+  const x1 = W - gap / 2
+  const bw = x1 - x0
+  const s = Math.max(bw / iw, H / ih)
+  const w = iw * s
+  const h = ih * s
+  ctx.drawImage(imagen, x0 + (bw - w) / 2, (H - h) / 2, w, h)
+}
+
+function Mug({ imagen }) {
+  const wrap = useMemo(() => makeBlankWrap(), [])
+  const tex = useMemo(() => {
+    const t = new THREE.CanvasTexture(wrap.c)
+    t.colorSpace = THREE.SRGBColorSpace
+    t.anisotropy = 8
+    t.needsUpdate = true
+    return t
+  }, [wrap])
+  const [, setTick] = useState(0)
+
+  useEffect(() => {
+    let alive = true
+    let img = null
+    if (imagen) {
+      img = new Image()
+      img.onload = () => {
+        if (!alive) return
+        drawWrapOnto(wrap, img)
+        tex.needsUpdate = true
+        tex.image = wrap.c
+        setTick((t) => t + 1)
+      }
+      img.src = imagen
+    } else {
+      drawWrapPlain(wrap)
+      tex.needsUpdate = true
+      tex.image = wrap.c
+      setTick((t) => t + 1)
+    }
+    return () => {
+      alive = false
+      if (img) img.src = ''
+    }
+  }, [imagen, wrap, tex])
+
   return (
     <group>
       <mesh geometry={MUG_GEOMETRY}>
-        <meshStandardMaterial
-          map={hasTex ? tex : null}
-          color="#ffffff"
-          roughness={0.16}
-          metalness={0.0}
-          envMapIntensity={0.5}
-        />
+        <meshStandardMaterial map={tex} color="#ffffff" roughness={0.16} metalness={0.0} envMapIntensity={0.5} />
       </mesh>
       <mesh geometry={MUG_GEOMETRY} scale={[0.97, 1.0, 0.97]}>
         <primitive object={INNER} attach="material" />
@@ -70,52 +133,6 @@ function Mug({ tex }) {
 }
 
 export default function Taza3D({ imagen, onExportRef }) {
-  const [tex, setTex] = useState(null)
-
-  useEffect(() => {
-    let alive = true
-    if (!imagen) {
-      setTex(null)
-      return
-    }
-    const img = new Image()
-    img.onload = () => {
-      if (!alive) return
-      const iw = img.naturalWidth || img.width
-      const ih = img.naturalHeight || img.height
-      const W = 1200
-      const H = 480
-      const c = document.createElement('canvas')
-      c.width = W
-      c.height = H
-      const ctx = c.getContext('2d')
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, W, H)
-      if (iw && ih) {
-        const gap = W * 0.09
-        const x0 = gap / 2
-        const x1 = W - gap / 2
-        const bw = x1 - x0
-        const s = Math.max(bw / iw, H / ih)
-        const w = iw * s
-        const h = ih * s
-        ctx.drawImage(img, x0 + (bw - w) / 2, (H - h) / 2, w, h)
-      }
-      const t = new THREE.CanvasTexture(c)
-      t.colorSpace = THREE.SRGBColorSpace
-      t.anisotropy = 8
-      if (alive) setTex(t)
-    }
-    img.onerror = () => { if (alive) setTex(null) }
-    img.src = imagen
-    return () => {
-      alive = false
-      img.onload = null
-      img.onerror = null
-      img.src = ''
-    }
-  }, [imagen])
-
   return (
     <div className="taza3d">
       <Canvas
@@ -130,7 +147,7 @@ export default function Taza3D({ imagen, onExportRef }) {
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 6, 4]} intensity={1.3} />
         <directionalLight position={[-4, 2, -3]} intensity={0.5} />
-        <Mug tex={tex} />
+        <Mug imagen={imagen} />
         <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.1} minDistance={3} maxDistance={9} minPolarAngle={0.3} maxPolarAngle={Math.PI - 0.3} target={[0, 0.95, 0]} />
       </Canvas>
     </div>
