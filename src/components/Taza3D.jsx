@@ -64,9 +64,9 @@ function drawWrapPlain(blank) {
   ctx.fillRect(0, 0, W, H)
 }
 
-// Escala la imagen conservando su proporcion (sin deformar) para que siempre
-// quepa completa en el area frontal de la taza. La dimension que quede mas libre
-// se centra, de modo que no toque el fondo ni el borde y el resto quede blanco.
+// Full-wrap: la imagen se escala manteniendo su proporcion (no se deforma) para
+// que su ancho llene ~90% de la vuelta. Si es mas alta que la zona, se recorta
+// arriba/abajo. Solo queda en blanco el hueco de la manija (en los bordes).
 function drawWrapOnto(blank, imagen) {
   const { ctx, W, H } = blank
   const iw = imagen.naturalWidth || imagen.width
@@ -76,16 +76,16 @@ function drawWrapOnto(blank, imagen) {
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, H)
 
-  const maxW = W * 0.62
-  const maxTop = H * 0.26
-  const maxBot = H * 0.78
-  const maxH = maxBot - maxTop
+  const areaW = W * 0.9
+  const areaTop = H * 0.01
+  const areaBot = H * 0.99
+  const areaH = areaBot - areaTop
 
-  const s = Math.min(maxW / iw, maxH / ih)
+  const s = Math.max(areaW / iw, areaH / ih)
   const w = iw * s
   const h = ih * s
   const dx = W / 2 - w / 2
-  const dy = (maxTop + maxBot) / 2 - h / 2
+  const dy = (areaTop + areaBot) / 2 - h / 2
   ctx.drawImage(imagen, dx, dy, w, h)
 }
 
