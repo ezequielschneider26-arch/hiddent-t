@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, RoundedBox, ContactShadows, Environment, Lightformer } from '@react-three/drei'
+import { OrbitControls, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 
 const BODY_W = 2.6
@@ -33,17 +33,17 @@ function bodyShape() {
   const w = 2.6
   const x0 = -w / 2
   const x1 = w / 2
-  const rB = 0.4
-  const shY = TOP_Y - 0.3
-  const arcH = 0.55
+  const r = 0.45
   const s = new THREE.Shape()
-  s.moveTo(x0, BOTTOM_Y + rB)
-  s.lineTo(x0, shY)
-  s.quadraticCurveTo(0, TOP_Y + arcH, x1, shY)
-  s.lineTo(x1, BOTTOM_Y + rB)
-  s.quadraticCurveTo(x1, BOTTOM_Y, x1 - rB, BOTTOM_Y)
-  s.lineTo(x0 + rB, BOTTOM_Y)
-  s.quadraticCurveTo(x0, BOTTOM_Y, x0, BOTTOM_Y + rB)
+  s.moveTo(x0, BOTTOM_Y + r)
+  s.lineTo(x0, TOP_Y - r)
+  s.quadraticCurveTo(x0, TOP_Y, x0 + r, TOP_Y)
+  s.lineTo(x1 - r, TOP_Y)
+  s.quadraticCurveTo(x1, TOP_Y, x1, TOP_Y - r)
+  s.lineTo(x1, BOTTOM_Y + r)
+  s.quadraticCurveTo(x1, BOTTOM_Y, x1 - r, BOTTOM_Y)
+  s.lineTo(x0 + r, BOTTOM_Y)
+  s.quadraticCurveTo(x0, BOTTOM_Y, x0, BOTTOM_Y + r)
   s.closePath()
   return s
 }
@@ -427,20 +427,12 @@ export default function Mochila3D(props) {
         }}
       >
         <color attach="background" args={['#e5e5e8']} />
-        <ambientLight intensity={0.35} />
-        <hemisphereLight args={['#ffffff', '#3a3a3a', 0.28]} />
-        <directionalLight position={[4, 6, 5]} intensity={1.1} />
-        <directionalLight position={[-4, 3, -4]} intensity={0.4} />
-        <Environment resolution={256}>
-          <Lightformer form="rect" intensity={3.2} position={[0, 3, 5]} scale={[4.5, 2.6]} color="#ffffff" />
-          <Lightformer form="rect" intensity={1.8} position={[-4, 1, 2]} rotation-y={Math.PI / 2} scale={[3, 2]} color="#cdd2da" />
-          <Lightformer form="rect" intensity={1.8} position={[4, 1, 2]} rotation-y={-Math.PI / 2} scale={[3, 2]} color="#cdd2da" />
-          <Lightformer form="ring" intensity={1.2} position={[0, 4, -4]} scale={3} color="#ffffff" />
-        </Environment>
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[5, 6, 4]} intensity={1.3} />
+        <directionalLight position={[-4, 2, -3]} intensity={0.5} />
         <Backpack mats={mats} />
         <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
         <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
-        <ContactShadows position={[0, BOTTOM_Y - 0.12, 0]} opacity={0.4} scale={9} blur={2.6} far={4} color="#000000" />
         <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.3} maxPolarAngle={Math.PI - 0.3} target={[0, 0, 0]} />
       </Canvas>
     </div>
