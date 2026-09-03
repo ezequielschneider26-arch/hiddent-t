@@ -6,21 +6,8 @@ import * as THREE from 'three'
 function makeMugGeometry() {
   const pts = [
     new THREE.Vector2(0.0, 0.0),
-    new THREE.Vector2(0.92, 0.0),
-    new THREE.Vector2(0.94, 0.05),
-    new THREE.Vector2(0.90, 0.1),
-    new THREE.Vector2(0.88, 0.15),
-    new THREE.Vector2(0.86, 0.25),
-    new THREE.Vector2(0.85, 0.5),
-    new THREE.Vector2(0.85, 1.4),
-    new THREE.Vector2(0.86, 1.6),
-    new THREE.Vector2(0.90, 1.75),
-    new THREE.Vector2(0.94, 1.8),
-    new THREE.Vector2(0.96, 1.85),
-    new THREE.Vector2(0.95, 1.9),
-    new THREE.Vector2(0.90, 1.92),
-    new THREE.Vector2(0.86, 1.9),
-    new THREE.Vector2(0.80, 1.88),
+    new THREE.Vector2(0.9, 0.0),
+    new THREE.Vector2(0.9, 1.9),
   ]
   return new THREE.LatheGeometry(pts, 48)
 }

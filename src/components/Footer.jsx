@@ -1,4 +1,5 @@
 import { FiInstagram, FiHeart } from 'react-icons/fi'
+import VisitorCounter from './VisitorCounter'
 import './Footer.css'
 
 export default function Footer() {
@@ -38,6 +39,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
+        <VisitorCounter />
         <p>
           Hecho con <FiHeart size={14} className="heart-icon" /> en Argentina
           &middot; {new Date().getFullYear()} HIDDEN T
