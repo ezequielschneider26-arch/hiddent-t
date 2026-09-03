@@ -406,3 +406,33 @@
     min-height: 120px;
   }
 }
+
+.producto-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.producto-tab {
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.producto-tab:hover {
+  color: var(--text);
+  border-color: rgba(6, 182, 212, 0.4);
+}
+.producto-tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(245, 158, 11, 0.2));
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
