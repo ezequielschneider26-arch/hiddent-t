@@ -76,9 +76,9 @@ function drawWrapOnto(blank, imagen) {
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, H)
 
-  const areaW = W * 0.55
-  const areaTop = H * 0.24
-  const areaBot = H * 0.8
+  const areaW = W * 0.62
+  const areaTop = H * 0.28
+  const areaBot = H * 0.78
   const areaH = areaBot - areaTop
 
   const s = Math.max(areaW / iw, areaH / ih)

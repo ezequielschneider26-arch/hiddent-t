@@ -115,6 +115,16 @@
   min-height: 140px;
   justify-content: center;
 }
+.taza-measure-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 10px;
+  background: rgba(6, 182, 212, 0.08);
+  border-left: 3px solid var(--accent);
+  padding: 8px 12px;
+  border-radius: 6px;
+}
 .upload-zone:hover {
   border-color: var(--accent);
   background: rgba(6, 182, 212, 0.05);
