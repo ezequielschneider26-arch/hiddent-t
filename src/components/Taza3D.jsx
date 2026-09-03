@@ -64,10 +64,9 @@ function drawWrapPlain(blank) {
   ctx.fillRect(0, 0, W, H)
 }
 
-// La imagen se ve completa y sin deformar (contain), centrada en el cuerpo de la
-// taza. Usa maxima altura disponible y hasta 90% de la vuelta. Si la imagen es
-// apaisada llena el largo; si es cuadrada/vertical (ej. un escudo) se ve entera
-// y centrada. Solo queda en blanco la manija y las franjas laterales.
+// Zone de impresion realista: sin llegar al fondo de la taza ni al borde superior.
+// La imagen se ve completa y sin deformar (contain), centrada dentro de esa zona.
+// Area: 90% de la vuelta x zona vertical de 12% a 72% de la lamina (~3.75:1).
 function drawWrapOnto(blank, imagen) {
   const { ctx, W, H } = blank
   const iw = imagen.naturalWidth || imagen.width
@@ -78,8 +77,8 @@ function drawWrapOnto(blank, imagen) {
   ctx.fillRect(0, 0, W, H)
 
   const maxW = W * 0.9
-  const maxTop = 0
-  const maxBot = H
+  const maxTop = H * 0.12
+  const maxBot = H * 0.72
   const maxAH = maxBot - maxTop
 
   const s = Math.min(maxW / iw, maxAH / ih)
