@@ -5,85 +5,25 @@ import * as THREE from 'three'
 
 const BODY_W = 2.6
 const BODY_H = 3.4
+const BODY_D = 1.0
 const TOP_Y = BODY_H / 2
 const BOTTOM_Y = -BODY_H / 2
-
-function pocketShape() {
-  const x0 = -POCKET_W / 2
-  const x1 = POCKET_W / 2
-  const y0 = -POCKET_H / 2
-  const y1 = POCKET_H / 2
-  const rT = 0.3
-  const rB = 0.14
-  const s = new THREE.Shape()
-  s.moveTo(x0, y0 + rB)
-  s.lineTo(x0, y1 - rT)
-  s.quadraticCurveTo(x0, y1, x0 + rT, y1)
-  s.lineTo(x1 - rT, y1)
-  s.quadraticCurveTo(x1, y1, x1, y1 - rT)
-  s.lineTo(x1, y0 + rB)
-  s.quadraticCurveTo(x1, y0, x1 - rB, y0)
-  s.lineTo(x0 + rB, y0)
-  s.quadraticCurveTo(x0, y0, x0, y0 + rB)
-  s.closePath()
-  return s
-}
-
-function bodyShape() {
-  const w = 2.6
-  const x0 = -w / 2
-  const x1 = w / 2
-  const r = 0.45
-  const s = new THREE.Shape()
-  s.moveTo(x0, BOTTOM_Y + r)
-  s.lineTo(x0, TOP_Y - r)
-  s.quadraticCurveTo(x0, TOP_Y, x0 + r, TOP_Y)
-  s.lineTo(x1 - r, TOP_Y)
-  s.quadraticCurveTo(x1, TOP_Y, x1, TOP_Y - r)
-  s.lineTo(x1, BOTTOM_Y + r)
-  s.quadraticCurveTo(x1, BOTTOM_Y, x1 - r, BOTTOM_Y)
-  s.lineTo(x0 + r, BOTTOM_Y)
-  s.quadraticCurveTo(x0, BOTTOM_Y, x0, BOTTOM_Y + r)
-  s.closePath()
-  return s
-}
-
-function extruded(shape, depth, opts) {
-  const o = opts || {}
-  const bevelT = o.bevelT || 0.12
-  const bevelS = o.bevelS || 0.08
-  const bevelSeg = o.bevelSeg || 4
-  const curveSeg = o.curveSeg || 24
-  const g = new THREE.ExtrudeGeometry(shape, {
-    depth,
-    bevelEnabled: true,
-    bevelThickness: bevelT,
-    bevelSize: bevelS,
-    bevelSegments: bevelSeg,
-    curveSegments: curveSeg,
-  })
-  g.translate(0, 0, -depth / 2)
-  return g
-}
-
-const BODY_GEOM = extruded(bodyShape(), 1.0, { bevelT: 0.14, bevelS: 0.12, bevelSeg: 5, curveSeg: 32 })
+const BODY_FRONT_Z = BODY_D / 2
 
 const POCKET_W = 2.15
-const POCKET_H = 1.45
-const POCKET_Y = -0.86
-const POCKET_TOP_Y = POCKET_Y + POCKET_H / 2
-const POCKET_GEOM = extruded(pocketShape(), 0.1, { bevelT: 0.06, bevelS: 0.05, bevelSeg: 4 })
+const POCKET_H = 1.35
+const POCKET_Y = -0.7
+const POCKET_D = 0.16
+const POCKET_FRONT_Z = BODY_FRONT_Z + 0.05
 
-const BODY_FRONT_Z = 1.0 / 2 + 0.12
-const POCKET_FRONT_Z = 0.8
-const POCKET_Z = POCKET_FRONT_Z - (0.1 / 2 + 0.07)
-
-const ZIPPER_Y = POCKET_TOP_Y - 0.1
+const ZIPPER_Y = 0.6
+const ZIPPER_W = 2.1
+const ZIPPER_Z = BODY_FRONT_Z + 0.01
 
 const ZONE_DEF = {
-  centro: { pos: [0, 0.15, BODY_FRONT_Z + 0.03], hit: [1.9, 1.05], pct: 32 },
-  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.03], hit: [1.85, 1.3], pct: 38 },
-  tapa: { pos: [0, 1.3, BODY_FRONT_Z + 0.03], hit: [1.9, 0.6], pct: 22 },
+  centro: { pos: [0, 0.55, BODY_FRONT_Z + 0.02], hit: [1.7, 0.7], pct: 30 },
+  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.02], hit: [1.9, 1.25], pct: 40 },
+  tapa: { pos: [0, 1.35, BODY_FRONT_Z + 0.02], hit: [1.7, 0.45], pct: 18 },
 }
 
 const ZONES = [
@@ -246,51 +186,73 @@ function makeMats(hex, textureId) {
   const gloss = textureId === 'ft-glossy'
   const base = new THREE.Color(hex)
   const fabric = makeFabricTexture(hex, textureId)
-  const opt = { roughness: smoothish ? 0.32 : 0.62, metalness: gloss ? 0.12 : 0.02, color: '#ffffff', map: fabric, envMapIntensity: 0.5 }
+  const opt = { roughness: smoothish ? 0.32 : 0.55, metalness: gloss ? 0.12 : 0.02, color: '#ffffff', map: fabric, envMapIntensity: 0.4 }
   const body = new THREE.MeshStandardMaterial({ ...opt })
   const pocket = new THREE.MeshStandardMaterial({ ...opt })
-  const trim = new THREE.MeshStandardMaterial({ color: '#6c6c6c', map: fabric, roughness: 0.6, envMapIntensity: 0.45 })
-  const seam = new THREE.MeshStandardMaterial({ color: '#4a4a4a', map: fabric, roughness: 0.55, envMapIntensity: 0.45 })
-  const net = new THREE.MeshBasicMaterial({ color: base.clone().multiplyScalar(0.55), wireframe: true, transparent: true, opacity: 0.85 })
-  const zip = new THREE.MeshStandardMaterial({ color: '#0c0c0c', roughness: 0.3, metalness: 0.35 })
-  const zipper = new THREE.MeshStandardMaterial({ color: '#22262c', roughness: 0.22, metalness: 0.92, envMapIntensity: 1.4 })
-  const strap = new THREE.MeshStandardMaterial({ color: '#0d0d0f', map: fabric, roughness: 0.6, envMapIntensity: 0.4 })
+  const trim = new THREE.MeshStandardMaterial({ color: '#6c6c6c', map: fabric, roughness: 0.55, envMapIntensity: 0.4 })
+  const seam = new THREE.MeshStandardMaterial({ color: '#4a4a4a', map: fabric, roughness: 0.5, envMapIntensity: 0.4 })
+  const zip = new THREE.MeshStandardMaterial({ color: '#0c0c0c', roughness: 0.3, metalness: 0.4 })
+  const zipper = new THREE.MeshStandardMaterial({ color: '#c9cdd4', roughness: 0.2, metalness: 0.95, envMapIntensity: 1.2 })
+  const strap = new THREE.MeshStandardMaterial({ color: '#101114', map: fabric, roughness: 0.55, envMapIntensity: 0.35 })
   if (!gloss) {
     const normal = makeNormalTexture(textureId)
     body.normalMap = normal
-    body.normalScale = new THREE.Vector2(0.95, 0.95)
+    body.normalScale = new THREE.Vector2(0.9, 0.9)
     pocket.normalMap = normal
-    pocket.normalScale = new THREE.Vector2(0.95, 0.95)
+    pocket.normalScale = new THREE.Vector2(0.9, 0.9)
     trim.normalMap = normal
     trim.normalScale = new THREE.Vector2(0.5, 0.5)
     seam.normalMap = normal
     seam.normalScale = new THREE.Vector2(0.5, 0.5)
   }
-  return { body, pocket, trim, seam, net, zip, zipper, strap }
+  return { body, pocket, trim, seam, zip, zipper, strap }
 }
+
+function makeHandleGeometry() {
+  const pts = []
+  const r = 0.34
+  const y = TOP_Y + 0.18
+  const steps = 20
+  for (let i = 0; i <= steps; i++) {
+    const a = Math.PI + (i / steps) * Math.PI
+    pts.push(new THREE.Vector3(Math.cos(a) * r, y, 0))
+  }
+  return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.06, 12, false)
+}
+const HANDLE_GEOM = makeHandleGeometry()
 
 function Backpack({ mats }) {
   return (
     <group position={[0, 0, 0]}>
-      <mesh geometry={BODY_GEOM} material={mats.body} />
+      <RoundedBox args={[BODY_W, BODY_H, BODY_D]} radius={0.45} smoothness={6} material={mats.body} />
 
-      <mesh geometry={POCKET_GEOM} material={mats.pocket} position={[0, POCKET_Y, POCKET_Z]} />
+      <RoundedBox args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.24} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_FRONT_Z]} />
 
-      <RoundedBox args={[0.5, 0.035, 0.07]} radius={0.012} smoothness={4} material={mats.strap} position={[0, TOP_Y + 0.12, 0]} />
+      {/* Cierre horizontal superior */}
+      <Stitch length={ZIPPER_W} pos={[0, ZIPPER_Y, ZIPPER_Z]} />
+      <mesh position={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.02]}>
+        <boxGeometry args={[ZIPPER_W, 0.05, 0.012]} />
+        <primitive object={mats.zipper} attach="material" />
+      </mesh>
+      <mesh position={[0.98, ZIPPER_Y, POCKET_FRONT_Z + 0.018]} rotation={[0, 0, -0.2]}>
+        <boxGeometry args={[0.16, 0.05, 0.02]} />
+        <primitive object={mats.zip} attach="material" />
+      </mesh>
 
-      <Stitch length={1.95} pos={[0, ZIPPER_Y, POCKET_FRONT_Z + 0.008]} />
-      <RoundedBox args={[0.13, 0.1, 0.03]} radius={0.018} smoothness={4} material={mats.zipper} position={[0.72, ZIPPER_Y - 0.02, POCKET_FRONT_Z + 0.045]} rotation={[0, 0, -0.3]} />
+      {/* Asa superior */}
+      <mesh geometry={HANDLE_GEOM} material={mats.strap} />
 
-      <Stitch length={POCKET_W + 0.06} pos={[0, POCKET_TOP_Y + 0.025, POCKET_FRONT_Z + 0.012]} />
-      <Stitch length={POCKET_W + 0.06} pos={[0, POCKET_Y - POCKET_H / 2 - 0.025, POCKET_FRONT_Z + 0.012]} />
-      <Stitch length={POCKET_H + 0.06} pos={[-POCKET_W / 2 - 0.025, POCKET_Y, POCKET_FRONT_Z + 0.012]} />
-      <Stitch length={POCKET_H + 0.06} pos={[POCKET_W / 2 + 0.025, POCKET_Y, POCKET_FRONT_Z + 0.012]} />
+      {/* Costuras - borde del cuerpo */}
+      <Stitch length={BODY_H - 0.3} pos={[-BODY_W / 2 + 0.06, 0.1, BODY_FRONT_Z + 0.005]} />
+      <Stitch length={BODY_H - 0.3} pos={[BODY_W / 2 - 0.06, 0.1, BODY_FRONT_Z + 0.005]} />
+      {/* Costuras - borde del bolsillo */}
+      <Stitch length={POCKET_W - 0.2} pos={[0, POCKET_Y + POCKET_H / 2 - 0.03, POCKET_FRONT_Z + 0.01]} />
+      <Stitch length={POCKET_W - 0.2} pos={[0, POCKET_Y - POCKET_H / 2 + 0.03, POCKET_FRONT_Z + 0.01]} />
+      <Stitch length={POCKET_H - 0.2} pos={[-POCKET_W / 2 + 0.03, POCKET_Y, POCKET_FRONT_Z + 0.01]} />
+      <Stitch length={POCKET_H - 0.2} pos={[POCKET_W / 2 - 0.03, POCKET_Y, POCKET_FRONT_Z + 0.01]} />
 
-      <Stitch length={2.45} pos={[-1.2, 0, BODY_FRONT_Z + 0.01]} />
-      <Stitch length={2.45} pos={[1.2, 0, BODY_FRONT_Z + 0.01]} />
-      <Stitch length={2.42} pos={[0, -1.36, BODY_FRONT_Z + 0.01]} />
-
-      <RoundedBox args={[2.4, 0.14, 0.05]} radius={0.03} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y + 0.05, 0.04]} />
+      {/* Base (refuerzo inferior) */}
+      <RoundedBox args={[BODY_W - 0.1, 0.16, BODY_D - 0.1]} radius={0.05} smoothness={4} material={mats.trim} position={[0, BOTTOM_Y + 0.08, 0]} />
     </group>
   )
 }
@@ -301,7 +263,6 @@ function makeStitchTexture() {
   c.height = 16
   const x = c.getContext('2d')
   x.clearRect(0, 0, 64, 16)
-  x.fillStyle = 'rgba(0,0,0,0)'
   for (let i = 2; i < 64; i += 8) {
     x.fillStyle = 'rgba(30,32,36,0.6)'
     x.fillRect(i, 1, 5, 14)
