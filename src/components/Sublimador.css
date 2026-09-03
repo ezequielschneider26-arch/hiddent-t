@@ -172,6 +172,32 @@
 .btn-clear:hover {
   background: rgba(239, 68, 68, 0.25);
 }
+.btn-aplicar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(6, 182, 212, 0.15));
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-body);
+}
+.btn-aplicar:hover {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(6, 182, 212, 0.25));
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.35);
+}
+.btn-aplicar.aplicado {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(34, 197, 94, 0.15));
+  border-color: #22C55E;
+  color: #22C55E;
+}
 .bgmethod-selector {
   display: flex;
   gap: 8px;

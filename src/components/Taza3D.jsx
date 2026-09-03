@@ -29,6 +29,7 @@ function mugProfile() {
 const MUG_GEOMETRY = new THREE.LatheGeometry(mugProfile(), 64)
 
 // asa: arco vertical en el plano YZ que sobresale en +Z y toca el cuerpo en sus extremos
+// (en el JSX se rota 90deg para que sobresalga en +X, alineado con la costura del wrap)
 function makeHandleGeometry() {
   const pts = []
   const rBody = 0.9
@@ -70,14 +71,21 @@ function makeMugMaterials() {
   return { mug: white, inner, handle: handleMat }
 }
 
-// textura de sublimacion: imagen del usuario sobre fondo blanco
+// textura de sublimacion full-wrap: la imagen envuelve toda la vuelta exterior
+// y deja un hueco blanco (gap) en la zona donde va la manija (la costura +X).
+// El canvas representa la "lamina envolvente": al aplicarse como textura del
+// Lathe de 360deg, el borde izquierdo y derecho del canvas se encuentran en +X,
+// que es justamente donde esta la manija. Por eso el gap queda blanco.
 function makePrintedMaterial(imagen, onReady) {
+  const W = 1200
+  const H = 480
+  const gapFrac = 0.09
   const c = document.createElement('canvas')
-  c.width = 1024
-  c.height = 512
+  c.width = W
+  c.height = H
   const ctx = c.getContext('2d')
   ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, c.width, c.height)
+  ctx.fillRect(0, 0, W, H)
 
   const finish = () => {
     if (onReady) onReady()
@@ -88,10 +96,16 @@ function makePrintedMaterial(imagen, onReady) {
     img.onload = () => {
       const iw = img.naturalWidth || img.width
       const ih = img.naturalHeight || img.height
-      const scale = Math.min((c.width * 0.9) / iw, (c.height * 0.85) / ih)
+      const x0 = (gapFrac / 2) * W
+      const x1 = W - (gapFrac / 2) * W
+      const bw = x1 - x0
+      // "cover": la imagen llena la banda imprimible sin deformar (recorta)
+      const scale = Math.max(bw / iw, H / ih)
       const w = iw * scale
       const h = ih * scale
-      ctx.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h)
+      const dx = x0 + (bw - w) / 2
+      const dy = (H - h) / 2
+      ctx.drawImage(img, dx, dy, w, h)
       finish()
     }
     img.onerror = finish
@@ -123,7 +137,8 @@ function Mug({ printed }) {
       <mesh
         geometry={HANDLE_GEOMETRY}
         material={mats.handle}
-        position={[0.88, 0, 0]}
+        position={[0, 0, 0]}
+        rotation={[0, Math.PI / 2, 0]}
       />
     </group>
   )
