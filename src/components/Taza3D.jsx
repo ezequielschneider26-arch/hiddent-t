@@ -51,9 +51,9 @@ function drawWrapPlain(blank) {
   ctx.fillRect(0, 0, W, H)
 }
 
-// Zone de impresion realista: sin llegar al fondo de la taza ni al borde superior.
-// La imagen se ve completa y sin deformar (contain), centrada dentro de esa zona.
-// Area: 90% de la vuelta x zona vertical de 12% a 72% de la lamina (~3.75:1).
+// Zona de impresion sobre la pared del cuerpo (mitad superior de la lamina).
+// La imagen se ve completa y sin deformar (contain), centrada dentro de esa
+// zona, en la parte alta/media de la taza y sin tocar el fondo ni el borde.
 function drawWrapOnto(blank, imagen) {
   const { ctx, W, H } = blank
   const iw = imagen.naturalWidth || imagen.width
@@ -64,8 +64,8 @@ function drawWrapOnto(blank, imagen) {
   ctx.fillRect(0, 0, W, H)
 
   const maxW = W * 0.9
-  const maxTop = H * 0.12
-  const maxBot = H * 0.72
+  const maxTop = H * 0.5
+  const maxBot = H * 0.97
   const maxAH = maxBot - maxTop
 
   const s = Math.min(maxW / iw, maxAH / ih)
