@@ -28,8 +28,9 @@ function mugProfile() {
 
 const MUG_GEOMETRY = new THREE.LatheGeometry(mugProfile(), 64)
 
-// asa: arco vertical en el plano YZ que sobresale en +Z y toca el cuerpo en sus extremos
-// (en el JSX se rota 90deg para que sobresalga en +X, alineado con la costura del wrap)
+// asa: arco vertical que sobresale en +Z y toca el cuerpo en sus extremos.
+// La costura del LatheGeometry (donde se unen los bordes de la textura) esta en
+// +Z, de modo que el hueco blanco de la lamin quede justo donde va la manija.
 function makeHandleGeometry() {
   const pts = []
   const rBody = 0.9
@@ -72,9 +73,9 @@ function makeMugMaterials() {
 }
 
 // textura de sublimacion full-wrap: la imagen envuelve toda la vuelta exterior
-// y deja un hueco blanco (gap) en la zona donde va la manija (la costura +X).
+// y deja un hueco blanco (gap) en la zona donde va la manija (la costura del Lathe, en +Z).
 // El canvas representa la "lamina envolvente": al aplicarse como textura del
-// Lathe de 360deg, el borde izquierdo y derecho del canvas se encuentran en +X,
+// Lathe de 360deg, el borde izquierdo y derecho del canvas se encuentran en +Z,
 // que es justamente donde esta la manija. Por eso el gap queda blanco.
 function makePrintedMaterial(imagen, onReady) {
   const W = 1200
@@ -133,12 +134,11 @@ function Mug({ printed }) {
       <mesh geometry={MUG_GEOMETRY} material={printed || mats.mug} />
       {/* interior con el liquido/espacio oscuro */}
       <mesh geometry={MUG_GEOMETRY} material={mats.inner} scale={[0.97, 1.0, 0.97]} />
-      {/* asa */}
+      {/* asa: en el plano x=0, sobresale en +Z (donde cae la costura del wrap) y toca el cuerpo */}
       <mesh
         geometry={HANDLE_GEOMETRY}
         material={mats.handle}
         position={[0, 0, 0]}
-        rotation={[0, Math.PI / 2, 0]}
       />
     </group>
   )

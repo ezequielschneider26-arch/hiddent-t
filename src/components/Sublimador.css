@@ -88,6 +88,15 @@
   position: relative;
   overflow: hidden;
 }
+.taza2d-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.taza-area-2d .taza2d-svg {
+  max-width: 380px;
+  margin: 0 auto;
+}
 .fabric-canvas-container canvas {
   display: block;
   width: 100% !important;
