@@ -64,9 +64,9 @@ function drawWrapPlain(blank) {
   ctx.fillRect(0, 0, W, H)
 }
 
-// Dibuja la imagen completa y proporcionada (contain) en el area frontal de la
-// taza, limitada en tamano y acotada verticalmente para que no llegue al fondo
-// ni al borde. El resto de la lamina queda blanco y la manija en el hueco.
+// Dibuja la imagen en el area frontal de la taza. Usa "cover": se alarga hacia
+// las puntas (mas ancho) y se recorta verticalmente (menos altura), limitada para
+// que no llegue al fondo ni al borde. El resto de la lamina queda blanco.
 function drawWrapOnto(blank, imagen) {
   const { ctx, W, H } = blank
   const iw = imagen.naturalWidth || imagen.width
@@ -76,13 +76,12 @@ function drawWrapOnto(blank, imagen) {
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, H)
 
-  // area de impresion en el frente (evita el fondo y el borde de la taza)
-  const areaW = W * 0.48
-  const areaTop = H * 0.18
-  const areaBot = H * 0.9
+  const areaW = W * 0.55
+  const areaTop = H * 0.24
+  const areaBot = H * 0.8
   const areaH = areaBot - areaTop
 
-  const s = Math.min(areaW / iw, areaH / ih)
+  const s = Math.max(areaW / iw, areaH / ih)
   const w = iw * s
   const h = ih * s
   const dx = W / 2 - w / 2
