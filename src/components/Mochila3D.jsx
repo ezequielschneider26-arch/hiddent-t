@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { Suspense, useMemo, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
@@ -17,33 +17,21 @@ const MODEL_FRONT_Z = -1.9
 const _center = new THREE.Vector3()
 const _size = new THREE.Vector3()
 
-function applyTint(material) {
-  if (material.userData.tintU) return
-  material.userData.tintU = { value: new THREE.Color('#0d0d0f') }
-  material.userData.tintAmt = { value: 0.55 }
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms.uTint = material.userData.tintU
-    shader.uniforms.uTintAmt = material.userData.tintAmt
-    shader.fragmentShader =
-      'uniform vec3 uTint;\nuniform float uTintAmt;\n' +
-      shader.fragmentShader.replace(
-        '#include <map_fragment>',
-        `#include <map_fragment>
-#ifdef USE_MAP
-          diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * uTint, uTintAmt);
-#endif`
-      )
-  }
-  material.needsUpdate = true
+// Tinte simple: los colores elegidos multiplican la textura baked.
+// Para negro/blanco mostramos la textura original (ya es el color real del producto).
+function tintColor(colorTela) {
+  if (!colorTela || colorTela === '#1A1A1A' || colorTela === '#F5F5F5') return '#ffffff'
+  return colorTela
 }
 
 function buildModel(scene, colorTela) {
   const model = scene.clone(true)
+  const tint = tintColor(colorTela)
   model.traverse((obj) => {
     if (!obj.isMesh) return
-    obj.material = Array.isArray(obj.material) ? obj.material.map((m) => m.clone()) : obj.material.clone()
-    obj.material = Array.isArray(obj.material) ? obj.material : [obj.material]
-    obj.material.forEach((m) => applyTint(m))
+    const mats = Array.isArray(obj.material) ? obj.material.map((m) => m.clone()) : [obj.material.clone()]
+    obj.material = mats
+    mats.forEach((m) => { m.color.set(tint) })
   })
   model.scale.setScalar(GLB_SCALE)
   model.updateMatrixWorld(true)
@@ -51,15 +39,6 @@ function buildModel(scene, colorTela) {
   box.getCenter(_center)
   model.position.sub(_center)
   model.updateMatrixWorld(true)
-  const tint = new THREE.Color(colorTela && colorTela !== '#F5F5F5' ? colorTela : '#0d0d0f')
-  model.traverse((obj) => {
-    if (!obj.isMesh || !obj.material) return
-    const mats = Array.isArray(obj.material) ? obj.material : [obj.material]
-    mats.forEach((m) => {
-      if (m.userData.tintU) m.userData.tintU.value.copy(tint)
-      if (m.userData.tintAmt) m.userData.tintAmt.value = colorTela && colorTela !== '#F5F5F5' ? 0.55 : 0
-    })
-  })
   return model
 }
 
@@ -183,9 +162,11 @@ export default function Mochila3D(props) {
         <ambientLight intensity={0.55} />
         <directionalLight position={[5, 6, 4]} intensity={1.35} />
         <directionalLight position={[-4, 2, -3]} intensity={0.55} />
-        <Mochila colorTela={colorTela} />
-        <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
-        <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
+        <Suspense fallback={null}>
+          <Mochila colorTela={colorTela} />
+          <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
+          <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
+        </Suspense>
         <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.3} maxPolarAngle={Math.PI - 0.3} target={[0, 0, 0]} />
       </Canvas>
     </div>
