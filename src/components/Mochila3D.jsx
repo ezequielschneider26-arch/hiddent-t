@@ -1,6 +1,6 @@
-import { Suspense, useCallback, useMemo, useState, useEffect } from 'react'
+import { Suspense, useCallback, useMemo, useState, useEffect, Component } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, useGLTF } from '@react-three/drei'
+import { OrbitControls, useGLTF, Html } from '@react-three/drei'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import * as THREE from 'three'
 
@@ -56,6 +56,30 @@ function Mochila({ colorTela, onMeta }) {
   const meta = useMemo(() => medidaModelo(model), [model])
   useEffect(() => { if (onMeta) onMeta(meta) }, [meta, onMeta])
   return <primitive object={model} />
+}
+
+class ModelBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { err: null }
+  }
+  static getDerivedStateFromError(err) {
+    return { err }
+  }
+  render() {
+    if (this.state.err) {
+      const msg = String((this.state.err && this.state.err.message) || this.state.err || '')
+      console.error('[Mochila3D] error cargando modelo:', this.state.err)
+      return (
+        <Html center>
+          <div style={{ background: '#fff', color: '#c00', padding: '10px 14px', borderRadius: 8, border: '1px solid #c00', fontSize: 13, maxWidth: 300, textAlign: 'center' }}>
+            Error cargando modelo: {msg}
+          </div>
+        </Html>
+      )
+    }
+    return this.props.children
+  }
 }
 
 const META_DEFAULT = { w: 2.8, h: 3.4, d: 1, frontZ: -1.5 }
@@ -177,7 +201,9 @@ export default function Mochila3D(props) {
         <directionalLight position={[5, 6, 4]} intensity={1.8} />
         <directionalLight position={[-4, 2, -3]} intensity={0.8} />
         <Suspense fallback={null}>
-          <Mochila colorTela={colorTela} onMeta={handleMeta} />
+          <ModelBoundary>
+            <Mochila colorTela={colorTela} onMeta={handleMeta} />
+          </ModelBoundary>
           <ZoneHits meta={meta} imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
           <Design meta={meta} imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
         </Suspense>
