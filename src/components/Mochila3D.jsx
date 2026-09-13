@@ -1,6 +1,7 @@
 import { Suspense, useMemo, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF } from '@react-three/drei'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import * as THREE from 'three'
 
 // ---------- Modelo 3D real (GLB exportado de Blender) ----------
@@ -154,7 +155,11 @@ export default function Mochila3D(props) {
         camera={{ position: [0, 0.15, 7.6], fov: 36 }}
         dpr={[1, 2]}
         gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15 }}
-        onCreated={({ gl }) => {
+        onCreated={({ gl, scene }) => {
+          const pmrem = new THREE.PMREMGenerator(gl)
+          const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+          scene.environment = env
+          pmrem.dispose()
           if (onExportRef) onExportRef.current = () => gl.domElement.toDataURL('image/png')
         }}
       >
