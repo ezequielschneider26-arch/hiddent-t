@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useState, useEffect } from 'react'
+import { Suspense, useCallback, useMemo, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF } from '@react-three/drei'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
@@ -7,16 +7,11 @@ import * as THREE from 'three'
 // ---------- Modelo 3D real (GLB exportado de Blender) ----------
 const GLB_URL = '/modelos/mochila.glb'
 
-// Escala del GLB para que la mochila ocupe ~3.4 de alto en la escena
-const GLB_SCALE = 0.0341
-
-// Medidas resultantes tras centrar y escalar (unidades de escena)
-const MODEL_W = 3.17
-const MODEL_H = 3.4
-const MODEL_FRONT_Z = -1.9
+// Alto deseado de la mochila en unidades de escena
+const MODEL_TARGET_H = 3.4
 
 const _center = new THREE.Vector3()
-const _size = new THREE.Vector3()
+const _box = new THREE.Box3()
 
 // Tinte simple: los colores elegidos multiplican la textura baked.
 // Para negro/blanco mostramos la textura original (ya es el color real del producto).
@@ -34,42 +29,53 @@ function buildModel(scene, colorTela) {
     obj.material = mats
     mats.forEach((m) => { m.color.set(tint) })
   })
-  model.scale.setScalar(GLB_SCALE)
+
   model.updateMatrixWorld(true)
-  const box = new THREE.Box3().setFromObject(model)
+  const size = _box.setFromObject(model).getSize(new THREE.Vector3())
+  model.scale.setScalar(MODEL_TARGET_H / size.y)
+  model.position.set(0, 0, 0)
+  model.updateMatrixWorld(true)
+  const box = _box.setFromObject(model)
   box.getCenter(_center)
   model.position.sub(_center)
   model.updateMatrixWorld(true)
   return model
 }
 
+function medidaModelo(model) {
+  const box = new THREE.Box3().setFromObject(model)
+  const size = box.getSize(new THREE.Vector3())
+  return { w: size.x, h: size.y, d: size.z, frontZ: box.max.z }
+}
+
 useGLTF.preload(GLB_URL)
 
-function Mochila({ colorTela }) {
+function Mochila({ colorTela, onMeta }) {
   const { scene } = useGLTF(GLB_URL)
   const model = useMemo(() => buildModel(scene, colorTela), [scene, colorTela])
+  const meta = useMemo(() => medidaModelo(model), [model])
+  useEffect(() => { if (onMeta) onMeta(meta) }, [meta, onMeta])
   return <primitive object={model} />
 }
 
-// ---------- Zonas de bordado (frente del modelo) ----------
-const ZONE_DEF = {
-  centro: { pos: [0, 0.35, MODEL_FRONT_Z + 0.02], hit: [1.35, 0.85], pct: 26 },
-  bolsillo: { pos: [0, -1.0, MODEL_FRONT_Z + 0.02], hit: [1.25, 0.85], pct: 24 },
-  tapa: { pos: [0, 1.42, MODEL_FRONT_Z + 0.02], hit: [1.35, 0.5], pct: 22 },
+const META_DEFAULT = { w: 2.8, h: 3.4, d: 1, frontZ: -1.5 }
+
+function zonasFor(meta) {
+  const z = meta.frontZ + 0.02
+  return [
+    { id: 'centro', pos: [0, 0.35, z], hit: [1.35, 0.85] },
+    { id: 'bolsillo', pos: [0, -1.0, z], hit: [1.25, 0.85] },
+    { id: 'tapa', pos: [0, 1.42, z], hit: [1.35, 0.5] },
+  ]
 }
-const ZONES = [
-  { id: 'centro', ...ZONE_DEF.centro },
-  { id: 'bolsillo', ...ZONE_DEF.bolsillo },
-  { id: 'tapa', ...ZONE_DEF.tapa },
-]
 
 function setCursor(cur) {
   document.body.style.cursor = cur
 }
 
-function ZoneHits({ imagen, zonaActiva, zonasyMarca, onZoneClick, applied }) {
+function ZoneHits({ meta, imagen, zonaActiva, zonasyMarca, onZoneClick, applied }) {
   if (!imagen || applied || !onZoneClick) return null
-  return ZONES.map((z) => {
+  return zonasFor(meta).map((z) => {
     const active = zonaActiva === z.id
     const marked = zonasyMarca.indexOf(z.id) >= 0
     const col = active ? '#06B6D4' : marked ? '#10B981' : '#d7dbe2'
@@ -93,7 +99,7 @@ function ZoneHits({ imagen, zonaActiva, zonasyMarca, onZoneClick, applied }) {
   })
 }
 
-function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX, posY, applied }) {
+function Design({ meta, imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX, posY, applied }) {
   if (!imgInfo || !imagen || !(zonaActiva || modoLibre)) return null
   const aspect = imgInfo.w / imgInfo.h
   let width = 0
@@ -102,15 +108,16 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
   let z = 0
   if (modoLibre) {
     width = (tamano / 100) * 2.6
-    x = (posX / 100 - 0.5) * MODEL_W * 0.9
-    y = MODEL_H / 2 - (posY / 100) * MODEL_H
-    z = MODEL_FRONT_Z + 0.02
+    x = (posX / 100 - 0.5) * meta.w * 0.85
+    y = meta.h / 2 - (posY / 100) * meta.h
+    z = meta.frontZ + 0.02
   } else {
-    const zone = ZONE_DEF[zonaActiva]
-    width = (zone.pct / 100) * MODEL_W * 0.5 * (tamano / 40)
-    x = zone.pos[0]
-    y = zone.pos[1]
-    z = zone.pos[2] + 0.012
+    const zona = zonasFor(meta).find((q) => q.id === zonaActiva)
+    const pct = zonaActiva === 'centro' ? 26 : zonaActiva === 'bolsillo' ? 24 : 22
+    width = (pct / 100) * meta.w * 0.5 * (tamano / 40)
+    x = zona.pos[0]
+    y = zona.pos[1]
+    z = zona.pos[2] + 0.012
   }
   const height = width / aspect
   return (
@@ -124,6 +131,8 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
 export default function Mochila3D(props) {
   const { colorTela, telaSeleccionada: _telaSeleccionada, imagen, zonaActiva, modoLibre, tamano, rotacion, posX, posY, onZoneClick, zonasyMarca, applied, onExportRef } = props
   const [imgInfo, setImgInfo] = useState(null)
+  const [meta, setMeta] = useState(META_DEFAULT)
+  const handleMeta = useCallback((m) => setMeta(m), [])
 
   useEffect(() => {
     if (!imagen) { setImgInfo(null); return }
@@ -164,13 +173,13 @@ export default function Mochila3D(props) {
         }}
       >
         <color attach="background" args={['#e5e5e8']} />
-        <ambientLight intensity={0.55} />
-        <directionalLight position={[5, 6, 4]} intensity={1.35} />
-        <directionalLight position={[-4, 2, -3]} intensity={0.55} />
+        <ambientLight intensity={0.8} />
+        <directionalLight position={[5, 6, 4]} intensity={1.8} />
+        <directionalLight position={[-4, 2, -3]} intensity={0.8} />
         <Suspense fallback={null}>
-          <Mochila colorTela={colorTela} />
-          <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
-          <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
+          <Mochila colorTela={colorTela} onMeta={handleMeta} />
+          <ZoneHits meta={meta} imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
+          <Design meta={meta} imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
         </Suspense>
         <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.3} maxPolarAngle={Math.PI - 0.3} target={[0, 0, 0]} />
       </Canvas>
