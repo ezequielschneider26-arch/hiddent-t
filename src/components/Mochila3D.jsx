@@ -1,211 +1,81 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, RoundedBox } from '@react-three/drei'
+import { OrbitControls, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 
-// ---------- Medidas (referencia: mochila urbana minimalista negra) ----------
-const BODY_W = 2.4            // ancho ~70% del alto
-const BODY_H = 3.4            // alto
-const BODY_D = 0.95           // profundidad ~28% del alto
-const TOP_Y = BODY_H / 2
-const BOTTOM_Y = -BODY_H / 2
-const BODY_FRONT_Z = BODY_D / 2
-const BODY_BACK_Z = -BODY_D / 2
+// ---------- Modelo 3D real (GLB exportado de Blender) ----------
+const GLB_URL = '/modelos/mochila.glb'
 
-// ---------- Forma del cuerpo: caja rectangular vertical ----------
-// Esquinas superiores MUY redondeadas, inferiores moderadas.
-function bodyShape() {
-  const w = BODY_W
-  const x0 = -w / 2
-  const x1 = w / 2
-  const rTop = 0.78
-  const rBot = 0.42
-  const s = new THREE.Shape()
-  s.moveTo(x0, BOTTOM_Y + rBot)
-  s.lineTo(x0, TOP_Y - rTop)
-  s.quadraticCurveTo(x0, TOP_Y, x0 + rTop, TOP_Y)
-  s.lineTo(x1 - rTop, TOP_Y)
-  s.quadraticCurveTo(x1, TOP_Y, x1, TOP_Y - rTop)
-  s.lineTo(x1, BOTTOM_Y + rBot)
-  s.quadraticCurveTo(x1, BOTTOM_Y, x1 - rBot, BOTTOM_Y)
-  s.lineTo(x0 + rBot, BOTTOM_Y)
-  s.quadraticCurveTo(x0, BOTTOM_Y, x0, BOTTOM_Y + rBot)
-  s.closePath()
-  return s
+// Escala del GLB para que la mochila ocupe ~3.4 de alto en la escena
+const GLB_SCALE = 0.0341
+
+// Medidas resultantes tras centrar y escalar (unidades de escena)
+const MODEL_W = 3.17
+const MODEL_H = 3.4
+const MODEL_FRONT_Z = -1.9
+
+const _center = new THREE.Vector3()
+const _size = new THREE.Vector3()
+
+function applyTint(material) {
+  if (material.userData.tintU) return
+  material.userData.tintU = { value: new THREE.Color('#0d0d0f') }
+  material.userData.tintAmt = { value: 0.55 }
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uTint = material.userData.tintU
+    shader.uniforms.uTintAmt = material.userData.tintAmt
+    shader.fragmentShader =
+      'uniform vec3 uTint;\nuniform float uTintAmt;\n' +
+      shader.fragmentShader.replace(
+        '#include <map_fragment>',
+        `#include <map_fragment>
+#ifdef USE_MAP
+          diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * uTint, uTintAmt);
+#endif`
+      )
+  }
+  material.needsUpdate = true
 }
 
-function buildBodyGeometry() {
-  const g = new THREE.ExtrudeGeometry(bodyShape(), {
-    depth: BODY_D,
-    bevelEnabled: true,
-    bevelThickness: 0.16,
-    bevelSize: 0.12,
-    bevelSegments: 6,
-    curveSegments: 40,
+function buildModel(scene, colorTela) {
+  const model = scene.clone(true)
+  model.traverse((obj) => {
+    if (!obj.isMesh) return
+    obj.material = Array.isArray(obj.material) ? obj.material.map((m) => m.clone()) : obj.material.clone()
+    obj.material = Array.isArray(obj.material) ? obj.material : [obj.material]
+    obj.material.forEach((m) => applyTint(m))
   })
-  g.translate(0, 0, -BODY_D / 2)
-  g.computeVertexNormals()
-  return g
-}
-const BODY_GEOM = buildBodyGeometry()
-
-// ---------- Bolsillo frontal (inferior/media, centrado, leve relieve) ----------
-const POCKET_W = BODY_W * 0.63
-const POCKET_H = BODY_H * 0.26
-const POCKET_Y = -0.72
-const POCKET_D = 0.14
-const POCKET_FRONT_Z = BODY_FRONT_Z + 0.03
-
-// ---------- Cremallera en U invertida (frente, sigue el contorno superior) ----------
-const ZIP_D = 0.16
-function zipperPoints() {
-  const z = BODY_FRONT_Z + 0.018
-  const xL = -BODY_W / 2 + ZIP_D
-  const xR = BODY_W / 2 - ZIP_D
-  const pts = []
-  for (let i = 0; i <= 6; i++) {
-    pts.push(new THREE.Vector3(xL, -0.55 + i * (2.3 / 6), z))
-  }
-  const t0 = xL
-  const t1 = xR
-  for (let i = 0; i <= 14; i++) {
-    const t = i / 14
-    const xx = t0 + (t1 - t0) * t
-    const cy = TOP_Y - 0.72 + 0.34 * Math.sin(Math.PI * t)
-    pts.push(new THREE.Vector3(xx, cy, z))
-  }
-  for (let i = 0; i <= 6; i++) {
-    pts.push(new THREE.Vector3(xR, 1.75 - i * (2.3 / 6), z))
-  }
-  return pts
-}
-const ZIPPER_GEOM = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(zipperPoints()), 80, 0.02, 8, false)
-
-// ---------- Asa superior central (arco de tela) ----------
-function buildHandleGeometry() {
-  const pts = []
-  const r = 0.3
-  const y = TOP_Y + 0.16
-  const steps = 20
-  for (let i = 0; i <= steps; i++) {
-    const a = Math.PI + (i / steps) * Math.PI
-    pts.push(new THREE.Vector3(Math.cos(a) * r, y, 0))
-  }
-  return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.06, 12, false)
-}
-const HANDLE_GEOM = buildHandleGeometry()
-
-// ---------- Correas traseras acolchadas ----------
-const STRAP_W = 0.34
-const STRAP_H = 3.2
-function Backpack({ mats }) {
-  return (
-    <group position={[0, 0, 0]}>
-      {/* Cuerpo */}
-      <mesh geometry={BODY_GEOM} material={mats.body} />
-
-      {/* Bolsillo frontal */}
-      <RoundedBox args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.14} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_FRONT_Z]} />
-
-      {/* Cierre horizontal del bolsillo (en su parte superior, tirador a la izquierda) */}
-      <mesh position={[0, POCKET_Y + POCKET_H / 2 - 0.02, POCKET_FRONT_Z + 0.02]}>
-        <boxGeometry args={[POCKET_W - 0.16, 0.045, 0.012]} />
-        <primitive object={mats.zipper} attach="material" />
-      </mesh>
-      <mesh position={[-POCKET_W / 2 + 0.28, POCKET_Y + POCKET_H / 2 - 0.045, POCKET_FRONT_Z + 0.02]} rotation={[0, 0, -0.15]}>
-        <boxGeometry args={[0.12, 0.045, 0.014]} />
-        <primitive object={mats.zip} attach="material" />
-      </mesh>
-
-      {/* Cremallera principal en U invertida (sube por el lateral izq, curvea arriba, baja por el der) */}
-      <mesh geometry={ZIPPER_GEOM} material={mats.zipper} />
-
-      {/* Tiradores de la cremallera principal (izq y der) */}
-      <mesh position={[-BODY_W / 2 + ZIP_D, -0.3, BODY_FRONT_Z + 0.018]} rotation={[0, 0, 0.25]}>
-        <boxGeometry args={[0.11, 0.05, 0.016]} />
-        <primitive object={mats.zip} attach="material" />
-      </mesh>
-      <mesh position={[BODY_W / 2 - ZIP_D, 1.0, BODY_FRONT_Z + 0.018]} rotation={[0, 0, -0.2]}>
-        <boxGeometry args={[0.11, 0.05, 0.016]} />
-        <primitive object={mats.zip} attach="material" />
-      </mesh>
-
-      {/* Asa superior central */}
-      <mesh geometry={HANDLE_GEOM} material={mats.strap} />
-
-      {/* Bolsillo lateral derecho (botella), vertical abierto */}
-      <mesh position={[BODY_W / 2, -0.8, 0]} material={mats.pocket}>
-        <cylinderGeometry args={[0.24, 0.2, 1.7, 24, 1, true]} />
-      </mesh>
-
-      {/* Correas traseras acolchadas (ocultas parcialmente desde el frente) */}
-      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[-0.55, 0, BODY_BACK_Z - 0.09]} />
-      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[0.55, 0, BODY_BACK_Z - 0.09]} />
-
-      {/* Contorno de costura del panel frontal */}
-      <Stitch length={BODY_H - 0.2} pos={[-BODY_W / 2 + 0.08, 0, BODY_FRONT_Z + 0.006]} />
-      <Stitch length={BODY_H - 0.2} pos={[BODY_W / 2 - 0.08, 0, BODY_FRONT_Z + 0.006]} />
-      {/* Costura borde del bolsillo */}
-      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y + POCKET_H / 2 - 0.04, POCKET_FRONT_Z + 0.012]} />
-      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y - POCKET_H / 2 + 0.04, POCKET_FRONT_Z + 0.012]} />
-    </group>
-  )
-}
-
-// ---------- Materiales: negro mate liso ----------
-function makeMats(colorTela, textureId) {
-  const color = colorTela && colorTela !== '#F5F5F5' ? colorTela : '#0d0d0f'
-  const body = new THREE.MeshStandardMaterial({
-    color,
-    roughness: 0.72,
-    metalness: 0.03,
-    envMapIntensity: 0.4,
+  model.scale.setScalar(GLB_SCALE)
+  model.updateMatrixWorld(true)
+  const box = new THREE.Box3().setFromObject(model)
+  box.getCenter(_center)
+  model.position.sub(_center)
+  model.updateMatrixWorld(true)
+  const tint = new THREE.Color(colorTela && colorTela !== '#F5F5F5' ? colorTela : '#0d0d0f')
+  model.traverse((obj) => {
+    if (!obj.isMesh || !obj.material) return
+    const mats = Array.isArray(obj.material) ? obj.material : [obj.material]
+    mats.forEach((m) => {
+      if (m.userData.tintU) m.userData.tintU.value.copy(tint)
+      if (m.userData.tintAmt) m.userData.tintAmt.value = colorTela && colorTela !== '#F5F5F5' ? 0.55 : 0
+    })
   })
-  const pocket = body.clone()
-  const strap = new THREE.MeshStandardMaterial({ color: '#0a0a0c', roughness: 0.8, metalness: 0, envMapIntensity: 0.3 })
-  const zipper = new THREE.MeshStandardMaterial({ color: '#1a1a1c', roughness: 0.28, metalness: 0.55, envMapIntensity: 0.8 })
-  const zip = new THREE.MeshStandardMaterial({ color: '#050506', roughness: 0.55, metalness: 0.15, envMapIntensity: 0.3 })
-  return { body, pocket, trim: strap, seam: body, net: strap, zip, zipper, strap }
+  return model
 }
 
-// ---------- Costuras ----------
-function makeStitchTexture() {
-  const c = document.createElement('canvas')
-  c.width = 64
-  c.height = 16
-  const x = c.getContext('2d')
-  x.clearRect(0, 0, 64, 16)
-  for (let i = 2; i < 64; i += 8) {
-    x.fillStyle = 'rgba(0,0,0,0.7)'
-    x.fillRect(i, 1, 5, 14)
-    x.fillStyle = 'rgba(255,255,255,0.12)'
-    x.fillRect(i + 1, 2, 2, 12)
-  }
-  return c
-}
-const STITCH_CANVAS = makeStitchTexture()
+useGLTF.preload(GLB_URL)
 
-function Stitch({ length, pos }) {
-  const tex = useMemo(() => {
-    const t = new THREE.CanvasTexture(STITCH_CANVAS)
-    t.wrapS = t.wrapT = THREE.RepeatWrapping
-    t.colorSpace = THREE.SRGBColorSpace
-    t.repeat.set(Math.max(1, Math.round(length / 0.28)), 1)
-    return t
-  }, [length])
-  return (
-    <mesh position={pos} raycast={() => null}>
-      <planeGeometry args={[length, 0.045]} />
-      <meshBasicMaterial map={tex} transparent opacity={0.85} depthWrite={false} side={THREE.DoubleSide} />
-    </mesh>
-  )
+function Mochila({ colorTela }) {
+  const { scene } = useGLTF(GLB_URL)
+  const model = useMemo(() => buildModel(scene, colorTela), [scene, colorTela])
+  return <primitive object={model} />
 }
 
-// ---------- Zonas de bordado ----------
+// ---------- Zonas de bordado (frente del modelo) ----------
 const ZONE_DEF = {
-  centro: { pos: [0, 0.35, BODY_FRONT_Z + 0.02], hit: [1.55, 0.8], pct: 30 },
-  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.02], hit: [1.5, POCKET_H], pct: 42 },
-  tapa: { pos: [0, 1.45, BODY_FRONT_Z + 0.02], hit: [1.55, 0.4], pct: 16 },
+  centro: { pos: [0, 0.35, MODEL_FRONT_Z + 0.02], hit: [1.35, 0.85], pct: 26 },
+  bolsillo: { pos: [0, -1.0, MODEL_FRONT_Z + 0.02], hit: [1.25, 0.85], pct: 24 },
+  tapa: { pos: [0, 1.42, MODEL_FRONT_Z + 0.02], hit: [1.35, 0.5], pct: 22 },
 }
 const ZONES = [
   { id: 'centro', ...ZONE_DEF.centro },
@@ -251,13 +121,13 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
   let y = 0
   let z = 0
   if (modoLibre) {
-    width = (tamano / 100) * 2.3
-    x = (posX / 100 - 0.5) * BODY_W * 0.85
-    y = TOP_Y - (posY / 100) * BODY_H
-    z = BODY_FRONT_Z + 0.02
+    width = (tamano / 100) * 2.6
+    x = (posX / 100 - 0.5) * MODEL_W * 0.9
+    y = MODEL_H / 2 - (posY / 100) * MODEL_H
+    z = MODEL_FRONT_Z + 0.02
   } else {
     const zone = ZONE_DEF[zonaActiva]
-    width = (zone.pct / 100) * BODY_W * 0.55 * (tamano / 40)
+    width = (zone.pct / 100) * MODEL_W * 0.5 * (tamano / 40)
     x = zone.pos[0]
     y = zone.pos[1]
     z = zone.pos[2] + 0.012
@@ -272,7 +142,7 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
 }
 
 export default function Mochila3D(props) {
-  const { colorTela, telaSeleccionada, imagen, zonaActiva, modoLibre, tamano, rotacion, posX, posY, onZoneClick, zonasyMarca, applied, onExportRef } = props
+  const { colorTela, telaSeleccionada: _telaSeleccionada, imagen, zonaActiva, modoLibre, tamano, rotacion, posX, posY, onZoneClick, zonasyMarca, applied, onExportRef } = props
   const [imgInfo, setImgInfo] = useState(null)
 
   useEffect(() => {
@@ -299,8 +169,6 @@ export default function Mochila3D(props) {
     return () => { alive = false; img.src = '' }
   }, [imagen])
 
-  const mats = useMemo(() => makeMats(colorTela, telaSeleccionada), [colorTela])
-
   return (
     <div className="mochila3d">
       <Canvas
@@ -315,7 +183,7 @@ export default function Mochila3D(props) {
         <ambientLight intensity={0.55} />
         <directionalLight position={[5, 6, 4]} intensity={1.35} />
         <directionalLight position={[-4, 2, -3]} intensity={0.55} />
-        <Backpack mats={mats} />
+        <Mochila colorTela={colorTela} />
         <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
         <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
         <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.3} maxPolarAngle={Math.PI - 0.3} target={[0, 0, 0]} />
