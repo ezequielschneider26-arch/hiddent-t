@@ -2,6 +2,12 @@ import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { FiUpload, FiTrash2, FiRotateCw, FiMaximize2, FiSliders, FiImage, FiDownload, FiZap } from 'react-icons/fi'
 import { Canvas, FabricImage, Rect } from 'fabric'
 import Mochila3D from './Mochila3D'
+import Yerbera3D from './productos3d/Yerbera3D'
+import Bolso3D from './productos3d/Bolso3D'
+import Botinera3D from './productos3d/Botinera3D'
+import Gorra3D from './productos3d/Gorra3D'
+import Estuche3D from './productos3d/Estuche3D'
+import Cartera3D from './productos3d/Cartera3D'
 import { removeBackground } from '../utils/removeBg'
 import './Disenador.css'
 
@@ -131,8 +137,9 @@ var telaTextureMap = {
   mezclilla: 'ft-denim', tela_imp: 'ft-waterproof',
 }
 
-function FabricCanvas(props) {
-  var producto=props.producto,colorTela=props.colorTela,imagen=props.imagen
+var componentes3D={mochila:Mochila3D,yerbera:Yerbera3D,bolso:Bolso3D,botinera:Botinera3D,gorra:Gorra3D,estuche:Estuche3D,cartera:Cartera3D}
+
+function FabricCanvas(props) {  var producto=props.producto,colorTela=props.colorTela,imagen=props.imagen
   var zonaActiva=props.zonaActiva,modoLibre=props.modoLibre
   var tamano=props.tamano,rotacion=props.rotacion
   var posX=props.posX,posY=props.posY
@@ -324,7 +331,8 @@ export default function Disenador() {
   var dragStartRef=useRef(null)
 
   var zonas=zonasPorProducto[producto]||[]
-  var is3D=producto==='mochila'
+  var Comp3D=componentes3D[producto]||Mochila3D
+  var is3D=!!Comp3D
 
   var handleUpload=useCallback(function(e){
     var f=e.target.files&&e.target.files[0]
@@ -459,7 +467,7 @@ export default function Disenador() {
       React.createElement('div',{className:'disenador-canvas'},
         React.createElement('div',{ref:canvasAreaRef,className:is3D?'canvas-area canvas-area-3d':'canvas-area fabric-mode',style:is3D?undefined:{transform:canvasTransform}},
           is3D
-            ? React.createElement(Mochila3D,{
+            ? React.createElement(Comp3D,{
                 colorTela:colorTela,telaSeleccionada:telaSeleccionada,imagen:imagen,
                 zonaActiva:zonaActiva,modoLibre:modoLibre,
                 tamano:tamano,rotacion:rotacion,posX:posX,posY:posY,
@@ -479,7 +487,7 @@ export default function Disenador() {
           !is3D&&colorTela&&colorTela!=='#F5F5F5'?React.createElement('div',{className:'color-tint-overlay'+(colorTela==='#1A1A1A'?' negro':''),style:{backgroundColor:colorTela}}):null,
           !imagen?React.createElement('div',{className:'canvas-hint'},React.createElement(FiUpload,{size:24}),React.createElement('p',null,'Subí tu imagen para empezar')):null,
           imagen&&!zonaActiva&&!modoLibre&&!aplicada?React.createElement('div',{className:'canvas-hint'},React.createElement('p',null,'Haz clic en una zona del producto')):null,
-          React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado':is3D&&imagen?'Arrastrá la mochila para girarla':modoLibre&&imagen?'Arrastrá para mover el diseño':'Elegí una zona para tu bordado')
+          React.createElement('div',{className:'canvas-tilt-hint'},aplicada?'Bordado aplicado':is3D&&imagen?'Arrastrá para girar el producto en 3D':modoLibre&&imagen?'Arrastrá para mover el diseño':'Elegí una zona para tu bordado')
         ),
         imagen?React.createElement('div',{className:'disenador-send-row'},
           React.createElement('button',{className:'btn btn-whatsapp disenador-send'+(aplicada?'':' is-disabled'),onClick:sendWA,disabled:!aplicada},'Enviar diseño por WhatsApp'),
@@ -512,7 +520,7 @@ export default function Disenador() {
         ),
         React.createElement('div',{className:'panel-section controls'},
           React.createElement('h3',null,'4. Rotar y ubicar'),
-          is3D?React.createElement('p',{className:'vista3d-hint'},'Arrastrá la mochila para girarla y mirar cada parte en 3D'):null,
+          is3D?React.createElement('p',{className:'vista3d-hint'},'Arrastrá el producto para girarlo y mirar cada parte en 3D'):null,
           !is3D?React.createElement('div',{className:'control-group'},React.createElement('label',null,React.createElement(FiRotateCw,{size:14}),' Rotar vista'),React.createElement('input',{type:'range',min:'-30',max:'30',value:rotacionY,onChange:function(e){setRotacionY(Number(e.target.value))}}),React.createElement('span',null,rotacionY+'°')):null,
           !is3D?React.createElement('div',{className:'control-group'},React.createElement('label',null,' Inclinar'),React.createElement('input',{type:'range',min:'-20',max:'20',value:tiltX,onChange:function(e){setTiltX(Number(e.target.value))}}),React.createElement('span',null,tiltX+'°')):null,
           !is3D&&(rotacionY!==0||tiltX!==0)?React.createElement('button',{className:'btn btn-outline btn-small',onClick:resetTilt},'Restaurar vista'):null,
