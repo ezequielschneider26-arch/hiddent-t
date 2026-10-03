@@ -59,31 +59,6 @@ const POCKET_D = 0.14
 const POCKET_FRONT_Z = FRONT_Z + 0.03
 const POCKET_TOP_Z = POCKET_FRONT_Z + POCKET_D / 2
 
-// ---------- Cremallera en U invertida (frente, sigue el contorno superior) ----------
-const ZIP_D = 0.16
-function zipperPoints() {
-  const z = FRONT_Z + 0.018
-  const xL = -BODY_W / 2 + ZIP_D
-  const xR = BODY_W / 2 - ZIP_D
-  const pts = []
-  for (let i = 0; i <= 6; i++) {
-    pts.push(new THREE.Vector3(xL, -0.55 + i * (2.3 / 6), z))
-  }
-  const t0 = xL
-  const t1 = xR
-  for (let i = 0; i <= 14; i++) {
-    const t = i / 14
-    const xx = t0 + (t1 - t0) * t
-    const cy = TOP_Y - 0.72 + 0.34 * Math.sin(Math.PI * t)
-    pts.push(new THREE.Vector3(xx, cy, z))
-  }
-  for (let i = 0; i <= 6; i++) {
-    pts.push(new THREE.Vector3(xR, 1.75 - i * (2.3 / 6), z))
-  }
-  return pts
-}
-const ZIPPER_GEOM = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(zipperPoints()), 80, 0.02, 8, false)
-
 // ---------- Asa superior central (arco de tela) ----------
 function buildHandleGeometry() {
   const pts = []
@@ -170,19 +145,6 @@ function Backpack({ mats, thread }) {
       </mesh>
       <mesh position={[-POCKET_W / 2 + 0.28, POCKET_Y + POCKET_H / 2 - 0.045, POCKET_TOP_Z + 0.012]} rotation={[0, 0, -0.15]}>
         <boxGeometry args={[0.12, 0.045, 0.014]} />
-        <primitive object={mats.zip} attach="material" />
-      </mesh>
-
-      {/* Cremallera principal en U invertida (sube por el lateral izq, curvea arriba, baja por el der) */}
-      <mesh geometry={ZIPPER_GEOM} material={mats.zipper} />
-
-      {/* Tiradores de la cremallera principal (izq y der) */}
-      <mesh position={[-BODY_W / 2 + ZIP_D, -0.3, FRONT_Z + 0.018]} rotation={[0, 0, 0.25]}>
-        <boxGeometry args={[0.11, 0.05, 0.016]} />
-        <primitive object={mats.zip} attach="material" />
-      </mesh>
-      <mesh position={[BODY_W / 2 - ZIP_D, 1.0, FRONT_Z + 0.018]} rotation={[0, 0, -0.2]}>
-        <boxGeometry args={[0.11, 0.05, 0.016]} />
         <primitive object={mats.zip} attach="material" />
       </mesh>
 
