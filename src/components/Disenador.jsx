@@ -139,7 +139,7 @@ var telaTextureMap = {
 }
 
 var componentes3D={mochila:Mochila3D,yerbera:Yerbera3D,bolso:Bolso3D,botinera:Botinera3D,gorra:Gorra3D,estuche:Estuche3D,cartera:Cartera3D}
-var colorPorDefecto={mochila:'#22345C',yerbera:'#1A1A1A'}
+var colorPorDefecto={mochila:'#22345C',yerbera:'#1A1A1A',botinera:'#22345C'}
 
 function FabricCanvas(props) {  var producto=props.producto,colorTela=props.colorTela,imagen=props.imagen
   var zonaActiva=props.zonaActiva,modoLibre=props.modoLibre
