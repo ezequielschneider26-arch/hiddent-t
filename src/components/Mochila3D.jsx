@@ -9,8 +9,7 @@ const BODY_H = 3.4            // alto
 const BODY_D = 0.95           // profundidad ~28% del alto
 const TOP_Y = BODY_H / 2
 const BOTTOM_Y = -BODY_H / 2
-const BODY_FRONT_Z = BODY_D / 2
-const BODY_BACK_Z = -BODY_D / 2
+// OJO: el frente real sale del bounding box (el bevel suma 0.16 en Z).
 
 // ---------- Forma del cuerpo: caja rectangular vertical ----------
 // Esquinas superiores MUY redondeadas, inferiores moderadas.
@@ -48,18 +47,22 @@ function buildBodyGeometry() {
   return g
 }
 const BODY_GEOM = buildBodyGeometry()
+BODY_GEOM.computeBoundingBox()
+const FRONT_Z = BODY_GEOM.boundingBox.max.z
+const BACK_Z = BODY_GEOM.boundingBox.min.z
 
 // ---------- Bolsillo frontal (inferior/media, centrado, leve relieve) ----------
 const POCKET_W = BODY_W * 0.63
 const POCKET_H = BODY_H * 0.26
 const POCKET_Y = -0.72
 const POCKET_D = 0.14
-const POCKET_FRONT_Z = BODY_FRONT_Z + 0.03
+const POCKET_FRONT_Z = FRONT_Z + 0.03
+const POCKET_TOP_Z = POCKET_FRONT_Z + POCKET_D / 2
 
 // ---------- Cremallera en U invertida (frente, sigue el contorno superior) ----------
 const ZIP_D = 0.16
 function zipperPoints() {
-  const z = BODY_FRONT_Z + 0.018
+  const z = FRONT_Z + 0.018
   const xL = -BODY_W / 2 + ZIP_D
   const xR = BODY_W / 2 - ZIP_D
   const pts = []
@@ -85,11 +88,12 @@ const ZIPPER_GEOM = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(zipperPoin
 function buildHandleGeometry() {
   const pts = []
   const r = 0.3
-  const y = TOP_Y + 0.16
+  const baseY = TOP_Y - 0.02
+  const archH = 0.38
   const steps = 20
   for (let i = 0; i <= steps; i++) {
     const a = Math.PI + (i / steps) * Math.PI
-    pts.push(new THREE.Vector3(Math.cos(a) * r, y, 0))
+    pts.push(new THREE.Vector3(Math.cos(a) * r, baseY + (-Math.sin(a)) * archH, 0))
   }
   return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.06, 12, false)
 }
@@ -160,11 +164,11 @@ function Backpack({ mats, thread }) {
       <RoundedBox args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.14} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_FRONT_Z]} castShadow receiveShadow />
 
       {/* Cierre horizontal del bolsillo (en su parte superior, tirador a la izquierda) */}
-      <mesh position={[0, POCKET_Y + POCKET_H / 2 - 0.02, POCKET_FRONT_Z + 0.02]}>
+      <mesh position={[0, POCKET_Y + POCKET_H / 2 - 0.02, POCKET_TOP_Z + 0.01]}>
         <boxGeometry args={[POCKET_W - 0.16, 0.045, 0.012]} />
         <primitive object={mats.zipper} attach="material" />
       </mesh>
-      <mesh position={[-POCKET_W / 2 + 0.28, POCKET_Y + POCKET_H / 2 - 0.045, POCKET_FRONT_Z + 0.02]} rotation={[0, 0, -0.15]}>
+      <mesh position={[-POCKET_W / 2 + 0.28, POCKET_Y + POCKET_H / 2 - 0.045, POCKET_TOP_Z + 0.012]} rotation={[0, 0, -0.15]}>
         <boxGeometry args={[0.12, 0.045, 0.014]} />
         <primitive object={mats.zip} attach="material" />
       </mesh>
@@ -173,11 +177,11 @@ function Backpack({ mats, thread }) {
       <mesh geometry={ZIPPER_GEOM} material={mats.zipper} />
 
       {/* Tiradores de la cremallera principal (izq y der) */}
-      <mesh position={[-BODY_W / 2 + ZIP_D, -0.3, BODY_FRONT_Z + 0.018]} rotation={[0, 0, 0.25]}>
+      <mesh position={[-BODY_W / 2 + ZIP_D, -0.3, FRONT_Z + 0.018]} rotation={[0, 0, 0.25]}>
         <boxGeometry args={[0.11, 0.05, 0.016]} />
         <primitive object={mats.zip} attach="material" />
       </mesh>
-      <mesh position={[BODY_W / 2 - ZIP_D, 1.0, BODY_FRONT_Z + 0.018]} rotation={[0, 0, -0.2]}>
+      <mesh position={[BODY_W / 2 - ZIP_D, 1.0, FRONT_Z + 0.018]} rotation={[0, 0, -0.2]}>
         <boxGeometry args={[0.11, 0.05, 0.016]} />
         <primitive object={mats.zip} attach="material" />
       </mesh>
@@ -192,15 +196,15 @@ function Backpack({ mats, thread }) {
       </mesh>
 
       {/* Correas traseras acolchadas (ocultas parcialmente desde el frente) */}
-      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[-0.55, 0, BODY_BACK_Z - 0.09]} castShadow />
-      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[0.55, 0, BODY_BACK_Z - 0.09]} castShadow />
+      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[-0.55, 0, BACK_Z - 0.09]} castShadow />
+      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[0.55, 0, BACK_Z - 0.09]} castShadow />
 
       {/* Contorno de costura del panel frontal */}
-      <Stitch length={BODY_H - 0.2} pos={[-BODY_W / 2 + 0.08, 0, BODY_FRONT_Z + 0.006]} tone={thread} />
-      <Stitch length={BODY_H - 0.2} pos={[BODY_W / 2 - 0.08, 0, BODY_FRONT_Z + 0.006]} tone={thread} />
+      <Stitch length={BODY_H - 0.2} pos={[-BODY_W / 2 + 0.08, 0, FRONT_Z + 0.006]} tone={thread} />
+      <Stitch length={BODY_H - 0.2} pos={[BODY_W / 2 - 0.08, 0, FRONT_Z + 0.006]} tone={thread} />
       {/* Costura borde del bolsillo */}
-      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y + POCKET_H / 2 - 0.04, POCKET_FRONT_Z + 0.012]} tone={thread} />
-      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y - POCKET_H / 2 + 0.04, POCKET_FRONT_Z + 0.012]} tone={thread} />
+      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y + POCKET_H / 2 - 0.04, POCKET_TOP_Z + 0.006]} tone={thread} />
+      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y - POCKET_H / 2 + 0.04, POCKET_TOP_Z + 0.006]} tone={thread} />
     </group>
   )
 }
@@ -281,9 +285,9 @@ function Stitch({ length, pos, tone }) {
 
 // ---------- Zonas de bordado ----------
 const ZONE_DEF = {
-  centro: { pos: [0, 0.35, BODY_FRONT_Z + 0.02], hit: [1.55, 0.8], pct: 30 },
-  bolsillo: { pos: [0, POCKET_Y, POCKET_FRONT_Z + 0.02], hit: [1.5, POCKET_H], pct: 42 },
-  tapa: { pos: [0, 1.45, BODY_FRONT_Z + 0.02], hit: [1.55, 0.4], pct: 16 },
+  centro: { pos: [0, 0.35, FRONT_Z + 0.02], hit: [1.55, 0.8], pct: 30 },
+  bolsillo: { pos: [0, POCKET_Y, POCKET_TOP_Z + 0.02], hit: [1.5, POCKET_H], pct: 42 },
+  tapa: { pos: [0, 1.45, FRONT_Z + 0.02], hit: [1.55, 0.4], pct: 16 },
 }
 const ZONES = [
   { id: 'centro', ...ZONE_DEF.centro },
@@ -330,7 +334,7 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
     width = (tamano / 100) * 2.3
     x = (posX / 100 - 0.5) * BODY_W * 0.85
     y = TOP_Y - (posY / 100) * BODY_H
-    z = BODY_FRONT_Z + 0.02
+    z = FRONT_Z + 0.02
   } else {
     const zone = ZONE_DEF[zonaActiva]
     if (!zone) return null
@@ -445,7 +449,7 @@ export default function Mochila3D(props) {
         <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
         <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
         {/* Piso receptor de sombra */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, 0]} receiveShadow>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.05, 0]} receiveShadow>
           <planeGeometry args={[14, 14]} />
           <shadowMaterial opacity={0.35} />
         </mesh>
