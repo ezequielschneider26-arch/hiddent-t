@@ -70,10 +70,10 @@ const BACK_Z = BODY_GEOM.boundingBox.min.z
 
 // ---------- Bolsillo frontal: 86% del ancho, integrado con volumen ----------
 const POCKET_W = 2.10
-const POCKET_H = 0.92
+const POCKET_H = 0.97
 const POCKET_Y = -0.75
 const POCKET_D = 0.22
-const POCKET_CZ = FRONT_Z + 0.02
+const POCKET_CZ = FRONT_Z - 0.01
 const POCKET_TOP_Z = POCKET_CZ + POCKET_D / 2
 const POCKET_ZIP_Y = POCKET_Y + POCKET_H / 2 - 0.04
 
@@ -160,21 +160,21 @@ function Backpack({ mats }) {
   return (
     <group position={[0, 0, 0]}>
       {/* Cuerpo principal */}
-      <mesh geometry={BODY_GEOM} material={mats.body} castShadow receiveShadow />
+      <mesh name="cuerpo-principal" geometry={BODY_GEOM} material={mats.body} castShadow receiveShadow />
 
       {/* Panel trasero independiente */}
-      <RoundedBox args={[2.10, 2.90, 0.12]} radius={0.06} smoothness={4} material={mats.bodyDark} position={[0, 0, BACK_Z]} receiveShadow />
+      <RoundedBox name="panel-trasero" args={[2.10, 2.90, 0.12]} radius={0.06} smoothness={4} material={mats.bodyDark} position={[0, 0, BACK_Z]} receiveShadow />
 
       {/* Bolsillo frontal integrado */}
-      <RoundedBox args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.10} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_CZ]} castShadow receiveShadow />
+      <RoundedBox name="bolsillo-frontal" args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.10} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_CZ]} castShadow receiveShadow />
       {/* Cierre del bolsillo: cinta + dientes */}
-      <mesh geometry={POCKET_TAPE_GEOM} material={mats.tape} />
-      <mesh geometry={POCKET_TEETH_GEOM} material={mats.zipper} />
+      <mesh name="cierre-frontal-cinta" geometry={POCKET_TAPE_GEOM} material={mats.tape} />
+      <mesh name="cierre-frontal-dientes" geometry={POCKET_TEETH_GEOM} material={mats.zipper} />
       {/* Cursor + tirador de cordón del bolsillo */}
-      <mesh position={[POCKET_SLIDER_X, POCKET_ZIP_Y + 0.01, POCKET_TOP_Z + 0.05]} material={mats.zip}>
+      <mesh name="tirador-bolsillo-cursor" position={[POCKET_SLIDER_X, POCKET_ZIP_Y + 0.01, POCKET_TOP_Z + 0.05]} material={mats.zip}>
         <boxGeometry args={[0.11, 0.07, 0.06]} />
       </mesh>
-      <group position={[POCKET_SLIDER_X, POCKET_ZIP_Y - 0.03, POCKET_TOP_Z + 0.05]} rotation={[0.15, 0, 0.1]}>
+      <group name="tirador-bolsillo-lazo" position={[POCKET_SLIDER_X, POCKET_ZIP_Y - 0.03, POCKET_TOP_Z + 0.05]} rotation={[0.15, 0, 0.1]}>
         <mesh position={[0, -0.02, 0]} material={mats.zip}>
           <boxGeometry args={[0.03, 0.05, 0.02]} />
         </mesh>
@@ -184,13 +184,16 @@ function Backpack({ mats }) {
       </group>
 
       {/* Cierre principal: cinta + dientes con volumen */}
-      <mesh geometry={MAIN_TAPE_GEOM} material={mats.tape} />
-      <mesh geometry={MAIN_TEETH_GEOM} material={mats.zipper} />
+      <mesh name="cierre-principal-cinta" geometry={MAIN_TAPE_GEOM} material={mats.tape} />
+      <mesh name="cierre-principal-dientes" geometry={MAIN_TEETH_GEOM} material={mats.zipper} />
+      {/* Costuras que flanquean el cierre principal */}
+      <SeamTube curve={SEAM_L_CURVE} />
+      <SeamTube curve={SEAM_R_CURVE} />
       {/* Cursor + tirador al final del recorrido */}
-      <mesh position={[MAIN_ZIP_END.x, MAIN_ZIP_END.y + 0.02, MAIN_ZIP_END.z + 0.05]} rotation={[0, 0, -0.5]} material={mats.zip}>
+      <mesh name="tirador-principal-cursor" position={[MAIN_ZIP_END.x, MAIN_ZIP_END.y + 0.02, MAIN_ZIP_END.z + 0.05]} rotation={[0, 0, -0.5]} material={mats.zip}>
         <boxGeometry args={[0.13, 0.08, 0.07]} />
       </mesh>
-      <group position={[MAIN_ZIP_END.x + 0.03, MAIN_ZIP_END.y - 0.06, MAIN_ZIP_END.z + 0.05]} rotation={[0.2, 0, -0.15]}>
+      <group name="tirador-principal-lazo" position={[MAIN_ZIP_END.x + 0.03, MAIN_ZIP_END.y - 0.06, MAIN_ZIP_END.z + 0.05]} rotation={[0.2, 0, -0.15]}>
         <mesh position={[0, -0.02, 0]} material={mats.zip}>
           <boxGeometry args={[0.03, 0.05, 0.02]} />
         </mesh>
@@ -200,21 +203,21 @@ function Backpack({ mats }) {
       </group>
 
       {/* Bolsillo lateral izquierdo (funda abierta) */}
-      <mesh position={[SIDE_X, SIDE_Y, 0.05]} material={mats.pocketSide} castShadow>
+      <mesh name="bolsillo-lateral" position={[SIDE_X, SIDE_Y, 0.05]} material={mats.pocketSide} castShadow>
         <cylinderGeometry args={[SIDE_R_TOP, SIDE_R_BOT, SIDE_H, 24, 1, true, Math.PI, Math.PI]} />
       </mesh>
       {/* Aro elástico fruncido superior */}
-      <mesh position={[SIDE_X, SIDE_Y + SIDE_H / 2, 0.05]} rotation={[Math.PI / 2, 0, 0]} material={mats.dark}>
+      <mesh name="bolsillo-lateral-elastico" position={[SIDE_X, SIDE_Y + SIDE_H / 2, 0.05]} rotation={[Math.PI / 2, 0, 0]} material={mats.dark}>
         <torusGeometry args={[SIDE_R_TOP, 0.055, 10, 28]} />
       </mesh>
 
       {/* Tirantes acolchados */}
       {STRAP_GEOMS.map((g, i) => (
-        <mesh key={i} geometry={g} material={mats.strap} scale={[1, 1, 0.62]} castShadow />
+        <mesh key={i} name={i === 0 ? 'correa-derecha' : 'correa-izquierda'} geometry={g} material={mats.strap} scale={[1, 1, 0.62]} castShadow />
       ))}
       {/* Parches de unión de tirantes */}
       {[1, -1].map((sx) => (
-        <group key={sx}>
+        <group key={sx} name={sx === 1 ? 'union-correa-derecha' : 'union-correa-izquierda'}>
           <mesh position={[sx * 0.55, TOP_Y - 0.18, BACK_Z + 0.02]} material={mats.bodyDark}>
             <boxGeometry args={[0.30, 0.24, 0.07]} />
           </mesh>
@@ -225,15 +228,19 @@ function Backpack({ mats }) {
       ))}
 
       {/* Asa superior */}
-      <mesh geometry={HANDLE_GEOM} material={mats.strap} scale={[1, 1, 0.7]} castShadow />
+      <mesh name="asa-superior" geometry={HANDLE_GEOM} material={mats.strap} scale={[1, 1, 0.7]} castShadow />
 
       {/* Costuras de construcción: unión frente/lateral */}
       <Stitch length={BODY_H - 0.7} pos={[-1.02, 0, FRONT_Z + 0.006]} />
       <Stitch length={BODY_H - 0.7} pos={[1.02, 0, FRONT_Z + 0.006]} />
-      {/* Costuras del bolsillo: laterales + inferior */}
+      {/* Costuras del bolsillo: laterales + inferior + sobre el cierre */}
       <Stitch length={POCKET_H - 0.12} pos={[-POCKET_W / 2 + 0.07, POCKET_Y, POCKET_TOP_Z + 0.006]} />
       <Stitch length={POCKET_H - 0.12} pos={[POCKET_W / 2 - 0.07, POCKET_Y, POCKET_TOP_Z + 0.006]} />
       <Stitch length={POCKET_W - 0.2} pos={[0, POCKET_Y - POCKET_H / 2 + 0.05, POCKET_TOP_Z + 0.006]} />
+      <Stitch length={POCKET_W - 0.3} pos={[0, POCKET_ZIP_Y + 0.10, POCKET_TOP_Z + 0.006]} />
+      {/* Costuras de la base del asa */}
+      <Stitch length={0.18} pos={[-0.22, TOP_Y + 0.015, 0.12]} rot={[-Math.PI / 2, 0, 0]} />
+      <Stitch length={0.18} pos={[0.22, TOP_Y + 0.015, 0.12]} rot={[-Math.PI / 2, 0, 0]} />
     </group>
   )
 }
@@ -269,30 +276,29 @@ function makeMats(colorTela) {
   return { body, pocket, bodyDark, pocketSide, tape, strap, dark, zip, zipper }
 }
 
-// ---------- Costuras (hilo según tono de la tela, una textura compartida) ----------
+// ---------- Costuras (hilo claro sobre marino, canvas compartido) ----------
 const stitchCache = {}
-function makeStitchCanvas(thread) {
-  const c = document.createElement('canvas')
-  c.width = 64
-  c.height = 16
-  const x = c.getContext('2d')
-  x.clearRect(0, 0, 64, 16)
-  for (let i = 2; i < 64; i += 8) {
-    x.fillStyle = thread
-    x.fillRect(i, 3, 5, 10)
-    x.fillStyle = 'rgba(255,255,255,0.18)'
-    x.fillRect(i + 1, 4, 1.5, 8)
+function navyStitchCanvas() {
+  if (!stitchCache.navy) {
+    const c = document.createElement('canvas')
+    c.width = 64
+    c.height = 16
+    const x = c.getContext('2d')
+    x.clearRect(0, 0, 64, 16)
+    for (let i = 2; i < 64; i += 8) {
+      x.fillStyle = '#c9cdd6'
+      x.fillRect(i, 3, 5, 10)
+      x.fillStyle = 'rgba(255,255,255,0.18)'
+      x.fillRect(i + 1, 4, 1.5, 8)
+    }
+    stitchCache.navy = c
   }
-  return c
+  return stitchCache.navy
 }
 
-function Stitch({ length, pos }) {
+function Stitch({ length, pos, rot }) {
   const tex = useMemo(() => {
-    const key = 'navy'
-    if (!stitchCache[key]) {
-      stitchCache[key] = makeStitchCanvas('#c9cdd6')
-    }
-    const t = new THREE.CanvasTexture(stitchCache[key])
+    const t = new THREE.CanvasTexture(navyStitchCanvas())
     t.wrapS = t.wrapT = THREE.RepeatWrapping
     t.colorSpace = THREE.SRGBColorSpace
     t.repeat.set(Math.max(1, Math.round(length / 0.28)), 1)
@@ -300,9 +306,43 @@ function Stitch({ length, pos }) {
   }, [length])
   useEffect(() => () => { tex.dispose() }, [tex])
   return (
-    <mesh position={pos} raycast={() => null}>
+    <mesh position={pos} rotation={rot || [0, 0, 0]} raycast={() => null}>
       <planeGeometry args={[length, 0.045]} />
       <meshBasicMaterial map={tex} transparent opacity={0.9} depthWrite={false} />
+    </mesh>
+  )
+}
+
+// ---------- Costura punteada que flanquea el cierre principal ----------
+// Sigue la curva del cierre a ±offset, en el plano de la superficie.
+function seamCurve(offset) {
+  const pts = []
+  const Z = new THREE.Vector3(0, 0, 1)
+  for (let i = 0; i <= 48; i++) {
+    const t = i / 48
+    const p = MAIN_ZIP_CURVE.getPointAt(t)
+    const tan = MAIN_ZIP_CURVE.getTangentAt(t)
+    const perp = new THREE.Vector3().crossVectors(tan, Z).normalize()
+    pts.push(new THREE.Vector3(p.x + perp.x * offset, p.y + perp.y * offset, p.z + 0.008))
+  }
+  return new THREE.CatmullRomCurve3(pts)
+}
+const SEAM_L_CURVE = seamCurve(0.085)
+const SEAM_R_CURVE = seamCurve(-0.085)
+
+function SeamTube({ curve }) {
+  const { tex, geom } = useMemo(() => {
+    const g = new THREE.TubeGeometry(curve, 64, 0.016, 6, false)
+    const t = new THREE.CanvasTexture(navyStitchCanvas())
+    t.wrapS = t.wrapT = THREE.RepeatWrapping
+    t.colorSpace = THREE.SRGBColorSpace
+    t.repeat.set(Math.max(4, Math.round(curve.getLength() / 0.22)), 1)
+    return { tex: t, geom: g }
+  }, [curve])
+  useEffect(() => () => { tex.dispose(); geom.dispose() }, [tex, geom])
+  return (
+    <mesh geometry={geom} raycast={() => null}>
+      <meshBasicMaterial map={tex} transparent opacity={0.85} depthWrite={false} />
     </mesh>
   )
 }
