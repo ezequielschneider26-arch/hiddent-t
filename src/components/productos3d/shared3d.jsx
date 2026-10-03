@@ -71,7 +71,8 @@ export function useFabricMats(colorTela, telaId) {
     })
     const dark = new THREE.MeshStandardMaterial({ color: '#0c0c0e', roughness: 0.8, metalness: 0, envMapIntensity: 0.3 })
     const metal = new THREE.MeshStandardMaterial({ color: '#2a2a2e', roughness: 0.3, metalness: 0.6, envMapIntensity: 0.9 })
-    return { body, bodyDark, dark, metal }
+    const silver = new THREE.MeshStandardMaterial({ color: '#C8CCD4', roughness: 0.32, metalness: 0.9, envMapIntensity: 1.0 })
+    return { body, bodyDark, dark, metal, silver }
   }, [colorTela, telaId])
   const prev = useRef(null)
   useEffect(() => {
