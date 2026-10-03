@@ -1,9 +1,9 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 
-// ---------- Medidas (referencia: mochila urbana minimalista negra) ----------
+// ---------- Medidas (referencia: mochila urbana minimalista) ----------
 const BODY_W = 2.4            // ancho ~70% del alto
 const BODY_H = 3.4            // alto
 const BODY_D = 0.95           // profundidad ~28% del alto
@@ -98,14 +98,66 @@ const HANDLE_GEOM = buildHandleGeometry()
 // ---------- Correas traseras acolchadas ----------
 const STRAP_W = 0.34
 const STRAP_H = 3.2
-function Backpack({ mats }) {
+
+// ---------- Micro-relieve de tela (bump compartido, barato) ----------
+function makeFabricBump() {
+  const c = document.createElement('canvas')
+  c.width = 128
+  c.height = 128
+  const x = c.getContext('2d')
+  x.fillStyle = '#808080'
+  x.fillRect(0, 0, 128, 128)
+  // trama tejida
+  for (let j = 0; j < 128; j += 2) {
+    for (let i = 0; i < 128; i += 2) {
+      const v = 118 + Math.round(Math.random() * 20) + ((i + j) % 4 === 0 ? 8 : 0)
+      x.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')'
+      x.fillRect(i, j, 2, 2)
+    }
+  }
+  const t = new THREE.CanvasTexture(c)
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(3, 3)
+  return t
+}
+let FABRIC_BUMP = null
+function getFabricBump() {
+  if (!FABRIC_BUMP) FABRIC_BUMP = makeFabricBump()
+  return FABRIC_BUMP
+}
+
+// ---------- Telas: cómo se ve cada material en 3D ----------
+const TELA_PROPS = {
+  nylon600: { roughness: 0.38, metalness: 0.02, bump: 0.015 },
+  poliester: { roughness: 0.5, metalness: 0.02, bump: 0.012 },
+  cuero_sint: { roughness: 0.42, metalness: 0.06, bump: 0.008 },
+  lona: { roughness: 0.85, metalness: 0.0, bump: 0.03 },
+  lona12: { roughness: 0.85, metalness: 0.0, bump: 0.03 },
+  lona16: { roughness: 0.9, metalness: 0.0, bump: 0.035 },
+  malla: { roughness: 0.92, metalness: 0.0, bump: 0.045 },
+  algodon: { roughness: 0.88, metalness: 0.0, bump: 0.028 },
+  nylon: { roughness: 0.4, metalness: 0.02, bump: 0.016 },
+  polar: { roughness: 0.95, metalness: 0.0, bump: 0.04 },
+  neoprene: { roughness: 0.6, metalness: 0.0, bump: 0.01 },
+  pvc: { roughness: 0.25, metalness: 0.05, bump: 0.006 },
+  mezclilla: { roughness: 0.8, metalness: 0.0, bump: 0.028 },
+  tela_imp: { roughness: 0.3, metalness: 0.04, bump: 0.01 },
+}
+const DEFAULT_TELA = { roughness: 0.72, metalness: 0.03, bump: 0.02 }
+
+function luminance(hex) {
+  const c = new THREE.Color(hex)
+  return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+}
+
+function Backpack({ mats, thread }) {
   return (
     <group position={[0, 0, 0]}>
       {/* Cuerpo */}
-      <mesh geometry={BODY_GEOM} material={mats.body} />
+      <mesh geometry={BODY_GEOM} material={mats.body} castShadow receiveShadow />
 
       {/* Bolsillo frontal */}
-      <RoundedBox args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.14} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_FRONT_Z]} />
+      <RoundedBox args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.14} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_FRONT_Z]} castShadow receiveShadow />
 
       {/* Cierre horizontal del bolsillo (en su parte superior, tirador a la izquierda) */}
       <mesh position={[0, POCKET_Y + POCKET_H / 2 - 0.02, POCKET_FRONT_Z + 0.02]}>
@@ -131,72 +183,98 @@ function Backpack({ mats }) {
       </mesh>
 
       {/* Asa superior central */}
-      <mesh geometry={HANDLE_GEOM} material={mats.strap} />
+      <mesh geometry={HANDLE_GEOM} material={mats.strap} castShadow />
 
       {/* Bolsillo lateral derecho (botella), vertical abierto */}
-      <mesh position={[BODY_W / 2, -0.8, 0]} material={mats.pocket}>
+      <mesh position={[BODY_W / 2, -0.8, 0]}>
         <cylinderGeometry args={[0.24, 0.2, 1.7, 24, 1, true]} />
+        <primitive object={mats.pocketSide} attach="material" />
       </mesh>
 
       {/* Correas traseras acolchadas (ocultas parcialmente desde el frente) */}
-      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[-0.55, 0, BODY_BACK_Z - 0.09]} />
-      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[0.55, 0, BODY_BACK_Z - 0.09]} />
+      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[-0.55, 0, BODY_BACK_Z - 0.09]} castShadow />
+      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[0.55, 0, BODY_BACK_Z - 0.09]} castShadow />
 
       {/* Contorno de costura del panel frontal */}
-      <Stitch length={BODY_H - 0.2} pos={[-BODY_W / 2 + 0.08, 0, BODY_FRONT_Z + 0.006]} />
-      <Stitch length={BODY_H - 0.2} pos={[BODY_W / 2 - 0.08, 0, BODY_FRONT_Z + 0.006]} />
+      <Stitch length={BODY_H - 0.2} pos={[-BODY_W / 2 + 0.08, 0, BODY_FRONT_Z + 0.006]} tone={thread} />
+      <Stitch length={BODY_H - 0.2} pos={[BODY_W / 2 - 0.08, 0, BODY_FRONT_Z + 0.006]} tone={thread} />
       {/* Costura borde del bolsillo */}
-      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y + POCKET_H / 2 - 0.04, POCKET_FRONT_Z + 0.012]} />
-      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y - POCKET_H / 2 + 0.04, POCKET_FRONT_Z + 0.012]} />
+      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y + POCKET_H / 2 - 0.04, POCKET_FRONT_Z + 0.012]} tone={thread} />
+      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y - POCKET_H / 2 + 0.04, POCKET_FRONT_Z + 0.012]} tone={thread} />
     </group>
   )
 }
 
-// ---------- Materiales: negro mate liso ----------
-function makeMats(colorTela, textureId) {
-  const color = colorTela && colorTela !== '#F5F5F5' ? colorTela : '#0d0d0f'
+// ---------- Materiales según color de tela + tipo de tela elegidos ----------
+function makeMats(colorTela, telaId) {
+  const color = colorTela || '#17171a'
+  const tp = (telaId && TELA_PROPS[telaId]) || DEFAULT_TELA
+  const bumpMap = getFabricBump()
   const body = new THREE.MeshStandardMaterial({
     color,
-    roughness: 0.72,
-    metalness: 0.03,
+    roughness: tp.roughness,
+    metalness: tp.metalness,
+    bumpMap,
+    bumpScale: tp.bump,
+    envMapIntensity: 0.5,
+  })
+  // Bolsillo apenas más oscuro para dar volumen
+  const pocketColor = new THREE.Color(color).multiplyScalar(0.9)
+  const pocket = new THREE.MeshStandardMaterial({
+    color: pocketColor,
+    roughness: Math.min(1, tp.roughness + 0.05),
+    metalness: tp.metalness,
+    bumpMap,
+    bumpScale: tp.bump,
+    envMapIntensity: 0.45,
+  })
+  const pocketSide = new THREE.MeshStandardMaterial({
+    color: pocketColor,
+    roughness: Math.min(1, tp.roughness + 0.05),
+    metalness: tp.metalness,
+    side: THREE.DoubleSide,
     envMapIntensity: 0.4,
   })
-  const pocket = body.clone()
-  const strap = new THREE.MeshStandardMaterial({ color: '#0a0a0c', roughness: 0.8, metalness: 0, envMapIntensity: 0.3 })
-  const zipper = new THREE.MeshStandardMaterial({ color: '#1a1a1c', roughness: 0.28, metalness: 0.55, envMapIntensity: 0.8 })
-  const zip = new THREE.MeshStandardMaterial({ color: '#050506', roughness: 0.55, metalness: 0.15, envMapIntensity: 0.3 })
-  return { body, pocket, trim: strap, seam: body, net: strap, zip, zipper, strap }
+  const strap = new THREE.MeshStandardMaterial({ color: '#0c0c0e', roughness: 0.8, metalness: 0, envMapIntensity: 0.3 })
+  const zipper = new THREE.MeshStandardMaterial({ color: '#2a2a2e', roughness: 0.3, metalness: 0.6, envMapIntensity: 0.9 })
+  const zip = new THREE.MeshStandardMaterial({ color: '#101012', roughness: 0.5, metalness: 0.25, envMapIntensity: 0.4 })
+  return { body, pocket, pocketSide, trim: strap, seam: body, net: strap, zip, zipper, strap }
 }
 
-// ---------- Costuras ----------
-function makeStitchTexture() {
+// ---------- Costuras con hilo contrastante (una textura por tono, compartida) ----------
+const stitchCache = {}
+function makeStitchCanvas(thread) {
   const c = document.createElement('canvas')
   c.width = 64
   c.height = 16
   const x = c.getContext('2d')
   x.clearRect(0, 0, 64, 16)
   for (let i = 2; i < 64; i += 8) {
-    x.fillStyle = 'rgba(0,0,0,0.7)'
-    x.fillRect(i, 1, 5, 14)
-    x.fillStyle = 'rgba(255,255,255,0.12)'
-    x.fillRect(i + 1, 2, 2, 12)
+    x.fillStyle = thread
+    x.fillRect(i, 3, 5, 10)
+    x.fillStyle = 'rgba(255,255,255,0.18)'
+    x.fillRect(i + 1, 4, 1.5, 8)
   }
   return c
 }
-const STITCH_CANVAS = makeStitchTexture()
 
-function Stitch({ length, pos }) {
+function Stitch({ length, pos, tone }) {
   const tex = useMemo(() => {
-    const t = new THREE.CanvasTexture(STITCH_CANVAS)
+    const key = tone || 'dark'
+    if (!stitchCache[key]) {
+      stitchCache[key] = makeStitchCanvas(key === 'light' ? '#e9e9ec' : '#232326')
+    }
+    const t = new THREE.CanvasTexture(stitchCache[key])
     t.wrapS = t.wrapT = THREE.RepeatWrapping
     t.colorSpace = THREE.SRGBColorSpace
     t.repeat.set(Math.max(1, Math.round(length / 0.28)), 1)
     return t
-  }, [length])
+  }, [length, tone])
+  useEffect(() => () => { tex.dispose() }, [tex])
   return (
     <mesh position={pos} raycast={() => null}>
       <planeGeometry args={[length, 0.045]} />
-      <meshBasicMaterial map={tex} transparent opacity={0.85} depthWrite={false} side={THREE.DoubleSide} />
+      <meshBasicMaterial map={tex} transparent opacity={0.9} depthWrite={false} />
     </mesh>
   )
 }
@@ -213,11 +291,8 @@ const ZONES = [
   { id: 'tapa', ...ZONE_DEF.tapa },
 ]
 
-function setCursor(cur) {
-  document.body.style.cursor = cur
-}
-
 function ZoneHits({ imagen, zonaActiva, zonasyMarca, onZoneClick, applied }) {
+  useEffect(() => () => { document.body.style.cursor = 'auto' }, [])
   if (!imagen || applied || !onZoneClick) return null
   return ZONES.map((z) => {
     const active = zonaActiva === z.id
@@ -228,13 +303,13 @@ function ZoneHits({ imagen, zonaActiva, zonasyMarca, onZoneClick, applied }) {
       <group key={z.id} position={z.pos}>
         <mesh
           onClick={(e) => { e.stopPropagation(); onZoneClick(z.id) }}
-          onPointerOver={() => setCursor('pointer')}
-          onPointerOut={() => setCursor('auto')}
+          onPointerOver={() => { document.body.style.cursor = 'pointer' }}
+          onPointerOut={() => { document.body.style.cursor = 'auto' }}
         >
           <planeGeometry args={z.hit} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={active ? 0.14 : marked ? 0.1 : 0.02} side={THREE.DoubleSide} depthWrite={false} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={active ? 0.14 : marked ? 0.1 : 0.02} depthWrite={false} />
         </mesh>
-        <mesh>
+        <mesh raycast={() => null}>
           <boxGeometry args={[z.hit[0], z.hit[1], 0.012]} />
           <meshBasicMaterial wireframe color={col} transparent opacity={op} depthWrite={false} />
         </mesh>
@@ -250,6 +325,7 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
   let x = 0
   let y = 0
   let z = 0
+  let maxH = BODY_H * 0.5
   if (modoLibre) {
     width = (tamano / 100) * 2.3
     x = (posX / 100 - 0.5) * BODY_W * 0.85
@@ -257,16 +333,32 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
     z = BODY_FRONT_Z + 0.02
   } else {
     const zone = ZONE_DEF[zonaActiva]
-    width = (zone.pct / 100) * BODY_W * 0.55 * (tamano / 40)
+    if (!zone) return null
+    width = (zone.pct / 100) * BODY_W * 1.1 * (tamano / 40)
     x = zone.pos[0]
     y = zone.pos[1]
     z = zone.pos[2] + 0.012
+    maxH = zone.hit[1] * 0.92
   }
-  const height = width / aspect
+  let height = width / aspect
+  // Si la imagen es vertical, achicar para que no desborde la zona
+  if (height > maxH) {
+    const s = maxH / height
+    width *= s
+    height = maxH
+  }
   return (
-    <mesh position={[x, y, z]} rotation={[0, 0, (rotacion * Math.PI) / 180]}>
+    <mesh position={[x, y, z]} rotation={[0, 0, (rotacion * Math.PI) / 180]} raycast={() => null}>
       <planeGeometry args={[width, height]} />
-      <meshBasicMaterial map={imgInfo.tex} transparent depthWrite={false} opacity={applied ? 0.94 : 1} />
+      <meshBasicMaterial
+        map={imgInfo.tex}
+        transparent
+        depthWrite={false}
+        opacity={applied ? 0.94 : 1}
+        toneMapped={false}
+        polygonOffset
+        polygonOffsetFactor={-2}
+      />
     </mesh>
   )
 }
@@ -278,6 +370,11 @@ export default function Mochila3D(props) {
   useEffect(() => {
     if (!imagen) { setImgInfo(null); return }
     let alive = true
+    let tex = null
+    setImgInfo((prev) => {
+      if (prev && prev.tex) prev.tex.dispose()
+      return null
+    })
     const img = new Image()
     img.onload = () => {
       const w = img.naturalWidth || img.width
@@ -289,35 +386,69 @@ export default function Mochila3D(props) {
       c.width = Math.max(1, Math.round(w * scale))
       c.height = Math.max(1, Math.round(h * scale))
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
-      const tex = new THREE.CanvasTexture(c)
+      tex = new THREE.CanvasTexture(c)
       tex.colorSpace = THREE.SRGBColorSpace
-      tex.anisotropy = 8
+      tex.anisotropy = 4
       if (alive) setImgInfo({ tex, w: c.width, h: c.height })
+      else tex.dispose()
     }
     img.onerror = () => { if (alive) setImgInfo(null) }
     img.src = imagen
-    return () => { alive = false; img.src = '' }
+    return () => { alive = false; img.src = ''; if (tex) tex.dispose() }
   }, [imagen])
 
-  const mats = useMemo(() => makeMats(colorTela, telaSeleccionada), [colorTela])
+  const mats = useMemo(() => makeMats(colorTela, telaSeleccionada), [colorTela, telaSeleccionada])
+  const prevMats = useRef(null)
+  useEffect(() => {
+    const old = prevMats.current
+    prevMats.current = mats
+    return () => {
+      if (old) Object.values(old).forEach((m) => { if (m && m.dispose && m !== old.body) m.dispose(); })
+      if (old && old.body) old.body.dispose()
+    }
+  }, [mats])
+  useEffect(() => () => {
+    const cur = prevMats.current
+    if (cur) Object.values(cur).forEach((m) => { if (m && m.dispose) m.dispose() })
+  }, [])
+
+  const thread = useMemo(() => (luminance(colorTela || '#17171a') < 0.35 ? 'light' : 'dark'), [colorTela])
 
   return (
     <div className="mochila3d">
       <Canvas
+        shadows
         camera={{ position: [0, 0.15, 7.6], fov: 36 }}
-        dpr={[1, 2]}
-        gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15 }}
+        dpr={[1, 1.75]}
+        gl={{ antialias: true, preserveDrawingBuffer: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15 }}
         onCreated={({ gl }) => {
           if (onExportRef) onExportRef.current = () => gl.domElement.toDataURL('image/png')
         }}
       >
-        <color attach="background" args={['#e5e5e8']} />
-        <ambientLight intensity={0.55} />
-        <directionalLight position={[5, 6, 4]} intensity={1.35} />
-        <directionalLight position={[-4, 2, -3]} intensity={0.55} />
-        <Backpack mats={mats} />
+        <color attach="background" args={['#14141c']} />
+        <fog attach="fog" args={['#14141c', 10, 18]} />
+        <hemisphereLight args={['#ffffff', '#23232b', 0.5]} />
+        <ambientLight intensity={0.25} />
+        <directionalLight
+          position={[4, 6, 5]}
+          intensity={1.6}
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-camera-left={-4}
+          shadow-camera-right={4}
+          shadow-camera-top={5}
+          shadow-camera-bottom={-4}
+        />
+        <directionalLight position={[-5, 3, -4]} intensity={0.9} color="#a78bfa" />
+        <directionalLight position={[0, 1, 6]} intensity={0.35} />
+        <Backpack mats={mats} thread={thread} />
         <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
         <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
+        {/* Piso receptor de sombra */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, 0]} receiveShadow>
+          <planeGeometry args={[14, 14]} />
+          <shadowMaterial opacity={0.35} />
+        </mesh>
         <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.08} minDistance={4.5} maxDistance={11} minPolarAngle={0.3} maxPolarAngle={Math.PI - 0.3} target={[0, 0, 0]} />
       </Canvas>
     </div>
