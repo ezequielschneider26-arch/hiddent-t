@@ -3,32 +3,33 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 
-// ---------- Medidas (referencia: mochila urbana minimalista) ----------
-const BODY_W = 2.4            // ancho ~70% del alto
-const BODY_H = 3.4            // alto
-const BODY_D = 0.95           // profundidad ~28% del alto
+// =====================================================================
+// Mochila urbana reconstruida como blueprint: cada pieza visible es un
+// elemento geométrico diferenciado. Proporciones en unidades de escena
+// (altura total 3.4 = 100u  =>  1u = 0.034):
+//   ancho 2.45 (72u) | profundidad 0.82 (24u) | bolsillo 2.10 x 0.92
+// =====================================================================
+const BODY_W = 2.45
+const BODY_H = 3.4
+const BODY_D = 0.82
 const TOP_Y = BODY_H / 2
 const BOTTOM_Y = -BODY_H / 2
-// OJO: el frente real sale del bounding box (el bevel suma 0.16 en Z).
 
-// ---------- Forma del cuerpo: caja rectangular vertical ----------
-// Esquinas superiores MUY redondeadas, inferiores moderadas.
+// ---------- Silueta frontal: base más ancha, esquinas inf. redondeadas,
+// ---------- laterales que se curvan en el último ~22% superior ----------
 function bodyShape() {
-  const w = BODY_W
-  const x0 = -w / 2
-  const x1 = w / 2
-  const rTop = 0.78
-  const rBot = 0.42
+  const hw = BODY_W / 2
+  const rBot = 0.4
+  const yArch = TOP_Y - 0.75
   const s = new THREE.Shape()
-  s.moveTo(x0, BOTTOM_Y + rBot)
-  s.lineTo(x0, TOP_Y - rTop)
-  s.quadraticCurveTo(x0, TOP_Y, x0 + rTop, TOP_Y)
-  s.lineTo(x1 - rTop, TOP_Y)
-  s.quadraticCurveTo(x1, TOP_Y, x1, TOP_Y - rTop)
-  s.lineTo(x1, BOTTOM_Y + rBot)
-  s.quadraticCurveTo(x1, BOTTOM_Y, x1 - rBot, BOTTOM_Y)
-  s.lineTo(x0 + rBot, BOTTOM_Y)
-  s.quadraticCurveTo(x0, BOTTOM_Y, x0, BOTTOM_Y + rBot)
+  s.moveTo(-hw + rBot, BOTTOM_Y)
+  s.lineTo(-hw, yArch)
+  s.quadraticCurveTo(-hw, TOP_Y, 0, TOP_Y)
+  s.quadraticCurveTo(hw, TOP_Y, hw, yArch)
+  s.lineTo(hw, BOTTOM_Y + rBot)
+  s.quadraticCurveTo(hw, BOTTOM_Y, hw - rBot, BOTTOM_Y)
+  s.lineTo(-hw + rBot, BOTTOM_Y)
+  s.quadraticCurveTo(-hw, BOTTOM_Y, -hw, BOTTOM_Y + rBot)
   s.closePath()
   return s
 }
@@ -37,177 +38,238 @@ function buildBodyGeometry() {
   const g = new THREE.ExtrudeGeometry(bodyShape(), {
     depth: BODY_D,
     bevelEnabled: true,
-    bevelThickness: 0.16,
-    bevelSize: 0.12,
-    bevelSegments: 6,
-    curveSegments: 40,
+    bevelThickness: 0.14,
+    bevelSize: 0.10,
+    bevelSegments: 5,
+    curveSegments: 36,
   })
   g.translate(0, 0, -BODY_D / 2)
+  // Post-proceso de confección: taper superior, frente convexo, espalda curva.
+  const pos = g.attributes.position
+  const v = new THREE.Vector3()
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i)
+    const t = THREE.MathUtils.clamp((v.y - BOTTOM_Y) / BODY_H, 0, 1)
+    const xn = THREE.MathUtils.clamp(v.x / (BODY_W / 2), -1, 1)
+    v.x *= 1 - 0.10 * THREE.MathUtils.smoothstep(t, 0.35, 1.0)
+    if (v.z > 0) {
+      v.z += 0.05 * (1 - xn * xn) * Math.sin(Math.PI * t)
+    } else {
+      v.z += 0.06 * (1 - xn * xn)
+    }
+    pos.setXYZ(i, v.x, v.y, v.z)
+  }
+  pos.needsUpdate = true
   g.computeVertexNormals()
+  g.computeBoundingBox()
   return g
 }
 const BODY_GEOM = buildBodyGeometry()
-BODY_GEOM.computeBoundingBox()
 const FRONT_Z = BODY_GEOM.boundingBox.max.z
 const BACK_Z = BODY_GEOM.boundingBox.min.z
 
-// ---------- Bolsillo frontal (inferior/media, centrado, leve relieve) ----------
-const POCKET_W = BODY_W * 0.63
-const POCKET_H = BODY_H * 0.26
-const POCKET_Y = -0.72
-const POCKET_D = 0.14
-const POCKET_FRONT_Z = FRONT_Z + 0.03
-const POCKET_TOP_Z = POCKET_FRONT_Z + POCKET_D / 2
+// ---------- Bolsillo frontal: 86% del ancho, integrado con volumen ----------
+const POCKET_W = 2.10
+const POCKET_H = 0.92
+const POCKET_Y = -0.75
+const POCKET_D = 0.22
+const POCKET_CZ = FRONT_Z + 0.02
+const POCKET_TOP_Z = POCKET_CZ + POCKET_D / 2
+const POCKET_ZIP_Y = POCKET_Y + POCKET_H / 2 - 0.04
 
-// ---------- Asa superior central (arco de tela) ----------
-function buildHandleGeometry() {
+// ---------- Cierre principal: nace abajo-izquierda, sube por el borde,
+// ---------- corona la curva superior y termina arriba centro-derecha ----------
+function mainZipperPoints() {
+  return [
+    new THREE.Vector3(-1.18, -1.30, 0.34),
+    new THREE.Vector3(-1.08, -1.05, 0.52),
+    new THREE.Vector3(-1.02, -0.50, 0.55),
+    new THREE.Vector3(-1.00, 0.20, 0.57),
+    new THREE.Vector3(-0.92, 0.90, 0.58),
+    new THREE.Vector3(-0.62, 1.35, 0.58),
+    new THREE.Vector3(-0.15, 1.58, 0.56),
+    new THREE.Vector3(0.30, 1.58, 0.52),
+  ]
+}
+const MAIN_ZIP_PTS = mainZipperPoints()
+const MAIN_ZIP_CURVE = new THREE.CatmullRomCurve3(MAIN_ZIP_PTS)
+const MAIN_TAPE_GEOM = new THREE.TubeGeometry(MAIN_ZIP_CURVE, 64, 0.042, 10, false)
+const MAIN_TEETH_GEOM = new THREE.TubeGeometry(
+  new THREE.CatmullRomCurve3(MAIN_ZIP_PTS.map((p) => new THREE.Vector3(p.x - 0.012, p.y, p.z + 0.045))),
+  64, 0.02, 8, false
+)
+const MAIN_ZIP_END = MAIN_ZIP_PTS[MAIN_ZIP_PTS.length - 1]
+
+// ---------- Cierre horizontal del bolsillo (recto, con tirador de cordón) ----------
+const POCKET_ZIP_X0 = -0.92
+const POCKET_ZIP_X1 = 0.92
+function pocketZipPoints() {
   const pts = []
-  const r = 0.3
-  const baseY = TOP_Y - 0.02
-  const archH = 0.38
-  const steps = 20
-  for (let i = 0; i <= steps; i++) {
-    const a = Math.PI + (i / steps) * Math.PI
-    pts.push(new THREE.Vector3(Math.cos(a) * r, baseY + (-Math.sin(a)) * archH, 0))
+  for (let i = 0; i <= 12; i++) {
+    const t = i / 12
+    pts.push(new THREE.Vector3(
+      POCKET_ZIP_X0 + (POCKET_ZIP_X1 - POCKET_ZIP_X0) * t,
+      POCKET_ZIP_Y,
+      POCKET_TOP_Z + 0.005
+    ))
   }
-  return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.06, 12, false)
+  return pts
 }
-const HANDLE_GEOM = buildHandleGeometry()
+const POCKET_ZIP_CURVE = new THREE.CatmullRomCurve3(pocketZipPoints())
+const POCKET_TAPE_GEOM = new THREE.TubeGeometry(POCKET_ZIP_CURVE, 24, 0.04, 10, false)
+const POCKET_TEETH_GEOM = new THREE.TubeGeometry(
+  new THREE.CatmullRomCurve3(pocketZipPoints().map((p) => new THREE.Vector3(p.x, p.y, p.z + 0.042))),
+  24, 0.018, 8, false
+)
+// Tirador a ~52% del ancho, colgando hacia abajo
+const POCKET_SLIDER_X = POCKET_ZIP_X0 + (POCKET_ZIP_X1 - POCKET_ZIP_X0) * 0.52
 
-// ---------- Correas traseras acolchadas ----------
-const STRAP_W = 0.34
-const STRAP_H = 3.2
+// ---------- Bolsillo lateral izquierdo: funda vertical abierta, elástica ----------
+const SIDE_X = -1.18
+const SIDE_Y = -0.95
+const SIDE_R_TOP = 0.30
+const SIDE_R_BOT = 0.26
+const SIDE_H = 0.75
 
-// ---------- Micro-relieve de tela (bump compartido, barato) ----------
-function makeFabricBump() {
-  const c = document.createElement('canvas')
-  c.width = 128
-  c.height = 128
-  const x = c.getContext('2d')
-  x.fillStyle = '#808080'
-  x.fillRect(0, 0, 128, 128)
-  // trama tejida
-  for (let j = 0; j < 128; j += 2) {
-    for (let i = 0; i < 128; i += 2) {
-      const v = 118 + Math.round(Math.random() * 20) + ((i + j) % 4 === 0 ? 8 : 0)
-      x.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')'
-      x.fillRect(i, j, 2, 2)
-    }
-  }
-  const t = new THREE.CanvasTexture(c)
-  t.wrapS = t.wrapT = THREE.RepeatWrapping
-  t.repeat.set(3, 3)
-  return t
+// ---------- Tirantes: curvas acolchadas independientes ----------
+function strapCurve(sx) {
+  return new THREE.CatmullRomCurve3([
+    new THREE.Vector3(sx * 0.55, TOP_Y - 0.15, BACK_Z + 0.05),
+    new THREE.Vector3(sx * 0.66, 0.80, BACK_Z - 0.18),
+    new THREE.Vector3(sx * 0.64, -0.20, BACK_Z - 0.26),
+    new THREE.Vector3(sx * 0.58, -1.20, BACK_Z - 0.12),
+    new THREE.Vector3(sx * 0.55, -1.45, BACK_Z + 0.0),
+  ])
 }
-let FABRIC_BUMP = null
-function getFabricBump() {
-  if (!FABRIC_BUMP) FABRIC_BUMP = makeFabricBump()
-  return FABRIC_BUMP
-}
+const STRAP_GEOMS = [strapCurve(1), strapCurve(-1)].map(
+  (c) => new THREE.TubeGeometry(c, 40, 0.12, 12, false)
+)
 
-// ---------- Telas: cómo se ve cada material en 3D ----------
-const TELA_PROPS = {
-  nylon600: { roughness: 0.38, metalness: 0.02, bump: 0.015 },
-  poliester: { roughness: 0.5, metalness: 0.02, bump: 0.012 },
-  cuero_sint: { roughness: 0.42, metalness: 0.06, bump: 0.008 },
-  lona: { roughness: 0.85, metalness: 0.0, bump: 0.03 },
-  lona12: { roughness: 0.85, metalness: 0.0, bump: 0.03 },
-  lona16: { roughness: 0.9, metalness: 0.0, bump: 0.035 },
-  malla: { roughness: 0.92, metalness: 0.0, bump: 0.045 },
-  algodon: { roughness: 0.88, metalness: 0.0, bump: 0.028 },
-  nylon: { roughness: 0.4, metalness: 0.02, bump: 0.016 },
-  polar: { roughness: 0.95, metalness: 0.0, bump: 0.04 },
-  neoprene: { roughness: 0.6, metalness: 0.0, bump: 0.01 },
-  pvc: { roughness: 0.25, metalness: 0.05, bump: 0.006 },
-  mezclilla: { roughness: 0.8, metalness: 0.0, bump: 0.028 },
-  tela_imp: { roughness: 0.3, metalness: 0.04, bump: 0.01 },
-}
-const DEFAULT_TELA = { roughness: 0.72, metalness: 0.03, bump: 0.02 }
+// ---------- Asa superior: arco de tira doblada ----------
+const HANDLE_GEOM = new THREE.TubeGeometry(
+  new THREE.CatmullRomCurve3(
+    Array.from({ length: 17 }, (_, i) => {
+      const a = Math.PI + (i / 16) * Math.PI
+      return new THREE.Vector3(Math.cos(a) * 0.22, TOP_Y + 0.0 + (-Math.sin(a)) * 0.22, 0)
+    })
+  ),
+  24, 0.05, 10, false
+)
 
-function luminance(hex) {
-  const c = new THREE.Color(hex)
-  return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
-}
-
-function Backpack({ mats, thread }) {
+function Backpack({ mats }) {
   return (
     <group position={[0, 0, 0]}>
-      {/* Cuerpo */}
+      {/* Cuerpo principal */}
       <mesh geometry={BODY_GEOM} material={mats.body} castShadow receiveShadow />
 
-      {/* Bolsillo frontal */}
-      <RoundedBox args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.14} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_FRONT_Z]} castShadow receiveShadow />
+      {/* Panel trasero independiente */}
+      <RoundedBox args={[2.10, 2.90, 0.12]} radius={0.06} smoothness={4} material={mats.bodyDark} position={[0, 0, BACK_Z]} receiveShadow />
 
-      {/* Cierre horizontal del bolsillo (en su parte superior, tirador a la izquierda) */}
-      <mesh position={[0, POCKET_Y + POCKET_H / 2 - 0.02, POCKET_TOP_Z + 0.01]}>
-        <boxGeometry args={[POCKET_W - 0.16, 0.045, 0.012]} />
-        <primitive object={mats.zipper} attach="material" />
+      {/* Bolsillo frontal integrado */}
+      <RoundedBox args={[POCKET_W, POCKET_H, POCKET_D]} radius={0.10} smoothness={5} material={mats.pocket} position={[0, POCKET_Y, POCKET_CZ]} castShadow receiveShadow />
+      {/* Cierre del bolsillo: cinta + dientes */}
+      <mesh geometry={POCKET_TAPE_GEOM} material={mats.tape} />
+      <mesh geometry={POCKET_TEETH_GEOM} material={mats.zipper} />
+      {/* Cursor + tirador de cordón del bolsillo */}
+      <mesh position={[POCKET_SLIDER_X, POCKET_ZIP_Y + 0.01, POCKET_TOP_Z + 0.05]} material={mats.zip}>
+        <boxGeometry args={[0.11, 0.07, 0.06]} />
       </mesh>
-      <mesh position={[-POCKET_W / 2 + 0.28, POCKET_Y + POCKET_H / 2 - 0.045, POCKET_TOP_Z + 0.012]} rotation={[0, 0, -0.15]}>
-        <boxGeometry args={[0.12, 0.045, 0.014]} />
-        <primitive object={mats.zip} attach="material" />
+      <group position={[POCKET_SLIDER_X, POCKET_ZIP_Y - 0.03, POCKET_TOP_Z + 0.05]} rotation={[0.15, 0, 0.1]}>
+        <mesh position={[0, -0.02, 0]} material={mats.zip}>
+          <boxGeometry args={[0.03, 0.05, 0.02]} />
+        </mesh>
+        <mesh position={[0, -0.10, 0.005]} material={mats.zip}>
+          <torusGeometry args={[0.05, 0.016, 8, 20]} />
+        </mesh>
+      </group>
+
+      {/* Cierre principal: cinta + dientes con volumen */}
+      <mesh geometry={MAIN_TAPE_GEOM} material={mats.tape} />
+      <mesh geometry={MAIN_TEETH_GEOM} material={mats.zipper} />
+      {/* Cursor + tirador al final del recorrido */}
+      <mesh position={[MAIN_ZIP_END.x, MAIN_ZIP_END.y + 0.02, MAIN_ZIP_END.z + 0.05]} rotation={[0, 0, -0.5]} material={mats.zip}>
+        <boxGeometry args={[0.13, 0.08, 0.07]} />
+      </mesh>
+      <group position={[MAIN_ZIP_END.x + 0.03, MAIN_ZIP_END.y - 0.06, MAIN_ZIP_END.z + 0.05]} rotation={[0.2, 0, -0.15]}>
+        <mesh position={[0, -0.02, 0]} material={mats.zip}>
+          <boxGeometry args={[0.03, 0.05, 0.02]} />
+        </mesh>
+        <mesh position={[0, -0.10, 0.005]} material={mats.zip}>
+          <torusGeometry args={[0.05, 0.016, 8, 20]} />
+        </mesh>
+      </group>
+
+      {/* Bolsillo lateral izquierdo (funda abierta) */}
+      <mesh position={[SIDE_X, SIDE_Y, 0.05]} material={mats.pocketSide} castShadow>
+        <cylinderGeometry args={[SIDE_R_TOP, SIDE_R_BOT, SIDE_H, 24, 1, true, Math.PI, Math.PI]} />
+      </mesh>
+      {/* Aro elástico fruncido superior */}
+      <mesh position={[SIDE_X, SIDE_Y + SIDE_H / 2, 0.05]} rotation={[Math.PI / 2, 0, 0]} material={mats.dark}>
+        <torusGeometry args={[SIDE_R_TOP, 0.055, 10, 28]} />
       </mesh>
 
-      {/* Asa superior central */}
-      <mesh geometry={HANDLE_GEOM} material={mats.strap} castShadow />
+      {/* Tirantes acolchados */}
+      {STRAP_GEOMS.map((g, i) => (
+        <mesh key={i} geometry={g} material={mats.strap} scale={[1, 1, 0.62]} castShadow />
+      ))}
+      {/* Parches de unión de tirantes */}
+      {[1, -1].map((sx) => (
+        <group key={sx}>
+          <mesh position={[sx * 0.55, TOP_Y - 0.18, BACK_Z + 0.02]} material={mats.bodyDark}>
+            <boxGeometry args={[0.30, 0.24, 0.07]} />
+          </mesh>
+          <mesh position={[sx * 0.55, -1.42, BACK_Z + 0.02]} material={mats.bodyDark}>
+            <boxGeometry args={[0.30, 0.22, 0.07]} />
+          </mesh>
+        </group>
+      ))}
 
-      {/* Bolsillo lateral derecho (botella), vertical abierto */}
-      <mesh position={[BODY_W / 2, -0.8, 0]}>
-        <cylinderGeometry args={[0.24, 0.2, 1.7, 24, 1, true]} />
-        <primitive object={mats.pocketSide} attach="material" />
-      </mesh>
+      {/* Asa superior */}
+      <mesh geometry={HANDLE_GEOM} material={mats.strap} scale={[1, 1, 0.7]} castShadow />
 
-      {/* Correas traseras acolchadas (ocultas parcialmente desde el frente) */}
-      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[-0.55, 0, BACK_Z - 0.09]} castShadow />
-      <RoundedBox args={[STRAP_W, STRAP_H, 0.14]} radius={0.07} smoothness={4} material={mats.strap} position={[0.55, 0, BACK_Z - 0.09]} castShadow />
-
-      {/* Contorno de costura del panel frontal */}
-      <Stitch length={BODY_H - 0.2} pos={[-BODY_W / 2 + 0.08, 0, FRONT_Z + 0.006]} tone={thread} />
-      <Stitch length={BODY_H - 0.2} pos={[BODY_W / 2 - 0.08, 0, FRONT_Z + 0.006]} tone={thread} />
-      {/* Costura borde del bolsillo */}
-      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y + POCKET_H / 2 - 0.04, POCKET_TOP_Z + 0.006]} tone={thread} />
-      <Stitch length={POCKET_W - 0.12} pos={[0, POCKET_Y - POCKET_H / 2 + 0.04, POCKET_TOP_Z + 0.006]} tone={thread} />
+      {/* Costuras de construcción: unión frente/lateral */}
+      <Stitch length={BODY_H - 0.7} pos={[-1.02, 0, FRONT_Z + 0.006]} />
+      <Stitch length={BODY_H - 0.7} pos={[1.02, 0, FRONT_Z + 0.006]} />
+      {/* Costuras del bolsillo: laterales + inferior */}
+      <Stitch length={POCKET_H - 0.12} pos={[-POCKET_W / 2 + 0.07, POCKET_Y, POCKET_TOP_Z + 0.006]} />
+      <Stitch length={POCKET_H - 0.12} pos={[POCKET_W / 2 - 0.07, POCKET_Y, POCKET_TOP_Z + 0.006]} />
+      <Stitch length={POCKET_W - 0.2} pos={[0, POCKET_Y - POCKET_H / 2 + 0.05, POCKET_TOP_Z + 0.006]} />
     </group>
   )
 }
 
-// ---------- Materiales según color de tela + tipo de tela elegidos ----------
-function makeMats(colorTela, telaId) {
-  const color = colorTela || '#17171a'
-  const tp = (telaId && TELA_PROPS[telaId]) || DEFAULT_TELA
-  const bumpMap = getFabricBump()
+// ---------- Materiales: cuerpo en tela elegida, negros siempre en detalles ----------
+function makeMats(colorTela) {
+  const color = colorTela || '#22345C'
   const body = new THREE.MeshStandardMaterial({
     color,
-    roughness: tp.roughness,
-    metalness: tp.metalness,
-    bumpMap,
-    bumpScale: tp.bump,
-    envMapIntensity: 0.5,
-  })
-  // Bolsillo apenas más oscuro para dar volumen
-  const pocketColor = new THREE.Color(color).multiplyScalar(0.9)
-  const pocket = new THREE.MeshStandardMaterial({
-    color: pocketColor,
-    roughness: Math.min(1, tp.roughness + 0.05),
-    metalness: tp.metalness,
-    bumpMap,
-    bumpScale: tp.bump,
-    envMapIntensity: 0.45,
-  })
-  const pocketSide = new THREE.MeshStandardMaterial({
-    color: pocketColor,
-    roughness: Math.min(1, tp.roughness + 0.05),
-    metalness: tp.metalness,
-    side: THREE.DoubleSide,
+    roughness: 0.78,
+    metalness: 0.02,
     envMapIntensity: 0.4,
   })
-  const strap = new THREE.MeshStandardMaterial({ color: '#0c0c0e', roughness: 0.8, metalness: 0, envMapIntensity: 0.3 })
-  const zipper = new THREE.MeshStandardMaterial({ color: '#2a2a2e', roughness: 0.3, metalness: 0.6, envMapIntensity: 0.9 })
-  const zip = new THREE.MeshStandardMaterial({ color: '#101012', roughness: 0.5, metalness: 0.25, envMapIntensity: 0.4 })
-  return { body, pocket, pocketSide, trim: strap, seam: body, net: strap, zip, zipper, strap }
+  const pocket = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(color).multiplyScalar(0.92),
+    roughness: 0.8,
+    metalness: 0.02,
+    envMapIntensity: 0.4,
+  })
+  const bodyDark = new THREE.MeshStandardMaterial({ color: new THREE.Color(color).multiplyScalar(0.72), roughness: 0.82, metalness: 0.02, envMapIntensity: 0.35 })
+  const pocketSide = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(color).multiplyScalar(0.85),
+    roughness: 0.85,
+    metalness: 0.0,
+    side: THREE.DoubleSide,
+    envMapIntensity: 0.35,
+  })
+  const tape = new THREE.MeshStandardMaterial({ color: '#1A2340', roughness: 0.8, metalness: 0.0, envMapIntensity: 0.3 })
+  const strap = new THREE.MeshStandardMaterial({ color: '#0B0B0D', roughness: 0.8, metalness: 0, envMapIntensity: 0.3 })
+  const zipper = new THREE.MeshStandardMaterial({ color: '#0A0A0C', roughness: 0.35, metalness: 0.6, envMapIntensity: 0.8 })
+  const zip = new THREE.MeshStandardMaterial({ color: '#0B0B0D', roughness: 0.5, metalness: 0.25, envMapIntensity: 0.4 })
+  const dark = strap
+  return { body, pocket, bodyDark, pocketSide, tape, strap, dark, zip, zipper }
 }
 
-// ---------- Costuras con hilo contrastante (una textura por tono, compartida) ----------
+// ---------- Costuras (hilo según tono de la tela, una textura compartida) ----------
 const stitchCache = {}
 function makeStitchCanvas(thread) {
   const c = document.createElement('canvas')
@@ -224,18 +286,18 @@ function makeStitchCanvas(thread) {
   return c
 }
 
-function Stitch({ length, pos, tone }) {
+function Stitch({ length, pos }) {
   const tex = useMemo(() => {
-    const key = tone || 'dark'
+    const key = 'navy'
     if (!stitchCache[key]) {
-      stitchCache[key] = makeStitchCanvas(key === 'light' ? '#e9e9ec' : '#232326')
+      stitchCache[key] = makeStitchCanvas('#c9cdd6')
     }
     const t = new THREE.CanvasTexture(stitchCache[key])
     t.wrapS = t.wrapT = THREE.RepeatWrapping
     t.colorSpace = THREE.SRGBColorSpace
     t.repeat.set(Math.max(1, Math.round(length / 0.28)), 1)
     return t
-  }, [length, tone])
+  }, [length])
   useEffect(() => () => { tex.dispose() }, [tex])
   return (
     <mesh position={pos} raycast={() => null}>
@@ -247,9 +309,9 @@ function Stitch({ length, pos, tone }) {
 
 // ---------- Zonas de bordado ----------
 const ZONE_DEF = {
-  centro: { pos: [0, 0.35, FRONT_Z + 0.02], hit: [1.55, 0.8], pct: 30 },
-  bolsillo: { pos: [0, POCKET_Y, POCKET_TOP_Z + 0.02], hit: [1.5, POCKET_H], pct: 42 },
-  tapa: { pos: [0, 1.45, FRONT_Z + 0.02], hit: [1.55, 0.4], pct: 16 },
+  centro: { pos: [0, 0.45, FRONT_Z + 0.02], hit: [1.5, 0.85], pct: 30 },
+  bolsillo: { pos: [0, POCKET_Y, POCKET_TOP_Z + 0.02], hit: [1.9, 0.8], pct: 42 },
+  tapa: { pos: [0, 1.25, FRONT_Z + 0.02], hit: [1.3, 0.45], pct: 16 },
 }
 const ZONES = [
   { id: 'centro', ...ZONE_DEF.centro },
@@ -307,7 +369,6 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
     maxH = zone.hit[1] * 0.92
   }
   let height = width / aspect
-  // Si la imagen es vertical, achicar para que no desborde la zona
   if (height > maxH) {
     const s = maxH / height
     width *= s
@@ -330,7 +391,7 @@ function Design({ imagen, imgInfo, zonaActiva, modoLibre, tamano, rotacion, posX
 }
 
 export default function Mochila3D(props) {
-  const { colorTela, telaSeleccionada, imagen, zonaActiva, modoLibre, tamano, rotacion, posX, posY, onZoneClick, zonasyMarca, applied, onExportRef } = props
+  const { colorTela, imagen, zonaActiva, modoLibre, tamano, rotacion, posX, posY, onZoneClick, zonasyMarca, applied, onExportRef } = props
   const [imgInfo, setImgInfo] = useState(null)
 
   useEffect(() => {
@@ -363,7 +424,7 @@ export default function Mochila3D(props) {
     return () => { alive = false; img.src = ''; if (tex) tex.dispose() }
   }, [imagen])
 
-  const mats = useMemo(() => makeMats(colorTela, telaSeleccionada), [colorTela, telaSeleccionada])
+  const mats = useMemo(() => makeMats(colorTela), [colorTela])
   const prevMats = useRef(null)
   useEffect(() => {
     const old = prevMats.current
@@ -377,8 +438,6 @@ export default function Mochila3D(props) {
     const cur = prevMats.current
     if (cur) Object.values(cur).forEach((m) => { if (m && m.dispose) m.dispose() })
   }, [])
-
-  const thread = useMemo(() => (luminance(colorTela || '#17171a') < 0.35 ? 'light' : 'dark'), [colorTela])
 
   return (
     <div className="mochila3d">
@@ -407,7 +466,7 @@ export default function Mochila3D(props) {
         />
         <directionalLight position={[-5, 3, -4]} intensity={0.9} color="#a78bfa" />
         <directionalLight position={[0, 1, 6]} intensity={0.35} />
-        <Backpack mats={mats} thread={thread} />
+        <Backpack mats={mats} />
         <ZoneHits imagen={imagen} zonaActiva={zonaActiva} zonasyMarca={zonasyMarca} onZoneClick={onZoneClick} applied={applied} />
         <Design imagen={imagen} imgInfo={imgInfo} zonaActiva={zonaActiva} modoLibre={modoLibre} tamano={tamano} rotacion={rotacion} posX={posX} posY={posY} applied={applied} />
         {/* Piso receptor de sombra */}

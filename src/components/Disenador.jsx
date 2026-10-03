@@ -22,6 +22,7 @@ var productos = [
 ]
 
 var coloresTela = [
+  { id: 'marino', nombre: 'Marino', hex: '#22345C' },
   { id: 'negro', nombre: 'Negro', hex: '#1A1A1A' },
   { id: 'blanco', nombre: 'Blanco', hex: '#F5F5F5' },
   { id: 'gris', nombre: 'Gris', hex: '#6B7280' },
@@ -308,7 +309,7 @@ function FabricCanvas(props) {  var producto=props.producto,colorTela=props.colo
 
 export default function Disenador() {
   var p=useState('mochila'),producto=p[0],setProducto=p[1]
-  var q=useState('#1A1A1A'),colorTela=q[0],setColorTela=q[1]
+  var q=useState('#22345C'),colorTela=q[0],setColorTela=q[1]
   var r2=useState(null),imagen=r2[0],setImagen=r2[1]
   var s2=useState(null),zonaActiva=s2[0],setZonaActiva=s2[1]
   var t2=useState(40),tamano=t2[0],setTamano=t2[1]
